@@ -8,6 +8,7 @@
             {{-- Le titre de la page --}}
             <h1 class="h4 mb-0 text-primary fw-bold">
                 <i class="fas fa-users me-2"></i>Details sur l'utilisateur
+
             </h1>
             {{-- Le bouton pour ajouter un utilisateur, aligné à droite --}}
 
@@ -25,7 +26,7 @@
                     @endforeach
                 </ul>
             </div>
-            <a href="{{ route('user.index') }}" class="btn btn-secondary">Retour</a>
+            <a href="{{ route('user.index') }}" class="btn btn-secondary"><i class="fe-arrow-left"></i></a>
         </div>
     </div>
 </div>

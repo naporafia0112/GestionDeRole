@@ -7,12 +7,11 @@ use App\Http\Controllers\UserController;
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('user', UserController::class);
-    Route::resource('roles', RoleController::class);
-
+    Route::resource('roles', controller: RoleController::class);
 });
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
