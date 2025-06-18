@@ -41,11 +41,11 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $currentUser = Auth::user();
+        #$currentUser = Auth::user();
 
-        if (!$currentUser->hasPermission('modifier_utilisateur')) {
-        abort(403, 'Accès refusé – Permission manquante.');
-    }
+        #if (!$currentUser->hasPermission('modifier_utilisateur')) {
+        #abort(403, 'Accès refusé – Permission manquante.');
+
         $roles = Role::all(); // <-- Cette ligne est obligatoire
         return view('user.edit', compact('user','roles'));
     }

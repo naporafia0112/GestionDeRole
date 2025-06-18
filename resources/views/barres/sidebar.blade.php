@@ -72,7 +72,7 @@
 
                             <li class="menu-title mt-2">RH</li>
                             <li>
-                                <a href="apps-calendar.html">
+                                <a href="{{ route('offres.index') }}">
                                     <i data-feather="file-text"></i>
                                     <span> Offres </span>
                                 </a>

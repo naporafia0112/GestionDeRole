@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.home')
 
 @section('content')
  <div class="container mt-4">
@@ -6,15 +6,15 @@
 
                     <!-- Start Content-->
                     <div class="container-fluid">
-                        
+
                         <!-- start page title -->
                         <div class="row">
                             <div class="col-12">
                                     <h4 class="page-title">Listes des utilisateurs</h4>
                                 </div>
                             </div>
-                        </div>     
-                        <!-- end page title --> 
+                        </div>
+                        <!-- end page title -->
 
 
                         <div class="row">
@@ -27,7 +27,7 @@
                                                 <i class="fas fa-plus me-1"></i>Ajouter un utilisateur
             </a>                             </div>
                                         </div>
-                
+
                                         <div class="table-responsive">
                                             <table class="table table-centered table-nowrap table-striped" id="products-datatable">
                                                 <thead>
@@ -45,14 +45,14 @@
                                                         <td class="text-center">
                                                             <div class="col-sm-6 col-md-4 col-lg-3">
                                                                 <a href="{{ route('user.show', $user) }}" class="btn btn-sm btn-info" title="Details">
-                                                                    <i class="fe-eye"></i> 
+                                                                    <i class="fe-eye"></i>
                                                                 </a>
-                                                           {{-- @if(auth()->user()->hasPermission('modifier_utilisateur'))  --}}                                                                  
+                                                           {{-- @if(auth()->user()->hasPermission('modifier_utilisateur'))  --}}
                                                             <a href="{{ route('user.edit', $user->id) }}" class="btn btn-sm btn-warning"> <i class="mdi mdi-square-edit-outline"></i></a>
                                                            {{--@endif--}}
 
-                                                                <a href="javascript:void(0);" 
-                                                                class="btn btn-sm btn-danger" 
+                                                                <a href="javascript:void(0);"
+                                                                class="btn btn-sm btn-danger"
                                                                 title="Supprimer"
                                                                 onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) { document.getElementById('delete-form-{{ $user->id }}').submit(); }">
                                                                 <i class="mdi mdi-delete"></i>
@@ -80,7 +80,7 @@
                                 </div> <!-- end card-->
                             </div> <!-- end col -->
                         </div>
-               
+
 @endsection
 
 @push('styles')

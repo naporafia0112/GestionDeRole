@@ -1,4 +1,5 @@
-@extends('layouts.app')
+@extends('layouts.home')
+
 
 @section('content')
  <div class="container mt-4">
@@ -10,8 +11,6 @@
                         <!-- start page title -->
                         <div class="row">
                             <div class="col-12">
-                                <a href="{{ route('user.index') }}" class="btn btn-secondary"><i class="fe-arrow-left"></i></a>
-
                                 <h4 class="page-title">Listes des rôles</h4>
                                 </div>
                             </div>
@@ -51,17 +50,17 @@
                                                         <td class="text-center">
                                                             <div class="d-inline-flex gap-2">
                                                                 <a href="{{ route('roles.show', $role) }}" class="btn btn-sm btn-info" title="Details">
-                                                                    <i class="fe-eye"></i> 
+                                                                    <i class="fe-eye"></i>
                                                                 </a>
                                                                 <a href="{{ route('roles.edit', $role) }}" class="btn btn-sm btn-warning" title="Modifier">
-                                                                    <i class="mdi mdi-square-edit-outline"></i> 
+                                                                    <i class="mdi mdi-square-edit-outline"></i>
                                                                 </a>
 
                                                                 <form action="{{ route('roles.destroy', $role) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur {{ addslashes($role->name) }} ?');">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
-                                                                        <i class="fas fa-trash-alt"></i> 
+                                                                        <i class="fas fa-trash-alt"></i>
                                                                     </button>
                                                                 </form>
                                                             </div>

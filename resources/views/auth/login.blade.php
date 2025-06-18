@@ -50,14 +50,14 @@
 
                     <!-- Email Address -->
                     <div class="mb-3">
-                        <x-input-label class="form-label" for="email" :value="__('Email')" />
+                        <x-input-label class="form-label" for="email" :value="__('Adresse mail')" />
                         <x-text-input id="email" class="form-control" type="email" name="email" :value="old('email')" placeholder="Enter your email" required autofocus autocomplete="username" />
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
                     <!-- Password -->
                 <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">Mot de passe</label>
                 <div class="input-group input-group-merge">
                     <input
                         type="password"
@@ -85,14 +85,14 @@
                     <div class="block mt-4">
                         <label for="remember_me" class="inline-flex items-center">
                             <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" name="remember">
-                            <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                            <span class="ms-2 text-sm text-gray-600">{{ __('Se rappeller de moi') }}</span>
                         </label>
                     </div>
 
                     <div class="flex items-center justify-end mt-4">
                         @if (Route::has('password.request'))
                             <a class="underline text-sm text-blue-600 hover:text-blue-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                                {{ __('Forgot your password?') }}
+                                {{ __('Mot de passe oublié?') }}
                             </a>
                         @endif
 
@@ -108,7 +108,7 @@
 
 
         <footer class="footer footer-alt">
-            Allez sur le site <a href="#" class="text-white-50">CAGECFI</a>
+            Allez sur le site <a href="https://www.cagecfi.com/" class="text-white-50">CAGECFI</a>
         </footer>
 
         <!-- Vendor js -->
