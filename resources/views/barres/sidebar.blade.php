@@ -4,8 +4,6 @@
 
                     <!-- User box -->
                     <div class="user-box text-center">
-                        <img src="../assets/images/users/user-1.jpg" alt="user-img" title="Mat Helme"
-                            class="rounded-circle avatar-md">
                         <div class="dropdown">
                             <a href="javascript: void(0);" class="text-dark dropdown-toggle h5 mt-2 mb-1 d-block"
                                 data-bs-toggle="dropdown">Geneva Kennedy</a>
@@ -78,9 +76,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="apps-calendar.html">
-                                    <i data-feather="archive"></i>
-                                    <span> Archives </span>
+                                <a href="{{ route('candidatures.index') }}">
+                                    <i data-feather="briefcase"></i>
+                                    <span> Candidatures </span>
                                 </a>
                             </li>
                             <li>

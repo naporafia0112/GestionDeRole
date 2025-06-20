@@ -10,20 +10,17 @@
       <div class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center">
         <h2>DIPRH</h2>
         <p>Découvrez nos opportunités de stage. Trouvez celle qui correspond à votre profil.</p>
-        <div class="d-flex">
-          <a href="{{ route('vitrine.index') }}" class="btn-get-started">Consulter les candidatures</a>
+        <div class="d-flex mt-0">
+          <a href="{{ route('vitrine.consulter')}}" class="btn-get-started bg-white rounded p-3" style="color: black;">Consulter ma candidature</a>
         </div>
-      </div>
-      <div class="col-lg-6 order-1 order-lg-2">
-        <img src="{{ asset('assets/img/fond.jpg') }}" class="img-fluid" alt="">
       </div>
     </div>
   </div>
 </section>
-<section class="services section">
+<section id="offres" class="services section">
   <div class="container section-title" data-aos="fade-up">
     <h2>Nos Offres</h2>
-    <div><span>Consultez</span> <span class="description-title">les offres disponibles</span></div>
+    <div><span class="description-title">Consultez les offres disponibles</span></div>
   </div>
 
   <div class="container">
@@ -38,7 +35,7 @@
             <p>{{ Str::limit($offre->description, 120) }}</p>
             <small><strong>Lieu:</strong> {{ $offre->localisation->pays ?? 'Non précisé' }}</small><br>
             <small><strong>Date limite:</strong> {{ $offre->date_limite->format('d/m/Y') }}</small>
-            <a href="#" class="stretched-link"></a>
+            <a href="{{ route('vitrine.show', $offre->id) }}" class="stretched-link"></a>
           </div>
         </div>
       @empty
@@ -49,6 +46,7 @@
     </div>
   </div>
 </section>
+
 @endsection
 
 

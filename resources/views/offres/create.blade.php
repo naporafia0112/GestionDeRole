@@ -12,7 +12,7 @@
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Offres</a></li>
+                                <li class="breadcrumb-item"><a href={{ route('offres.index') }}>Offres</a></li>
                                 <li class="breadcrumb-item active">{{ isset($offre) ? 'Modifier' : 'Créer' }} une offre</li>
                             </ol>
                         </div>
@@ -56,7 +56,7 @@
                                 @endif
                                 <!-- Titre de l'offre -->
                                 <div class="mb-3">
-                                    <label for="titre" class="form-label">Titre de l'offre *</label>
+                                    <label for="titre" class="form-label">Titre de l'offre <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="titre" name="titre"
                                         placeholder="Ex: Développeur Web Senior"
                                         value="{{ old('titre', $offre->titre ?? '') }}" required>
@@ -64,15 +64,15 @@
 
                                 <!-- Description -->
                                 <div class="mb-3">
-                                    <label for="description" class="form-label">Description *</label>
+                                    <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="description" name="description"
-                                        rows="5" required>{{ old('description', $offre->description ?? '') }}</textarea>
+                                        rows="3" required>{{ old('description', $offre->description ?? '') }}</textarea>
                                 </div>
 
 
                                 <!-- Localisation -->
                                 <div class="mb-3">
-                                    <label for="localisation_id" class="form-label">Localisation *</label>
+                                    <label for="localisation_id" class="form-label">Localisation <span class="text-danger">*</span></label>
                                     <select id="localisation_id" name="localisation_id" class="form-select" required>
                                         <option value="">-- Choisissez une localisation --</option>
                                         @foreach($localisations as $loc)
@@ -92,14 +92,14 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="exigences" class="form-label">Exigences *</label>
+                                    <label for="exigences" class="form-label">Exigences <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="exigences" name="exigences"
-                                        rows="5" required>{{ old('exigences', $offre->exigences ?? '') }}</textarea>
+                                        rows="3" required>{{ old('exigences', $offre->exigences ?? '') }}</textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="departement" class="form-label">Départements *</label>
+                                    <label for="departement" class="form-label">Départements <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="departement" name="departement"
-                                        rows="5" required>{{ old('departement', $offre->departement ?? '') }}</textarea>
+                                        rows="1" required>{{ old('departement', $offre->departement ?? '') }}</textarea>
                                 </div>
                                 <!-- Fichier PDF -->
                                 <div class="mb-3">
@@ -107,7 +107,7 @@
                                     <input type="file" class="form-control" id="fichier" name="fichier" accept=".pdf">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="date_limite" class="form-label">Date limite *</label>
+                                    <label for="date_limite" class="form-label">Date limite <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" id="date_limite" name="date_limite"
                                         value="{{ old('date_limite', isset($offre->date_limite) ? $offre->date_limite->format('Y-m-d') : '') }}" required>
                                 </div>

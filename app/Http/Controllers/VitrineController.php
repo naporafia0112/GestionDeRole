@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Offre;
+use App\Models\Localisation;
+use App\Models\User;
 class VitrineController extends Controller
 {
     /**
@@ -35,10 +37,15 @@ class VitrineController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Offre $offre)
     {
-        //
+        if (!$offre->est_publie) {
+            abort(404); // ou redirect avec erreur
+        }
+
+        return view('vitrine.show', compact('offre'));
     }
+   
 
     /**
      * Show the form for editing the specified resource.
@@ -63,4 +70,10 @@ class VitrineController extends Controller
     {
         //
     }
+
+    public function recherche()
+{
+    return view('vitrine.consulter');
+}
+
 }

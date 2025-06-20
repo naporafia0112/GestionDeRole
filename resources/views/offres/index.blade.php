@@ -31,8 +31,9 @@
                                         <tr>
                                             <th>Titre</th>
                                             <th>Département</th>
-                                            <th>Statut</th>
                                             <th>Date de publication</th>
+                                            <th>Localisation</th>
+                                            <th>Statut</th>
                                             <th style="width: 120px;">Actions</th>
                                         </tr>
                                     </thead>
@@ -40,7 +41,9 @@
                                         @forelse ($offres as $offre)
                                         <tr>
                                             <td>{{ $offre->titre }}</td>
-                                            <td>{{ $offre->departement }}</td>
+                                            <td style="white-space: normal; word-break: break-word;">{{ $offre->departement }}</td>
+                                            <td>{{ $offre->date_publication ? $offre->date_publication->format('d/m/Y') : 'Non publié' }}</td>
+                                            <td>{{ $offre->localisation->pays ?? 'Non défini' }}</td>
                                             <td>
                                                 @if($offre->est_publie)
                                                     <span class="badge bg-success">Publié</span>
@@ -48,7 +51,6 @@
                                                     <span class="badge bg-secondary">Brouillon</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $offre->date_publication ? $offre->date_publication->format('d/m/Y') : 'Non publié' }}</td>
                                             <td class="text-center">
                                                 <div class="btn-group">
                                                     <a href="{{ route('offres.show', $offre) }}" class="btn btn-sm btn-info" title="Détails">
@@ -85,8 +87,12 @@
                                             </td>
                                         </tr>
                                         @endforelse
+
                                     </tbody>
                                 </table>
+                                <div class="d-flex mt-3">
+                                    {{ $offres->links('pagination::bootstrap-5') }}
+                                </div>
                             </div>
                         </div> <!-- end card-body-->
                     </div> <!-- end card-->

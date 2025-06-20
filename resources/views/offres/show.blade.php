@@ -1,5 +1,5 @@
 @extends('layouts.home')
-
+@php use Illuminate\Support\Facades\Storage; @endphp
 @section('content')
 <div class="container mt-4">
     <!-- start page title -->
@@ -73,7 +73,7 @@
                     </div>
 
                     <label class="mt-3 mb-1"><strong>Description :</strong></label>
-                    <div class="border p-3 rounded mb-3">
+                    <div class="border p-2 rounded mb-3">
                         {!! nl2br(e( $offre->description)) !!}
                     </div>
 
@@ -88,9 +88,6 @@
         <!-- Colonne droite - PDF -->
         <div class="col-lg-4">
             <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title font-16 mb-3"><strong>Fiche de poste</strong></h5>
-
                     @if($offre->fichier)
                         <div class="card">
                             <div class="card-body">

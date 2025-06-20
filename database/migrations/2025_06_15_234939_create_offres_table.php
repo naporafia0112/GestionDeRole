@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('statut')->default('brouillon');
             $table->string('departement');
             $table->string('fichier')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

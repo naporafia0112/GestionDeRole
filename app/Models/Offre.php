@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Offre extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'titre',
         'description',
@@ -33,6 +35,11 @@ class Offre extends Model
     public function localisation()
 {
     return $this->belongsTo(Localisation::class);
+
+}
+public function user()
+{
+    return $this->belongsTo(User::class);
 }
 
 }
