@@ -4,16 +4,19 @@
 <div class="container mt-4">
     {{-- Utilisation d'une "Card" Bootstrap pour un meilleur encadrement du contenu --}}
     <div class="card shadow-sm">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            {{-- Le titre de la page --}}
-            <h1 class="h4 mb-0 text-primary fw-bold">
-                <i class="fas fa-users me-2"></i>Details sur l'utilisateur
-
-            </h1>
-            {{-- Le bouton pour ajouter un utilisateur, aligné à droite --}}
-
-        </div>
-
+        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box">
+                                    <div class="page-title-right">
+                                        <ol class="breadcrumb m-0">
+                                            <li class="breadcrumb-item"><a href="">DIPRH</a></li>
+                                            <li class="breadcrumb-item"><a href="{{ route('user.index') }}">Liste des utilisateurs</a></li>
+                                        </ol>
+                                    </div>
+                                    <h4 class="page-title"><strong>Details</strong></h4>
+                                </div>
+                            </div>
+                        </div>
         <div class="card-body">
 
             {{-- Le div "table-responsive" assure que le tableau ne casse pas le design sur mobile --}}

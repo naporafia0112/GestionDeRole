@@ -9,10 +9,6 @@
 
                     <h4 class="header-title mb-4">Postuler pour l'offre : {{ $offre->titre ?? 'Offre' }}</h4>
 
-                    @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
-
                     <form action="{{ route('candidature.store', $offre->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
@@ -22,21 +18,21 @@
                                 {{-- Nom --}}
                                 <div class="mb-3">
                                     <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
-                                    <input type="text" id="nom" name="nom" value="{{ old('nom') }}" class="form-control @error('nom') is-invalid @enderror" required>
+                                    <input type="text" id="nom" name="nom" value="{{ old('nom') }}" class="form-control @error('nom') is-invalid @enderror" >
                                     @error('nom') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Prénoms --}}
                                 <div class="mb-3">
                                     <label for="prenoms" class="form-label">Prénoms <span class="text-danger">*</span></label>
-                                    <input type="text" id="prenoms" name="prenoms" value="{{ old('prenoms') }}" class="form-control @error('prenoms') is-invalid @enderror" required>
+                                    <input type="text" id="prenoms" name="prenoms" value="{{ old('prenoms') }}" class="form-control @error('prenoms') is-invalid @enderror" >
                                     @error('prenoms') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Email --}}
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" required>
+                                    <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" >
                                     @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -54,21 +50,22 @@
                                     @error('quartier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
-                                {{-- Ville --}}
-                                <div class="mb-3">
-                                    <label for="ville" class="form-label">Ville</label>
-                                    <input type="text" id="ville" name="ville" value="{{ old('ville') }}" class="form-control @error('ville') is-invalid @enderror">
-                                    @error('ville') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
+
 
                             </div> <!-- end col -->
 
                             <div class="col-lg-6">
 
+                                 {{-- Ville --}}
+                                <div class="mb-3">
+                                    <label for="ville" class="form-label">Ville</label>
+                                    <input type="text" id="ville" name="ville" value="{{ old('ville') }}" class="form-control @error('ville') is-invalid @enderror">
+                                    @error('ville') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
                                 {{-- Type de dépôt --}}
                                 <div class="mb-3">
                                     <label for="type_depot" class="form-label">Type de dépôt <span class="text-danger">*</span></label>
-                                    <select id="type_depot" name="type_depot" class="form-select @error('type_depot') is-invalid @enderror" required>
+                                    <select id="type_depot" name="type_depot" class="form-select @error('type_depot') is-invalid @enderror" >
                                         <option value="">-- Sélectionner --</option>
                                         <option value="stage professionnel" {{ old('type_depot') == 'stage professionnel' ? 'selected' : '' }}>Stage professionnel</option>
                                         <option value="stage académique" {{ old('type_depot') == 'stage académique' ? 'selected' : '' }}>Stage académique</option>
@@ -79,27 +76,33 @@
 
                                 {{-- CV --}}
                                 <div class="mb-3">
-                                    <label for="cv_fichier" class="form-label">CV (PDF, DOC, DOCX)</label>
+                                    <label for="cv_fichier" class="form-label">CV (PDF)</label>
                                     <input type="file" id="cv_fichier" name="cv_fichier" class="form-control @error('cv_fichier') is-invalid @enderror">
                                     @error('cv_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Lettre de motivation --}}
                                 <div class="mb-3">
-                                    <label for="lm_fichier" class="form-label">Lettre de motivation</label>
+                                    <label for="lm_fichier" class="form-label">Lettre de motivation(PDF)</label>
                                     <input type="file" id="lm_fichier" name="lm_fichier" class="form-control @error('lm_fichier') is-invalid @enderror">
                                     @error('lm_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Lettre de recommandation --}}
                                 <div class="mb-3">
-                                    <label for="lr_fichier" class="form-label">Lettre de recommandation</label>
+                                    <label for="lr_fichier" class="form-label">Lettre de recommandation(PDF)</label>
                                     <input type="file" id="lr_fichier" name="lr_fichier" class="form-control @error('lr_fichier') is-invalid @enderror">
                                     @error('lr_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
-                                <button type="submit" class="btn btn-primary mt-3">Soumettre la candidature</button>
-
+                                <div class="text-end mt-4">
+                                    <a href="{{ route('vitrine.show', $offre->id) }}}}" class="btn btn-sm btn-link">
+                                        <i class="bi bi-arrow-left"></i> Retour
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="mdi mdi-send"></i> Soumettre la candidature
+                                    </button>
+                                </div>
                             </div> <!-- end col -->
                         </div> <!-- end row -->
 

@@ -19,10 +19,10 @@
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
 :root {
-  --background-color: #ffffff; /* Background color for the entire website, including individual sections */
+  --background-color: #eaf8fd; /* Background color for the entire website, including individual sections */
   --default-color: #212529; /* Default color used for the majority of the text content across the entire website */
-  --heading-color: #101f0c; /* Color for headings, subheadings and title throughout the website */
-  --accent-color:#bcdbf5; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+  --heading-color: #212529; /* Color for headings, subheadings and title throughout the website */
+  --accent-color:#212529; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
   --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
   --contrast-color: #29a9d4; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
 }
@@ -41,15 +41,15 @@
 
 .light-background {
   --background-color: #bcdbf5;
-  --surface-color: #ffffff;
+  --surface-color: #bcdbf5;
 }
 
 .dark-background {
   --background-color: #060606;
-  --default-color: #ffffff;
-  --heading-color: #ffffff;
+  --default-color: #bcdbf5;
+  --heading-color: #bcdbf5;
   --surface-color: #252525;
-  --contrast-color: #ffffff;
+  --contrast-color: #bcdbf5;
 }
 
 /* Smooth scroll */
@@ -77,8 +77,14 @@ a:hover {
   text-decoration: none;
 }
 
+h2{
+  color:#ffffff;
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0;
+}
+
 h1,
-h2,
 h3,
 h4,
 h5,
@@ -88,12 +94,32 @@ h6 {
 }
 
 .service-item {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
+    transform-origin: center center;
+    will-change: transform;
 }
+
 .service-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: scale(1.08);
+    background-color: #29a9d4;
+    color: #0f0f0f;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    z-index: 2;
 }
+
+.service-item:hover h3,
+.service-item:hover p,
+.service-item:hover small {
+    color: #0f0f0f;
+}
+
+.service-item:hover .icon {
+    color: #0f0f0f;
+}
+
 
 .btn-get-started {
   transition: all 0.3s ease;
@@ -160,7 +186,7 @@ h6 {
 --------------------------------------------------------------*/
 .header {
   color: var(--default-color);
-  background-color: var(--background-color);
+  background-color: var(--surface-color);
   padding: 15px 0;
   transition: all 0.5s;
   z-index: 997;
@@ -652,140 +678,72 @@ section,
 # Hero Section
 --------------------------------------------------------------*/
 
-.hero{
-  width: 100%;
-  position: relative;
-  min-height: 80vh;
-  padding: 160px 0 80px 0;
-
-  background: url('../img/fond2.jpg') center center no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  background-color: rgba(162, 231, 249, 0.5);
-}
-
-.hero .container {
-  position: relative;
-  z-index: 3;
-}
-
-.hero h2 {
-  font-size: 48px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.hero h2 .accent {
-  color: var(--accent-color);
-}
-
-.hero p {
-  color: color-mix(in srgb, var(--default-color), transparent 40%);
-  font-weight: 400;
-  margin-bottom: 30px;
-}
-
-.hero .btn-get-started {
-  color: var(--contrast-color);
-  background: #29a9d4;
-  font-family: var(--heading-font);
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 1px;
-  display: inline-block;
-  padding: 12px 36px;
-  border-radius: 50px;
-  transition: 0.5s;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
-}
-
-.hero .btn-get-started:hover {
-  background: color-mix(in srgb, var(--accent-color), transparent 15%);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
-}
-
-.hero .btn-watch-video {
-  font-size: 16px;
-  transition: 0.5s;
-  margin-left: 25px;
-  font-weight: 600;
-}
-
-.hero .btn-watch-video i {
-  color: var(--accent-color);
-  font-size: 32px;
-  transition: 0.3s;
-  line-height: 0;
-  margin-right: 8px;
-}
-
-.hero .btn-watch-video:hover {
-  color: var(--accent-color);
-}
-
-.hero .btn-watch-video:hover i {
-  color: color-mix(in srgb, var(--accent-color), transparent 15%);
-}
-
-@media (max-width: 640px) {
-  .hero h2 {
-    font-size: 36px;
+.background-slider {
+    position: absolute;
+    top: 0; left: 0;
+    width: 200%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
   }
 
-  .hero .btn-get-started,
-  .hero .btn-watch-video {
-    font-size: 14px;
+  .slider-track {
+    display: flex;
+    width: 200%;
+    animation: scroll-background 30s linear infinite;
   }
-}
 
-.hero .icon-boxes {
-  padding-bottom: 60px;
-  z-index: 4;
-}
+  .slider-track img {
+    width: 50%;
+    height: 100vh;
+    object-fit: cover;
+  }
 
-.hero .icon-box {
-  background: var(--surface-color);
-  padding: 60px 30px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 29px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-  border-radius: 8px;
-  z-index: 1;
-  height: 100%;
-  width: 100%;
-  text-align: center;
-}
+  @keyframes scroll-background {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 
-.hero .icon-box .title {
-  font-weight: 700;
-  margin-bottom: 15px;
-  font-size: 24px;
-}
+  .hero {
+    position: relative;
+    min-height: 90vh;
+    overflow: hidden;
+  }
 
-.hero .icon-box .title a {
-  color: color-mix(in srgb, var(--default-color), transparent 20%);
-  transition: 0.3s;
-}
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
 
-.hero .icon-box .icon {
-  margin-bottom: 20px;
-  padding-top: 10px;
-  display: inline-block;
-  transition: all 0.3s ease-in-out;
-  font-size: 48px;
-  line-height: 1;
-  color: var(--accent-color);
-}
+  .hero .container {
+    position: relative;
+    z-index: 2;
+  }
 
-.hero .icon-box:hover {
-  background-color: var(--accent-color);
-}
+  /* Zoom sur les cartes au survol */
+  .offre-card {
+    background: #29a9d4;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
+  }
 
-.hero .icon-box:hover .title a,
-.hero .icon-box:hover .icon {
-  color: var(--contrast-color);
-}
+  .offre-card:hover {
+    transform: scale(1.05);
+    background-color: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .offre-card .icon {
+    font-size: 32px;
+    color: #29a9d4;
+  }
+
+
 
 /*--------------------------------------------------------------
 # About Section
@@ -1354,4 +1312,141 @@ section,
 --------------------------------------------------------------*/
 .starter-section {
   /* Add your styles here */
+}
+
+/* Effet de clic sur les cartes */
+.offre-card:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Effet overlay sur image/vidéo au survol */
+.media-hover {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.media-hover img,
+.media-hover video {
+  transition: transform 0.4s ease;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.media-hover:hover img,
+.media-hover:hover video {
+  transform: scale(1.08);
+  filter: brightness(0.8);
+}
+
+.overlay-text {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.media-hover:hover .overlay-text {
+  opacity: 1;
+}
+/* *******FOOTER******** */
+.footer {
+  background-color: rgba(9, 99, 195, 0.8);
+  color: white;
+  font-family: var(--default-font, 'Roboto', sans-serif);
+  padding: 1rem 1rem;
+  text-align: center;
+  box-shadow: 0 -2px 5px rgba(251, 251, 251, 0.901);
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  backdrop-filter: blur(5px);
+}
+
+.footer .container {
+  display: flex;
+  color: white;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-logo img {
+  width: 120px;
+  margin-bottom: 0.5rem;
+}
+
+.footer h1,
+.footer h3 {
+  color: white;
+  margin-bottom: 0.75rem;
+  font-size: 1.3rem;
+}
+
+.footer p {
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.footer-links nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-links a:hover {
+  text-decoration: none;
+  color: white;
+}
+
+.footer-social {
+  display: flex;
+  flex-direction: column; /* Mettre en colonne */
+  gap: 0.75rem; /* Espacement entre les icônes */
+  align-items: flex-start; /* Aligné à gauche */
+  margin-top: 1rem;
+}
+
+.footer-social .social-icon {
+  color: white;
+  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-social .social-icon:hover {
+  color: white;
+}
+
+.footer-bottom {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: white;
+  text-align: left; /* alignement à gauche */
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }

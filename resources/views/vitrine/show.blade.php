@@ -1,67 +1,107 @@
 @extends('layouts.vitrine.vitrine')
+@php
+    use Illuminate\Support\Facades\Storage;
+    $hasFile = $offre->fichier && Storage::disk('public')->exists($offre->fichier);
+@endphp
 
 @section('content')
-<div class="col-auto">
+<div class="container mt-4">
+    <!-- start page title -->
+    <!-- end page title -->
 
-</div>
-<section class="section light-background">
-  <div class="container">
-    <a href="{{ route('vitrine.index') }}" class="text-white fs-2">
-            <i class="bi bi-arrow-left"></i>
-            </a>
     <div class="row">
+        <!-- Colonne gauche - Carte Principale -->
+        <div class="{{ $hasFile ? 'col-lg-8' : 'col-12' }}">
+            <div class="card d-block h-100">
+                <div class="card-body">
+                    <div class="float-sm-end mb-2 mb-sm-0">
+                        <div class="row g-2">
+                            <div class="col-auto">
+                                <a href="{{ route('vitrine.index') }}" class="btn btn-sm btn-link">
+                                    <i class="bi bi-arrow-left"></i> Retour
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{{ route('candidature.create',$offre->id) }}" class="btn btn-sm btn-primary">
+                                    <i class="mdi mdi-pencil"></i> Postuler á l'offre
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
-      {{-- Colonne gauche : PDF --}}
-      <div class="col-lg-3 mb-2">
-        @if($offre->fichier && Storage::disk('public')->exists($offre->fichier))
-          <div class="card h-100" style="border: 3px solid #29a9d4; height: 50%;">
-            <div class="card-body">
-              <h5 class="card-title"><strong>Fiche de poste</strong></h5>
-              <embed src="{{ asset('storage/'.$offre->fichier) }}"
-                     type="application/pdf"
-                     style="width: 100%; height: 400px; border-radius: 4px; border: 1px solid #ddd;" />
-              <div class="d-grid gap-2 mt-3">
-                <a href="{{ asset('storage/'.$offre->fichier) }}"
-                   class="btn btn-secondary"
-                   download>
-                   <i class="dripicons-download me-1"></i>
-                   <strong>Télécharger le PDF</strong>
-                   ({{ round(Storage::disk('public')->size($offre->fichier) / 1024) }} KB)
-                </a>
-              </div>
+                    <h4 class="mb-3 mt-0 font-18"><strong>{{ $offre->titre }}</strong></h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="mt-2 mb-1"><strong>Localisation :</strong></label>
+                            <p>
+                                <i class="mdi mdi-map-marker text-danger me-1"></i>
+                                <strong>{{ $offre->localisation->pays }}</strong>
+                            </p>
+                        </div>
+                        <!--div class="col-md-4">
+                            <label class="mt-2 mb-1"><strong>Département :</strong></label>
+                            <p><strong>{{--  --}}</strong></p>
+                        </!--div-->
+                        <!--div class="col-md-6">
+                            <label class="mt-2 mb-1"><strong>Statut :</strong></label>
+                                @if($offre->est_publie)
+                                <span class="badge bg-success">Publié</span>
+                                @else
+                                <span class="badge bg-secondary">Brouillon</span>
+                                @endif
+                            </span>
+                        </div-->
+                        <div class="col-md-6">
+                            <label class="mt-2 mb-1"><strong>Date de publication :</strong></label>
+                            <p><strong>{{ $offre->date_publication->format('d/m/Y') }}</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+
+                        <div class="col-md-6">
+                            <label class="mt-2 mb-1"><strong>Date limite :</strong></label>
+                            <p><strong>{{ $offre->date_limite->format('d/m/Y') }}</strong></p>
+                        </div>
+                    </div>
+
+                    <label class="mt-3 mb-1"><strong>Description :</strong></label>
+                    <div class="border p-2 rounded mb-3">
+                        {!! nl2br(e($offre->description)) !!}
+                    </div>
+
+                    <label class="mt-3 mb-1"><strong>Exigences :</strong></label>
+                    <div class="border p-3 rounded">
+                        {!! nl2br(e($offre->exigences)) !!}
+                    </div>
+                </div>
             </div>
-          </div>
-        @endif
-      </div>
-
-      {{-- Colonne droite : contenu de l’offre --}}
-      <div class="col-lg-9 ">
-        <div class="card " style="border: 3px solid #29a9d4;">
-          <div class="card-body">
-
-            <h2 class="mb-3">{{ $offre->titre }}</h2>
-            <p><strong>Département :</strong> {{ $offre->departement }}</p>
-            <p><strong>Lieu :</strong> {{ $offre->localisation->pays ?? 'Non précisé' }}</p>
-            <p><strong>Date limite :</strong> {{ $offre->date_limite->format('d/m/Y') }}</p>
-
-            <div class="mt-4" style="border: 1px solid #c0ebf9;">
-              <h4>Description de l'offre</h4>
-              <p style="white-space: pre-line;">{!! nl2br(e($offre->description)) !!}</p>
-            </div>
-
-            <div class="mt-4">
-              <h4>Exigences</h4>
-              <p style="white-space: pre-line;">{!! nl2br(e($offre->exigences)) !!}</p>
-            </div>
-
-            <div class="mt-6" id="hero">
-              <a href="{{ route( 'candidature.create', $offre->id) }}" class=" btn btn-secondary">Postuler</a>
-            </div>
-          </div>
         </div>
-      </div>
 
+        @if($hasFile)
+        <!-- Colonne droite - PDF -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><strong>Fiche de poste</strong></h5>
+                    <div class="text-center mb-3">
+                        <embed src="{{ asset('storage/'.$offre->fichier) }}"
+                               type="application/pdf"
+                               width="100%" height="300px">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ asset('storage/'.$offre->fichier) }}"
+                           class="btn btn-primary" download>
+                            <i class="dripicons-download me-1"></i>
+                            <strong>Télécharger le PDF</strong>
+                            ({{ round(Storage::disk('public')->size($offre->fichier) / 1024) }} KB)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
-  </div>
-</section>
+</div>
 @endsection

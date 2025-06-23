@@ -40,6 +40,7 @@
     <main>
         @yield('content')
     </main>
+    @include('layouts.vitrine.footer')
 <!-- Vendor JS Files -->
   <script src="{{asset('assets-vitrine/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
   <script src="{{asset('assets-vitrine/vendor/php-email-form/validate.js')}}"></script>
@@ -48,14 +49,30 @@
 
   <!-- Main JS File -->
   <script src="{{asset('assets-vitrine/js/main.js')}}"></script>
+<!-- AOS JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
   AOS.init({
-    duration: 800,
-    easing: 'ease-in-out',
-    once: true,
-    mirror: false
+    once: true,          // une seule fois
+    duration: 800,       // durée de l'animation
+    easing: 'ease-in-out' // type d'animation
   });
 </script>
+<!-- SweetAlert CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Affichage d'une alerte en cas de succès -->
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Succès',
+        text: '{{ session("success") }}',
+        confirmButtonText: 'OK',
+        timer: 6000
+    });
+</script>
+@endif
 
 </body>
 </html>

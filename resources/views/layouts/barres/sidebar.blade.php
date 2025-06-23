@@ -76,12 +76,6 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('candidatures.index') }}">
-                                    <i data-feather="briefcase"></i>
-                                    <span> Candidatures </span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="apps-calendar.html">
                                     <i data-feather="users"></i>
                                     <span> Tuteurs </span>

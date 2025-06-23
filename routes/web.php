@@ -1,47 +1,60 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\OffreController;
-use App\Http\Controllers\VitrineController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\CandidatureController;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\{
+    ProfileController,
+    RoleController,
+    OffreController,
+    VitrineController,
+    UserController,
+    CandidatureController
+};
 
-
-Route::get('/', function () {
-    return view('auth.login');
-});
-
+// 🔒 Routes protégées (admin, gestion RH, etc.)
 Route::middleware(['auth'])->group(function () {
     Route::resource('user', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('offres', OffreController::class);
-    Route::get('/candidatures',           [CandidatureController::class, 'index'])->name('candidatures.index');
-    Route::get('/candidatures/{id}',      [CandidatureController::class, 'show'])->name('candidatures.show');
-    Route::get('/candidatures/{id}/{f}',  [CandidatureController::class, 'downloadFile'])->name('candidatures.download');
-});
 
-Route::get('/offres/{id}/postuler', [CandidatureController::class, 'create'])
-     ->name('candidature.create');
-Route::post('/offres/{id}/postuler', [CandidatureController::class, 'store'])
-     ->name('candidature.store');
+    Route::get('/offres/{offre}/candidatures', [CandidatureController::class, 'index'])->name('offres.candidatures');
 
-Route::post('offres/{offre}/publish', [OffreController::class, 'publish'])->name('offres.publish');
+    Route::get('/candidatures',           [CandidatureController::class, 'all'])->name('candidatures.index');
+    Route::get('/candidatures/{id}/download/{field}', [CandidatureController::class, 'downloadFile'])->name('candidatures.download')->whereNumber('id');
+    Route::get('/candidatures/{id}/preview/{field}', [CandidatureController::class, 'previewFile'])->name('candidatures.preview')->whereNumber('id');
+    Route::get('/candidatures/{id}',      [CandidatureController::class, 'show'])->name('candidatures.show')->whereNumber('id');
 
-Route::get('/vitrine', [VitrineController::class, 'index'])->name('vitrine.index');
-Route::get('/vitrine/{offre}', [VitrineController::class, 'show'])->name('vitrine.show');
+    Route::post('offres/{offre}/publish', [OffreController::class, 'publish'])->name('offres.publish');
+    Route::get('/candidatures/{id}/analyser-ia', [CandidatureController::class, 'analyserIA'])->name('candidatures.analyser_ia');
 
-Route::get('/recherche', [VitrineController::class, 'recherche'])->name('vitrine.consulter');
+    Route::get('/dashboard', function () {
+        return redirect()->route('offres.index');
+    })->name('dashboard');
 
-Route::get('/dashboard', function () {
-return redirect()->route('offres.index');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    Route::patch('/candidatures/{id}/rejeter', [CandidatureController::class, 'rejeter'])->name('candidatures.reject');
 
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// 🌐 Routes publiques (vitrine et candidatures sans compte)
+Route::get('/', function () {
+    return view('auth.login');
+});
+
+Route::get('/vitrine', [VitrineController::class, 'index'])->name('vitrine.index');
+Route::get('/vitrine/{offre}', [VitrineController::class, 'show'])->name('vitrine.show');
+
+Route::get('/offres/{id}/postuler', [CandidatureController::class, 'create'])->name('candidature.create');
+Route::post('/offres/{id}/postuler', [CandidatureController::class, 'store'])->name('candidature.store');
+
+// Suivi de candidature via UUID (publique)
+Route::get('/candidatures/suivi/{uuid}', [CandidatureController::class, 'suivi'])->name('candidatures.suivi');
+
+// Formulaire public pour rechercher une candidature par UUID
+Route::post('/candidatures/recherche', action: [CandidatureController::class, 'recherche'])->name('candidatures.recherche');
+Route::get('/catalogue', [VitrineController::class, 'catalogue'])->name('vitrine.catalogue');
+
 
 require __DIR__.'/auth.php';

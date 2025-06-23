@@ -1,5 +1,9 @@
 @extends('layouts.home')
-@php use Illuminate\Support\Facades\Storage; @endphp
+@php
+    use Illuminate\Support\Facades\Storage;
+    $hasFile = $offre->fichier && Storage::disk('public')->exists($offre->fichier);
+@endphp
+
 @section('content')
 <div class="container mt-4">
     <!-- start page title -->
@@ -9,11 +13,11 @@
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item"><a href="">DIPRH</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Offres</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
                         <li class="breadcrumb-item active"><strong>Détails de l'offre</strong></li>
                     </ol>
                 </div>
-                <h4 class="page-title"><strong>Détails de l'offre N°{{ $offre->id }}</strong></h4>
+                <h4 class="page-title"><strong>Détails de l'offre N°{{ $numero }}</strong></h4>
             </div>
         </div>
     </div>
@@ -21,7 +25,7 @@
 
     <div class="row">
         <!-- Colonne gauche - Carte Principale -->
-        <div class="col-lg-8">
+        <div class="{{ $hasFile ? 'col-lg-8' : 'col-12' }}">
             <div class="card d-block h-100">
                 <div class="card-body">
                     <div class="float-sm-end mb-2 mb-sm-0">
@@ -50,76 +54,67 @@
                             </p>
                         </div>
                         <div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Département :</strong></label>
-                            <p><strong>{{ $offre->departement }}</strong></p>
+                            <label class="mt-2 mb-1"><strong>Statut :</strong></label>
+                           @if($offre->est_publie)
+                            <span class="badge bg-success">Publié</span>
+                            @else
+                            <span class="badge bg-secondary">Brouillon</span>
+                            @endif
                         </div>
                         <div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Statut :</strong></label>
-                            <span class="badge bg-{{ $offre->statut == 'publie' ? 'success' : 'warning' }}">
-                                <strong>{{ ucfirst($offre->statut) }}</strong>
-                            </span>
+                            <label class="mt-2 mb-1"><strong>Date de publication :</strong></label>
+                            <p><strong>{{ $offre->date_publication->format('d/m/Y') }}</strong></p>
                         </div>
                     </div>
 
                     <div class="row mt-2">
-                        <div class="col-md-6">
-                            <label class="mt-2 mb-1"><strong>Date de publication :</strong></label>
-                            <p><strong>{{ $offre->date_publication->format('d/m/Y') }}</strong></p>
-                        </div>
+
                         <div class="col-md-6">
                             <label class="mt-2 mb-1"><strong>Date limite :</strong></label>
                             <p><strong>{{ $offre->date_limite->format('d/m/Y') }}</strong></p>
                         </div>
                     </div>
 
+                    <label class="mt-3 mb-1"><strong>Département :</strong></label>
+                        <div class="p-2 rounded mb-3">
+                            <p><strong>{{ $offre->departement }}</strong></p>
+                        </div>
                     <label class="mt-3 mb-1"><strong>Description :</strong></label>
-                    <div class="border p-2 rounded mb-3">
-                        {!! nl2br(e( $offre->description)) !!}
+                    <div class=" p-2 rounded mb-3">
+                        {!! nl2br(e($offre->description)) !!}
                     </div>
 
                     <label class="mt-3 mb-1"><strong>Exigences :</strong></label>
-                    <div class="border p-3 rounded">
+                    <div class=" p-2 rounded  mb-3">
                         {!! nl2br(e($offre->exigences)) !!}
                     </div>
                 </div>
             </div>
         </div>
 
+        @if($hasFile)
         <!-- Colonne droite - PDF -->
         <div class="col-lg-4">
             <div class="card h-100">
-                    @if($offre->fichier)
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title"><strong>Fiche de poste</strong></h5>
-
-                                @if(Storage::disk('public')->exists($offre->fichier))
-                                <div class="text-center mb-3">
-                                    <embed src="{{ asset('storage/'.$offre->fichier) }}"
-                                        type="application/pdf"
-                                        width="100%"
-                                        height="300px">
-                                </div>
-                                <div class="d-grid gap-2">
-                                    <a href="{{ asset('storage/'.$offre->fichier) }}"
-                                    class="btn btn-primary"
-                                    download>
-                                    <i class="dripicons-download me-1"></i>
-                                    <strong>Télécharger le PDF</strong>
-                                    ({{ round(Storage::disk('public')->size($offre->fichier) / 1024) }} KB)
-                                    </a>
-                                </div>
-                                @else
-                                <div class="alert alert-danger">
-                                    <strong>Le fichier PDF est introuvable sur le serveur</strong>
-                                </div>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
+                <div class="card-body">
+                    <h5 class="card-title"><strong>Fiche de poste</strong></h5>
+                    <div class="text-center mb-3">
+                        <embed src="{{ asset('storage/'.$offre->fichier) }}"
+                               type="application/pdf"
+                               width="100%" height="300px">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ asset('storage/'.$offre->fichier) }}"
+                           class="btn btn-primary" download>
+                            <i class="dripicons-download me-1"></i>
+                            <strong>Télécharger le PDF</strong>
+                            ({{ round(Storage::disk('public')->size($offre->fichier) / 1024) }} KB)
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div>
 @endsection

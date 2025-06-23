@@ -11,11 +11,18 @@
                         <!-- start page title -->
                         <div class="row">
                             <div class="col-12">
-                                <h4 class="page-title">Listes des rôles</h4>
+                                <div class="page-title-box">
+                                    <div class="page-title-right">
+                                        <ol class="breadcrumb m-0">
+                                            <li class="breadcrumb-item"><a href="">DIPRH</a></li>
+                                            <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Liste des rôles</a></li>
+                                        </ol>
+                                    </div>
+                                    <h4 class="page-title"><strong>Liste des rôles</strong></h4>
                                 </div>
                             </div>
                         </div>
-                        <!-- end page title -->
+                                            <!-- end page title -->
 
 
                         <div class="row">
@@ -25,8 +32,8 @@
                                         <div class="row mb-2">
                                             <div class="col-sm-4">
                                                 <a href="{{ route('roles.create') }}" class="btn btn-primary">
-                                                <i class="fas fa-plus me-1"></i>Ajouter un rôle
-            </a>                             </div
+                                                <i class="fas fa-plus me-1"></i>Ajouter un rôle>
+            </a>                             </div>
                                         </div>
                         <div class="card-body">
                             @if (session('success'))

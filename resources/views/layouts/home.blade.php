@@ -33,8 +33,8 @@
 
     <!-- 🧭 NAVBAR -->
     <div id="wrapper">
-        @include('barres.navbar')
-        @include('barres.sidebar')
+        @include('layouts.barres.navbar')
+        @include('layouts.barres.sidebar')
 
 
         <div class="content-page">
@@ -80,6 +80,25 @@
             });
             }, 5000);
     </script>
-@livewireScripts
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </script>
+<!-- SweetAlert CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Affichage d'une alerte en cas de succès -->
+    @if(session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: '{{ session("success") }}',
+            confirmButtonText: 'OK',
+            timer: 6000
+        });
+    </script>
+    @endif
+    @stack('scripts')
+    @livewireScripts
 </body>
 </html>

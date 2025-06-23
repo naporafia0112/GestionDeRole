@@ -17,6 +17,11 @@ class VitrineController extends Controller
         return view('vitrine.index', compact('offres'));
     }
 
+    public function catalogue()
+    {
+        $offres = Offre::where('est_publie', true)->latest()->paginate(10);
+        return view('vitrine.catalogue', compact('offres'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -45,7 +50,7 @@ class VitrineController extends Controller
 
         return view('vitrine.show', compact('offre'));
     }
-   
+
 
     /**
      * Show the form for editing the specified resource.

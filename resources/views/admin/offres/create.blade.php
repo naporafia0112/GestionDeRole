@@ -33,47 +33,57 @@
                                 @if(isset($offre))
                                     @method('PUT')
                                 @endif
+
+                                <!-- Messages d'erreurs globaux -->
                                 @if($errors->any())
-                                <div class="alert alert-danger">
-                                    <ul class="mb-0">
-                                        @foreach($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
+                                    <div class="alert alert-danger">
+                                        <strong>Veuillez corriger les erreurs ci-dessous :</strong>
+                                        <ul class="mb-0">
+                                            @foreach($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
                                 @endif
 
                                 @if(session('error'))
-                                <div class="alert alert-danger">
-                                    {{ session('error') }}
-                                </div>
+                                    <div class="alert alert-danger">
+                                        {{ session('error') }}
+                                    </div>
                                 @endif
 
                                 @if(session('success'))
-                                <div class="alert alert-success">
-                                    {{ session('success') }}
-                                </div>
+                                    <div class="alert alert-success">
+                                        {{ session('success') }}
+                                    </div>
                                 @endif
+
                                 <!-- Titre de l'offre -->
                                 <div class="mb-3">
                                     <label for="titre" class="form-label">Titre de l'offre <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="titre" name="titre"
-                                        placeholder="Ex: Développeur Web Senior"
-                                        value="{{ old('titre', $offre->titre ?? '') }}" required>
+                                    <input type="text" class="form-control @error('titre') is-invalid @enderror"
+                                                id="titre" name="titre"
+                                                value="{{ old('titre', $offre->titre ?? '') }}"  >
+                                    @error('titre')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <!-- Description -->
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="description" name="description"
-                                        rows="3" required>{{ old('description', $offre->description ?? '') }}</textarea>
+                                    <textarea class="form-control @error('description') is-invalid @enderror" name="description"
+                                        rows="3" >{{ old('description', $offre->description ?? '') }}</textarea>
+                                        @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
 
                                 <!-- Localisation -->
                                 <div class="mb-3">
                                     <label for="localisation_id" class="form-label">Localisation <span class="text-danger">*</span></label>
-                                    <select id="localisation_id" name="localisation_id" class="form-select" required>
+                                    <select id="localisation_id" name="localisation_id" class="form-select @error('localisation_id') is-invalid @enderror" >
                                         <option value="">-- Choisissez une localisation --</option>
                                         @foreach($localisations as $loc)
                                             <option value="{{ $loc->id }}"
@@ -82,46 +92,53 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('localisation_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
 
                                 <div class="mb-3">
                                     <label for="date_publication" class="form-label">Date publication</label>
-                                    <input type="date" class="form-control" id="date_publication" name="date_publication"
+                                    <input type="date" class="form-control @error('date_publication') is-invalid @enderror" id="date_publication" name="date_publication"
                                         value="{{ old('date_publication', isset($offre->date_publication) ? $offre->date_publication->format('Y-m-d') : '') }}">
+                                        @error('date_publication')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="exigences" class="form-label">Exigences <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="exigences" name="exigences"
-                                        rows="3" required>{{ old('exigences', $offre->exigences ?? '') }}</textarea>
+                                    <textarea class="form-control @error('exigences') is-invalid @enderror" id="exigences" name="exigences"
+                                        rows="3" >{{ old('exigences', $offre->exigences ?? '') }}</textarea>
+                                        @error('exigences')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="departement" class="form-label">Départements <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="departement" name="departement"
-                                        rows="1" required>{{ old('departement', $offre->departement ?? '') }}</textarea>
+                                    <textarea class="form-control @error('exigences') is-invalid @enderror" id="departement" name="departement"
+                                        rows="1" >{{ old('departement', $offre->departement ?? '') }}</textarea>
+                                        @error('departement')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <!-- Fichier PDF -->
                                 <div class="mb-3">
                                     <label for="fichier" class="form-label">Joindre un fichier PDF</label>
-                                    <input type="file" class="form-control" id="fichier" name="fichier" accept=".pdf">
+                                    <input type="file" class="form-control @error('fichier') is-invalid @enderror" id="fichier" name="fichier" accept=".pdf">
+                                    @error('fichier')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="date_limite" class="form-label">Date limite <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="date_limite" name="date_limite"
-                                        value="{{ old('date_limite', isset($offre->date_limite) ? $offre->date_limite->format('Y-m-d') : '') }}" required>
+                                    <input type="date" class="form-control @error('date_limite') is-invalid @enderror" id="date_limite" name="date_limite"
+                                        value="{{ old('date_limite', isset($offre->date_limite) ? $offre->date_limite->format('Y-m-d') : '') }}" >
+                                    @error('date_limite')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
-
-                                @if(isset($offre))
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="est_publie" name="est_publie"
-                                            {{ old('est_publie', $offre->est_publie) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="est_publie">Publier cette offre</label>
-                                    </div>
-                                </div>
-                                @endif
-
                                 <!-- Boutons de soumission -->
                                 <div class="text-center mt-3">
                                     <button type="submit" class="btn btn-primary">

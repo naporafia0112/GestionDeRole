@@ -13,7 +13,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::all();
-        return view('roles.index', compact('roles'));
+        return view('admin.CreationUtilisateur.roles.index', compact('roles'));
     }
 
     /**
@@ -22,7 +22,7 @@ class RoleController extends Controller
     public function create()
     {
         $permissions = Permission::all();
-        return view('roles.create', compact('permissions'));
+        return view('admin.CreationUtilisateur.roles.create', compact('permissions'));
 
     }
 
@@ -42,7 +42,7 @@ class RoleController extends Controller
         $role->permissions()->attach($request->permissions);
     }
 
-    return redirect()->route('roles.index')->with('success', 'Rôle créé avec permissions');
+    return redirect()->route('admin.CreationUtilisateur.roles.index')->with('success', 'Rôle créé avec permissions');
 }
 
 
@@ -52,7 +52,7 @@ class RoleController extends Controller
     public function show(Role $role)
     {
         $permissions = $role->permissions;
-        return view('roles.show', compact('role', 'permissions'));
+        return view('admin.CreationUtilisateur.roles.show', compact('role', 'permissions'));
     }
 
     /**
@@ -61,7 +61,7 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
        $permissions = Permission::all()->sortBy('name');
-        return view('roles.edit', compact('role', 'permissions'));
+        return view('admin.CreationUtilisateur.roles.edit', compact('role', 'permissions'));
     }
 
 
@@ -80,7 +80,7 @@ class RoleController extends Controller
 
         $role->permissions()->sync($request->permissions ?? []);
 
-        return redirect()->route('roles.index')
+        return redirect()->route('admin.CreationUtilisateur.roles.index')
                          ->with('success', 'Rôle mis à jour avec succès');
     }
 
@@ -90,6 +90,6 @@ class RoleController extends Controller
     public function destroy(Role $role)
     {
         $role->delete();
-        return redirect()->route('roles.index')->with('success', 'Utilisateur supprimé');
+        return redirect()->route('admin.CreationUtilisateur.roles.index')->with('success', 'Utilisateur supprimé');
     }
 }

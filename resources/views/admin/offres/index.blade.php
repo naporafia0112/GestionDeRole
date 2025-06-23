@@ -5,10 +5,17 @@
     <div class="content">
         <!-- Start Content-->
         <div class="container-fluid">
-            <!-- start page title -->
             <div class="row">
                 <div class="col-12">
-                    <h4 class="page-title">Liste des offres</h4>
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href={{ route('offres.index') }}>Liste des offres</a></li>
+                            </ol>
+                        </div>
+                        <h4 class="page-title">Liste des offres</h4>
+                    </div>
                 </div>
             </div>
             <!-- end page title -->
@@ -27,7 +34,7 @@
 
                             <div class="table-responsive">
                                 <table class="table table-centered table-nowrap table-striped" id="offres-datatable">
-                                    <thead>
+                                    <thead class="text-center">
                                         <tr>
                                             <th>Titre</th>
                                             <th>Département</th>
@@ -37,7 +44,7 @@
                                             <th style="width: 120px;">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="text-center">
                                         @forelse ($offres as $offre)
                                         <tr>
                                             <td>{{ $offre->titre }}</td>
@@ -53,30 +60,35 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group">
-                                                    <a href="{{ route('offres.show', $offre) }}" class="btn btn-sm btn-info" title="Détails">
+                                                @if($offre->est_publie)
+                                                    <a href="{{ route('offres.candidatures', $offre->id) }}" class="btn btn-sm me-1 btn-secondary" title="Voir les candidatures">
+                                                        <i class="mdi mdi-account-multiple"></i>
+                                                    </a>
+                                                @endif
+                                                    <a href="{{ route('offres.show', $offre) }}" class="btn btn-sm  me-1 btn-info" title="Détails">
                                                         <i class="fe-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('offres.edit', $offre->id) }}" class="btn btn-sm btn-warning" title="Modifier">
+                                                    <a href="{{ route('offres.edit', $offre->id) }}" class="btn btn-sm  me-1 btn-warning" title="Modifier">
                                                         <i class="mdi mdi-square-edit-outline"></i>
                                                     </a>
 
                                                     @if(!$offre->est_publie)
-                                                        <form action="{{route('offres.publish', $offre->id) }}" method="POST" style="display: inline;">
+                                                        <form action="{{route('offres.publish', $offre->id) }}" id="publish-offre-{{ $offre->id }}" method="POST" style="display: inline;">
                                                             @csrf
-                                                            <button type="submit" class="btn btn-sm btn-primary" title="Publier">
+                                                            <button type="button" class="btn btn-sm  me-1 btn-primary" onclick="confirmPublish({{ $offre->id }})" title="Publier">
                                                                 <i class="mdi mdi-send"></i>
                                                             </button>
                                                         </form>
                                                     @endif
 
-                                                    <form action="{{ route('offres.destroy', $offre->id) }}" method="POST" style="display: inline;">
+                                                    <form id="delete-offre-{{ $offre->id }}" action="{{ route('offres.destroy', $offre->id) }}" method="POST" style="display: inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger"
-                                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette offre ?')" title="Supprimer">
+                                                        <button type="button" class="btn btn-sm  me-1 btn-danger" onclick="confirmDelete({{ $offre->id }})" title="Supprimer">
                                                             <i class="mdi mdi-delete"></i>
                                                         </button>
                                                     </form>
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -101,9 +113,46 @@
         </div>
     </div>
 </div>
-@endsection
 
+@push('scripts')
+<script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Supprimer cette offre ?',
+            text: "Cette action est irréversible.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e3342f',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-offre-' + id).submit();
+            }
+        });
+    }
+
+    function confirmPublish(id) {
+        Swal.fire({
+            title: 'Publier cette offre ?',
+            text: "Elle sera visible publiquement.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, publier',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('publish-offre-' + id).submit();
+            }
+        });
+    }
+</script>
+@endpush
 @push('styles')
+
 <style>
     .btn-group {
         display: flex;
@@ -114,3 +163,4 @@
     }
 </style>
 @endpush
+@endsection

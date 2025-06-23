@@ -7,19 +7,18 @@
         <div class="container-fluid">
             <!-- start page title -->
             <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box">
-                        <div class="page-title-right">
-                            <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Utilisateurs</a></li>
-                                <li class="breadcrumb-item active">Modifier utilisateur</li>
-                            </ol>
+                            <div class="col-12">
+                                <div class="page-title-box">
+                                    <div class="page-title-right">
+                                        <ol class="breadcrumb m-0">
+                                            <li class="breadcrumb-item"><a href="">DIPRH</a></li>
+                                            <li class="breadcrumb-item"><a href="{{ route('user.index') }}">Liste des utilisateurs</a></li>
+                                        </ol>
+                                    </div>
+                                    <h4 class="page-title"><strong>Modifier</strong></h4>
+                                </div>
+                            </div>
                         </div>
-                        <h4 class="page-title">Modifier l'utilisateur</h4>
-                    </div>
-                </div>
-            </div>
 
             <div class="row">
                 <div class="col-12">

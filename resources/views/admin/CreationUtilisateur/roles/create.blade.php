@@ -12,7 +12,7 @@
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Rôles</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route("roles.index") }}">Liste des rôles</a></li>
                                 <li class="breadcrumb-item active">Créer un rôle</li>
                             </ol>
                         </div>

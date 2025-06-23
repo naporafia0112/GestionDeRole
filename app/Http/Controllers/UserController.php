@@ -12,13 +12,13 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return view('user.index', compact('users'));
+        return view('admin.CreationUtilisateur.user.index', compact('users'));
     }
 
     public function create()
     {
         $roles = Role::all();
-        return view('user.create', compact('roles'));
+        return view('admin.CreationUtilisateur.user.create', compact('roles'));
     }
 
     public function store(Request $request)
@@ -36,7 +36,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
         $user->roles()->attach($request->role_id);
-        return redirect()->route('user.index')->with('success', 'Utilisateur ajouté');
+        return redirect()->route('admin.CreationUtilisateur.user.index')->with('success', 'Utilisateur ajouté');
     }
 
     public function edit(User $user)
@@ -47,7 +47,7 @@ class UserController extends Controller
         #abort(403, 'Accès refusé – Permission manquante.');
 
         $roles = Role::all(); // <-- Cette ligne est obligatoire
-        return view('user.edit', compact('user','roles'));
+        return view('admin.CreationUtilisateur.user.edit', compact('user','roles'));
     }
 
     public function update(Request $request, User $user)
@@ -64,17 +64,17 @@ class UserController extends Controller
             'email' => $request->email,
         ]);
         $user->roles()->sync([$request->role_id]);
-        return redirect()->route('user.index')->with('success', 'Utilisateur modifié');
+        return redirect()->route('admin.CreationUtilisateur.user.index')->with('success', 'Utilisateur modifié');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('user.index')->with('success', 'Utilisateur supprimé');
+        return redirect()->route('admin.CreationUtilisateur.user.index')->with('success', 'Utilisateur supprimé');
     }
     public function show(User $user)
     {
         $roles= $user->roles;
-        return view('user.show', compact('user','roles'));
+        return view('admin.CreationUtilisateur.user.show', compact('user','roles'));
     }
 }

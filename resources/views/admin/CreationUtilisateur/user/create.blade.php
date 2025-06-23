@@ -13,12 +13,11 @@
                                 <div class="page-title-box">
                                     <div class="page-title-right">
                                         <ol class="breadcrumb m-0">
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Formulaire</a></li>
-                                            <li class="breadcrumb-item active">Créer un utilisateur</li>
+                                            <li class="breadcrumb-item"><a href="">DIPRH</a></li>
+                                            <li class="breadcrumb-item"><a href="{{ route('user.index') }}">Liste des utilisateurs</a></li>
                                         </ol>
                                     </div>
-                                    <h4 class="page-title">Formulaire d'ajout</h4>
+                                    <h4 class="page-title"><strong>Créer</strong></h4>
                                 </div>
                             </div>
                         </div>

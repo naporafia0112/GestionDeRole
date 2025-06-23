@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Support\Str;
 class Candidature extends Model
 {
     use HasFactory;
@@ -18,6 +18,23 @@ class Candidature extends Model
         'lm_fichier',
         'lr_fichier',
     ];
+
+    public const STATUTS = [
+    'en_cours'   => 'En cours de traitement',
+    'retenu'     => 'Retenu',
+    'rejete'     => 'Rejeté',
+];
+
+    protected $casts = [
+    'date_soumission' => 'datetime',
+];
+
+    protected static function booted()
+    {
+    static::creating(function ($candidature) {
+        $candidature->uuid = Str::uuid()->toString();
+    });
+    }
 
     public function candidat()
     {

@@ -33,13 +33,16 @@ class Offre extends Model
     ];
 
     public function localisation()
-{
-    return $this->belongsTo(Localisation::class);
+    {
+        return $this->belongsTo(Localisation::class);
 
-}
-public function user()
-{
-    return $this->belongsTo(User::class);
-}
-
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function candidatures()
+    {
+        return $this->hasMany(Candidature::class);
+    }
 }
