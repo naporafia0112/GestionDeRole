@@ -8,6 +8,8 @@
     <meta content="Coderthemes" name="author" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+    <link href="https://cdn.materialdesignicons.com/7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/logo.jpg') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -89,17 +91,41 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Affichage d'une alerte en cas de succès -->
-    @if(session('success'))
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Succès',
-            text: '{{ session("success") }}',
-            confirmButtonText: 'OK',
-            timer: 6000
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès',
+                    text: @json(session('success')),
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: @json(session('error')),
+                    timer: 4000,
+                    showConfirmButton: true
+                });
+            @endif
+
+            @if($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    html: `<ul style="text-align:left;">{!! implode('', $errors->all('<li>:message</li>')) !!}</ul>`,
+                    showConfirmButton: true
+                });
+            @endif
         });
     </script>
-    @endif
+    @endpush
     @vite('resources/js/app.js')
     @stack('scripts')
     @livewireScripts

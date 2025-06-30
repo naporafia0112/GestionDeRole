@@ -61,7 +61,7 @@
                         <a href="#menu-admin" data-bs-toggle="collapse" class="{{ request()->routeIs('roles.*') || request()->routeIs('user.*') ? 'active' : '' }}">
                             <i data-feather="user"></i> <span> Utilisateurs & Rôles </span> <span class="menu-arrow"></span>
                         </a>
-                        <div class="collapse {{ request()->routeIs('roles.*') || request()->routeIs('user.*') ? 'show' : '' }}" id="menu-admin">
+                        <div class="collapse" {{ request()->routeIs('roles.*') || request()->routeIs('user.*') ? 'show' : '' }} id="menu-admin">
                             <ul class="nav-second-level">
                                 <li><a href="{{ route('roles.index') }}">Rôles</a></li>
                                 <li><a href="{{ route('user.index') }}">Utilisateurs</a></li>
@@ -88,12 +88,12 @@
                 @if (!Auth::user()->hasRole('ADMIN'))
                     <li class="menu-title mt-2">Gestion</li>
                     <li>
-                        <a href="#menu-stages" data-bs-toggle="collapse">
+                        <a href="#menu-stages" data-bs-toggle="collapse" class="collapsed">
                             <i data-feather="briefcase"></i> <span> Stages </span> <span class="menu-arrow"></span>
                         </a>
                         <div class="collapse" id="menu-stages">
                             <ul class="nav-second-level">
-                                <li><a href="#">Académique</a></li>
+                                <li><a href="{{ route('stages.index') }}">Académique</a></li>
                                 <li><a href="#">Professionnel</a></li>
                                 <li><a href="#">Pré-embauche</a></li>
                             </ul>
@@ -117,7 +117,7 @@
                     </li>
                 @endif
 
-                  <!-- 🔴 Bouton Déconnexion -->
+                  <!--Bouton Déconnexion -->
                 <li class="mt-3">
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
                         <i data-feather="log-out"></i>

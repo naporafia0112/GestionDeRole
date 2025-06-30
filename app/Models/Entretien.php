@@ -13,12 +13,13 @@ class Entretien extends Model
         'en_ligne'   => 'En ligne',
     ];
 
-    // ✅ Statuts d’entretien : clé => label
+    // Statuts d’entretien : clé => label
     public const STATUTS = [
-        'prévu'     => 'Prévu',
+        'prevu'     => 'Prévu',
         'en_cours'  => 'En cours',
-        'effectuée' => 'Effectuée',
-        'annulé'    => 'Annulé',
+        'effectuee' => 'Effectuée',
+        'termine'   => 'Terminé',
+        'annule'    => 'Annulé',
     ];
 
 
@@ -34,6 +35,13 @@ class Entretien extends Model
         'id_candidat',
         'id_offre',
     ];
+    // App\Models\Entretien.php
+    protected $casts = [
+        'date' => 'date',
+        'date_debut' => 'datetime',
+        'date_fin' => 'datetime',
+    ];
+
 
     public function candidat()
     {

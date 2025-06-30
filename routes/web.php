@@ -10,11 +10,11 @@ use App\Http\Controllers\{
     CandidatureController,
     EntretienController,
     DashboardController,
-    OpenAIController
+    StageController,
 };
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-// Routes publiques (pas d'auth)
+// Routes publiques
 Route::get('/', [VitrineController::class, 'index'])->name('vitrine.index');
 Route::get('/vitrine/{offre}', [VitrineController::class, 'show'])->name('vitrine.show');
 Route::get('/catalogue', [VitrineController::class, 'catalogue'])->name('vitrine.catalogue');
@@ -59,6 +59,8 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/candidatures/{id}/effectuee', [CandidatureController::class, 'effectuee'])
         ->name('candidatures.effectuee');
 
+    Route::resource('stages', StageController::class);
+
     // Liste candidatures d'une offre (pour admin/RH)
     Route::get('/offres/{offre}/candidatures', [CandidatureController::class, 'index'])
         ->name('offres.candidatures');
@@ -76,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/show', [EntretienController::class, 'show'])->name('show');
         Route::patch('/{id}/annuler', [EntretienController::class, 'annuler'])->name('annuler');
         Route::post('/action', [EntretienController::class, 'action'])->name('action');
-        Route::get('/entretiens/{id}/show-json', [EntretienController::class, 'showJson'])->name('entretiens.show-json');
+        Route::get('/{id}/show-json', [EntretienController::class, 'showJson'])->name('show-json');
     });
 
     // Routes Offres accessibles aux RH et ADMIN

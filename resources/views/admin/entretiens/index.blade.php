@@ -23,13 +23,6 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-sm-4">
-                                    <a href="{{ route('entretiens.create') }}" class="btn btn-sm me-1 btn-outline-primary mb-3">
-                                        <i class="mdi mdi-calendar-clock"></i> Planifier entretien
-                                    </a>
-                                </div>
-                            </div>
                         {{-- Onglets Bootstrap --}}
                         <ul class="nav nav-tabs" id="entretienTabs" role="tablist">
                             <li class="nav-item" role="presentation">
@@ -48,10 +41,16 @@
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="effectuee-tab" data-bs-toggle="tab" data-bs-target="#effectuee" type="button" role="tab" aria-controls="effectuee" aria-selected="false">
+                                    Effectuée ({{ $entretiensEffectues->count() }})
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="termine-tab" data-bs-toggle="tab" data-bs-target="#termine" type="button" role="tab" aria-controls="termine" aria-selected="false">
                                     Terminé ({{ $entretiensTermines->count() }})
                                 </button>
                             </li>
+
                         </ul>
 
                         {{-- Contenu des onglets --}}
@@ -67,6 +66,9 @@
 
                             <div class="tab-pane fade" id="encours" role="tabpanel" aria-labelledby="encours-tab">
                                 @include('admin.entretiens.partials', ['entretiens' => $entretiensEncours])
+                            </div>
+                            <div class="tab-pane fade" id="effectuee" role="tabpanel" aria-labelledby="effectuee-tab">
+                                @include('admin.entretiens.partials', ['entretiens' => $entretiensEffectues])
                             </div>
 
                             <div class="tab-pane fade" id="termine" role="tabpanel" aria-labelledby="termine-tab">

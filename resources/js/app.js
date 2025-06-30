@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const calendar = new Calendar(calendarEl, {
             plugins: [dayGridPlugin],
             initialView: 'dayGridMonth',
-            events: '/events' // route pour charger les événements dynamiques (facultatif)
+            events: '/events'
         });
 
         calendar.render();
