@@ -76,21 +76,21 @@
 
                                 {{-- CV --}}
                                 <div class="mb-3">
-                                    <label for="cv_fichier" class="form-label">CV (PDF)</label>
+                                    <label for="cv_fichier" class="form-label">CV (prénom_nom.pdf)</label>
                                     <input type="file" id="cv_fichier" name="cv_fichier" class="form-control @error('cv_fichier') is-invalid @enderror">
                                     @error('cv_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Lettre de motivation --}}
                                 <div class="mb-3">
-                                    <label for="lm_fichier" class="form-label">Lettre de motivation(PDF)</label>
+                                    <label for="lm_fichier" class="form-label">Lettre de motivation(prénom_nom.pdf)</label>
                                     <input type="file" id="lm_fichier" name="lm_fichier" class="form-control @error('lm_fichier') is-invalid @enderror">
                                     @error('lm_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Lettre de recommandation --}}
                                 <div class="mb-3">
-                                    <label for="lr_fichier" class="form-label">Lettre de recommandation(PDF)</label>
+                                    <label for="lr_fichier" class="form-label">Lettre de recommandation(prénom_nom.pdf)</label>
                                     <input type="file" id="lr_fichier" name="lr_fichier" class="form-control @error('lr_fichier') is-invalid @enderror">
                                     @error('lr_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>

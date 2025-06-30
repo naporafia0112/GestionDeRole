@@ -5,91 +5,92 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use App\Models\Permission;
+
 class RoleController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche la liste des rôles.
      */
     public function index()
     {
-        $roles = Role::all();
+        $roles = Role::with('permissions')->get(); // Précharge les permissions
         return view('admin.CreationUtilisateur.roles.index', compact('roles'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Affiche le formulaire de création d'un nouveau rôle.
      */
     public function create()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::orderBy('name')->get();
         return view('admin.CreationUtilisateur.roles.create', compact('permissions'));
-
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistre un nouveau rôle avec ses permissions.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|unique:roles,name',
-        'permissions' => 'array'
-    ]);
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|unique:roles,name',
+            'permissions' => 'array',
+            'permissions.*' => 'exists:permissions,id',
+        ]);
 
-    $role = Role::create(['name' => $request->name]);
+        $role = Role::create(['name' => $validated['name']]);
 
-    if ($request->has('permissions')) {
-        $role->permissions()->attach($request->permissions);
+        if (!empty($validated['permissions'])) {
+            $role->permissions()->sync($validated['permissions']);
+        }
+
+        return redirect()->route('roles.index')->with('success', 'Rôle créé avec succès');
     }
 
-    return redirect()->route('admin.CreationUtilisateur.roles.index')->with('success', 'Rôle créé avec permissions');
-}
-
-
     /**
-     * Display the specified resource.
+     * Affiche les détails d’un rôle.
      */
     public function show(Role $role)
     {
-        $permissions = $role->permissions;
+        $permissions = $role->permissions()->pluck('name');
         return view('admin.CreationUtilisateur.roles.show', compact('role', 'permissions'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Affiche le formulaire d'édition du rôle.
      */
     public function edit(Role $role)
     {
-       $permissions = Permission::all()->sortBy('name');
-        return view('admin.CreationUtilisateur.roles.edit', compact('role', 'permissions'));
+        $permissions = Permission::orderBy('name')->get();
+        $rolePermissions = $role->permissions()->pluck('id')->toArray();
+
+        return view('admin.CreationUtilisateur.roles.edit', compact('role', 'permissions', 'rolePermissions'));
     }
 
-
     /**
-     * Update the specified resource in storage.
+     * Met à jour un rôle existant.
      */
     public function update(Request $request, Role $role)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,'.$role->id,
+            'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
             'permissions' => 'sometimes|array',
-            'permissions.*' => 'exists:permissions,id'
+            'permissions.*' => 'exists:permissions,id',
         ]);
 
-        $role->update($validated);
+        $role->update(['name' => $validated['name']]);
+        $role->permissions()->sync($validated['permissions'] ?? []);
 
-        $role->permissions()->sync($request->permissions ?? []);
-
-        return redirect()->route('admin.CreationUtilisateur.roles.index')
-                         ->with('success', 'Rôle mis à jour avec succès');
+        return redirect()->route('roles.index')->with('success', 'Rôle mis à jour avec succès');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprime un rôle.
      */
     public function destroy(Role $role)
     {
+        $role->permissions()->detach(); // Important : détacher d’abord les permissions
         $role->delete();
-        return redirect()->route('admin.CreationUtilisateur.roles.index')->with('success', 'Utilisateur supprimé');
+
+        return redirect()->route('roles.index')->with('success', 'Rôle supprimé avec succès');
     }
 }

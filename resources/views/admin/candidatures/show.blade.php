@@ -14,7 +14,11 @@
                         <li class="breadcrumb-item active"><strong>Détails de la candidature</strong></li>
                     </ol>
                 </div>
-                <h4 class="page-title"><strong>Candidature N°{{ $candidature->id }}</strong></h4>
+<h4 class="page-title">
+    <strong>
+        Candidature N°{{ str_pad($numero, 3, '0', STR_PAD_LEFT) }} <small class="text-muted ms-2">(ID: {{ $candidature->id }})</small>
+    </strong>
+</h4>
             </div>
         </div>
     </div>
@@ -31,9 +35,7 @@
                             <a href="{{ route('offres.candidatures',$candidature->offre->id) }}" class="btn btn-sm me-1 btn-link">
                                 <i class="mdi mdi-keyboard-backspace"></i> Retour
                             </a>
-                            <a href="" class="btn btn-sm me-1 btn-outline-primary">
-                                <i class="mdi mdi-calendar-clock"></i> Planifier entretien
-                            </a>
+
                             @if(!in_array($candidature->statut, ['rejete', 'retenu']))
                             <form action="{{ route('candidatures.reject', $candidature->id) }}" id="rejeter-candidature-{{ $candidature->id }}" method="POST" onsubmit="return confirm('Confirmer le rejet de cette candidature ?');">
                             @csrf
@@ -63,6 +65,7 @@
                             <p><strong>{{ $candidature->candidat->type_depot ?? '-' }}</strong></p>
                         </div>
                     </div>
+
 
                     <div class="row mt-2">
                         <div class="col-md-4">
@@ -98,6 +101,11 @@
                             <label class="mt-2 mb-1"><strong>Quartier :</strong></label>
                             <p><strong>{{ $candidature->candidat->quartier ?? '-' }}</strong></p>
                         </div>
+                         <div class="col-md-4">
+                            <label class="mt-2 mb-1"><strong>Entretients :</strong></label>
+                            <p><strong></strong></p>
+                        </div>
+
                     </div>
 
                     <hr class="my-4">

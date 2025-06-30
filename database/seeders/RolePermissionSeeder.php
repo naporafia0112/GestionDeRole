@@ -10,36 +10,33 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Liste des permissions de base
+        // Création des rôles
+        $roles = ['ADMIN', 'RH', 'DIRECTEUR', 'TUTEUR'];
+
+        foreach ($roles as $roleName) {
+            Role::firstOrCreate(['name' => $roleName]);
+        }
+
+        // Création des permissions
         $permissions = [
             'voir_utilisateurs',
             'créer_utilisateur',
             'modifier_utilisateur',
             'supprimer_utilisateur',
-            'voir_roles',
-            'créer_role',
-            'modifier_role',
-            'supprimer_role',
+            'voir_candidatures',
+            'valider_stages',
+            'attribuer_tuteur',
+            'publier_offres',
+            'analyser_candidatures'
         ];
 
-        // Création des permissions
-        foreach ($permissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm]);
+        foreach ($permissions as $permName) {
+            Permission::firstOrCreate(['name' => $permName]);
         }
 
-        // Création de quelques rôles
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $userRole = Role::firstOrCreate(['name' => 'utilisateur']);
-
-        // Attribution de toutes les permissions à l'admin
-        $adminRole->permissions()->sync(Permission::all()->pluck('id'));
-
-        // Attribution de quelques permissions au rôle utilisateur
-        $userPermissions = Permission::whereIn('name', [
-            'voir_utilisateurs',
-            'voir_roles'
-        ])->pluck('id');
-
-        $userRole->permissions()->sync($userPermissions);
+        // Donner toutes les permissions au rôle ADMIN
+        $admin = Role::where('name', 'ADMIN')->first();
+        $allPermissions = Permission::pluck('id');
+        $admin->permissions()->sync($allPermissions);
     }
 }

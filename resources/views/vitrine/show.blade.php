@@ -15,24 +15,25 @@
             <div class="card d-block h-100">
                 <div class="card-body">
                     <div class="float-sm-end mb-2 mb-sm-0">
-                        <div class="row g-2">
+                       <div class="row g-2 align-items-center">
                             <div class="col-auto">
-                                <a href="{{ route('vitrine.index') }}" class="btn btn-sm btn-link">
-                                    <i class="bi bi-arrow-left"></i> Retour
+                                <a href="{{ route('vitrine.index') }}" class="btn btn-outline-primary rounded-pill px-4">
+                                    <i class="bi bi-arrow-left me-2"></i> Retour
                                 </a>
                             </div>
                             <div class="col-auto">
-                                <a href="{{ route('candidature.create',$offre->id) }}" class="btn btn-sm btn-primary">
-                                    <i class="mdi mdi-pencil"></i> Postuler á l'offre
+                                <a href="{{ route('candidature.create', $offre->id) }}" class="btn btn-sm btn-primary">
+                                    <i class="mdi mdi-pencil"></i> Postuler à l'offre
                                 </a>
                             </div>
                         </div>
+
                     </div>
 
                     <h4 class="mb-3 mt-0 font-18"><strong>{{ $offre->titre }}</strong></h4>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="mt-2 mb-1"><strong>Localisation :</strong></label>
                             <p>
                                 <i class="mdi mdi-map-marker text-danger me-1"></i>
@@ -52,27 +53,23 @@
                                 @endif
                             </span>
                         </div-->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="mt-2 mb-1"><strong>Date de publication :</strong></label>
                             <p><strong>{{ $offre->date_publication->format('d/m/Y') }}</strong></p>
                         </div>
-                    </div>
-
-                    <div class="row mt-2">
-
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="mt-2 mb-1"><strong>Date limite :</strong></label>
                             <p><strong>{{ $offre->date_limite->format('d/m/Y') }}</strong></p>
                         </div>
                     </div>
 
                     <label class="mt-3 mb-1"><strong>Description :</strong></label>
-                    <div class="border p-2 rounded mb-3">
+                    <div class=" p-2 rounded mb-3">
                         {!! nl2br(e($offre->description)) !!}
                     </div>
 
                     <label class="mt-3 mb-1"><strong>Exigences :</strong></label>
-                    <div class="border p-3 rounded">
+                    <div class=" p-3 rounded">
                         {!! nl2br(e($offre->exigences)) !!}
                     </div>
                 </div>

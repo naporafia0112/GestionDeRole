@@ -14,6 +14,12 @@
                                         </ol>
                                     </div>
                                     <h4 class="page-title"><strong>Détails de {{$role->name}}</strong></h4>
+                                    <h4>Permissions héritées :</h4>
+                                        <ul>
+                                            @foreach($permissions as $perm)
+                                                <li>{{ $perm }}</li>
+                                            @endforeach
+                                        </ul>
                                 </div>
                             </div>
                         </div>

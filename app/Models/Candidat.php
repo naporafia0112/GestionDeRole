@@ -23,4 +23,8 @@ class Candidat extends Model
     {
         return $this->hasMany(Candidature::class);
     }
+    public function tuteur()
+    {
+        return $this->belongsTo(Tuteur::class);
+    }
 }

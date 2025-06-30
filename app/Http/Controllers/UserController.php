@@ -30,14 +30,17 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        $user= User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-        $user->roles()->attach($request->role_id);
-        return redirect()->route('admin.CreationUtilisateur.user.index')->with('success', 'Utilisateur ajouté');
+
+        $user->roles()->sync([$request->role_id]); // note les crochets
+
+        return redirect()->route('user.index')->with('success', 'Utilisateur ajouté avec succès !');
     }
+
 
     public function edit(User $user)
     {
@@ -50,31 +53,46 @@ class UserController extends Controller
         return view('admin.CreationUtilisateur.user.edit', compact('user','roles'));
     }
 
-    public function update(Request $request, User $user)
+   public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => 'required',
             'email' => "required|email|unique:users,email,{$user->id}",
-            'role_id' => 'required|exists:roles,id',
-
+            'roles' => 'required|array',
+            'roles.*' => 'exists:roles,id',
         ]);
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
         ]);
-        $user->roles()->sync([$request->role_id]);
-        return redirect()->route('admin.CreationUtilisateur.user.index')->with('success', 'Utilisateur modifié');
+
+        $user->roles()->sync($request->roles);
+
+        return redirect()->route('user.index')->with('success', 'Utilisateur modifié avec succès.');
     }
+
 
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('admin.CreationUtilisateur.user.index')->with('success', 'Utilisateur supprimé');
+        return redirect()->route('user.index')->with('success', 'Utilisateur supprimé');
     }
     public function show(User $user)
     {
-        $roles= $user->roles;
-        return view('admin.CreationUtilisateur.user.show', compact('user','roles'));
+        $roles = $user->roles;
+        $permissions = [];
+
+        foreach ($roles as $role) {
+            foreach ($role->permissions as $permission) {
+                $permissions[] = $permission->name;
+            }
+        }
+
+        $permissions = array_unique($permissions);
+
+        return view('admin.CreationUtilisateur.user.show', compact('user','roles','permissions'));
     }
+
+
 }

@@ -4,23 +4,46 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+
 class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Vérifie si l'utilisateur existe déjà
-        if (!User::where('email', 'admin@test.com')->exists()) {
-            $user = User::create([
+        // Récupère les rôles par leur nom
+        $adminRole = Role::where('name', 'ADMIN')->first();
+        $rhRole = Role::where('name', 'RH')->first();
+
+        // 1️⃣ Création de l'utilisateur ADMIN
+        if (!User::where('email', 'naporafia0@gmail.com')->exists()) {
+            $admin = User::create([
                 'name' => 'Rafia',
                 'email' => 'naporafia0@gmail.com',
                 'email_verified_at' => Carbon::now(),
-                'password' => Hash::make('Rafia0112!'), // Assure-toi de hacher le mot de passe
+                'password' => Hash::make('Rafia0112!'),
             ]);
 
-            // Si tu utilises les rôles
-            // $user->roles()->attach(1); // ID du rôle admin, par exemple
+            // Lier le rôle ADMIN
+            if ($adminRole) {
+                $admin->roles()->attach($adminRole->id);
+            }
+        }
+
+        // 2️⃣ Création de l'utilisateur RH
+        if (!User::where('email', 'rh@test.com')->exists()) {
+            $rh = User::create([
+                'name' => 'RH Responsable',
+                'email' => 'rh@test.com',
+                'email_verified_at' => Carbon::now(),
+                'password' => Hash::make('Password123!'),
+            ]);
+
+            // Lier le rôle RH
+            if ($rhRole) {
+                $rh->roles()->attach($rhRole->id);
+            }
         }
     }
 }

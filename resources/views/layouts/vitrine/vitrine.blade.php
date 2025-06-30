@@ -37,7 +37,7 @@
 
 <body class="index-page">
     @include('layouts.vitrine.navbar')
-    <main>
+    <main  style="margin-bottom: 25px;">
         @yield('content')
     </main>
     @include('layouts.vitrine.footer')

@@ -32,7 +32,7 @@
                                         <div class="row mb-2">
                                             <div class="col-sm-4">
                                                 <a href="{{ route('roles.create') }}" class="btn btn-primary">
-                                                <i class="fas fa-plus me-1"></i>Ajouter un rôle>
+                                                <i class="fas fa-plus me-1"></i>Ajouter un rôle
             </a>                             </div>
                                         </div>
                         <div class="card-body">
