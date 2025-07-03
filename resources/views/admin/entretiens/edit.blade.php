@@ -30,7 +30,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('entretiens.update', $entretien->id) }}" method="POST">
+                    <form id=entretienForm action="{{ route('entretiens.update', $entretien->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -38,7 +38,7 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="date" class="form-label">Date</label>
-                                    <input type="date" name="date" id="date" class="form-control" value="{{ old('date', $entretien->date) }}" >
+                                    <input type="date" name="date" id="date" class="form-control" value="{{ old('date', \Carbon\Carbon::parse($entretien->date)->format('Y-m-d')) }}">
                                 </div>
                             </div>
 
@@ -122,10 +122,10 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="text-end">
                             <div class="col-12">
                                 <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
-                                <a href="{{ route('entretiens.calendrier') }}" class="btn btn-secondary">Annuler</a>
+                                <a href="{{ route('entretiens.calendrier') }}" class="btn btn-ligth">Annuler</a>
                             </div>
                         </div>
                     </form>
@@ -144,6 +144,23 @@
         $('.selectize-select').selectize({
             create: false,
             sortField: 'text'
+        });
+        $('#entretienForm').on('submit', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Confirmation',
+                text: "Souhaitez-vous Modifier cet entretien ?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, Modifier',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
         });
     });
 </script>

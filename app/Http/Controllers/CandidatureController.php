@@ -14,18 +14,126 @@ use App\Services\GeminiService;
 use App\Helpers\Helpers;
 use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class CandidatureController extends Controller
 {
+
+
+    public function analyze($id)
+    {
+        try {
+            // On récupère la candidature avec l'offre associée
+            $candidature = Candidature::with('offre')->findOrFail($id);
+
+            // Récupération du chemin du fichier CV
+            $cvFile = $candidature->cv_fichier;
+            if (!$cvFile) {
+                Log::error("Aucun fichier CV dans la candidature ID $id");
+                return response()->json(['score' => 0, 'commentaire' => 'Aucun fichier CV trouvé.'], 404);
+            }
+
+            $cvPath = storage_path('app/public/' . $cvFile);
+
+            if (!file_exists($cvPath)) {
+                Log::error("Fichier CV introuvable : $cvPath");
+                return response()->json(['score' => 0, 'commentaire' => 'CV introuvable.'], 404);
+            }
+
+            // Analyse du contenu du CV avec Smalot
+            $parser = new Parser();
+            $cvText = $parser->parseFile($cvPath)->getText();
+
+            $jobDescription = $candidature->offre->description;
+
+            // Création du prompt pour l'IA
+            $prompt = <<<EOT
+            Tu es un recruteur. Voici une offre d'emploi :
+
+            {$jobDescription}
+
+            Et voici un CV extrait :
+
+            {$cvText}
+
+            Analyse la pertinence de ce candidat pour cette offre.
+
+            Réponds uniquement en JSON :
+            {
+            "score": 80,
+            "commentaire": "Bon profil mais manque de DevOps"
+            } si tu ne trouves aucune information pertinente, réponds en JSON :
+            {
+            "score": 0,
+            "commentaire": "Aucune information pertinente trouvée."
+            } et si tu ne trouves pas de CV, réponds en JSON :
+            {
+            "score": 0,
+            "commentaire": "Aucun CV trouvé."
+            }
+            EOT;
+
+            // Appel à l'API IA
+            $response = Http::timeout(120)->post(config('ollama.url') . '/api/generate', [
+                'model' => config('ollama.model'),
+                'prompt' => $prompt,
+                'stream' => false,
+            ]);
+
+            if (!$response->successful()) {
+                Log::error('Erreur API Ollama : ' . $response->body());
+                return response()->json([
+                    'score' => 0,
+                    'commentaire' => 'Erreur lors de la communication avec l’IA.'
+                ], 500);
+            }
+
+            $responseText = trim($response->json()['response'] ?? '');
+
+            // Correction si la réponse est presque JSON mais mal formée
+            if (!Str::endsWith($responseText, '}')) {
+                $responseText .= '}';
+            }
+
+            $jsonResponse = json_decode($responseText, true);
+
+            if ($jsonResponse === null) {
+                Log::error('Erreur JSON décodage : ' . $responseText);
+                return response()->json([
+                    'score' => 0,
+                    'commentaire' => 'Réponse IA JSON invalide.'
+                ], 500);
+            }
+
+            // Sauvegarde du score et du commentaire dans la base
+            $candidature->score = $jsonResponse['score'] ?? 0;
+            $candidature->commentaire = $jsonResponse['commentaire'] ?? 'Analyse incomplète.';
+            $candidature->save();
+
+            return response()->json([
+                'score' => $candidature->score,
+                'commentaire' => $candidature->commentaire,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur analyse candidature ID ' . $id . ' : ' . $e->getMessage());
+            return response()->json([
+                'score' => 0,
+                'commentaire' => 'Erreur serveur lors de l’analyse.'
+            ], 500);
+        }
+    }
+
+
     /**
      * Liste des candidatures liées à une offre.
      */
     public function index($offreId)
     {
-        $offre = Offre::with(['candidatures' => function ($query) {
-            $query->orderBy('created_at', 'desc')->with('candidat');
-        }])->findOrFail($offreId);
-
+        $offre = Offre::with([
+            'candidatures.entretien',
+            'candidatures.candidat'
+        ])->findOrFail($offreId);
         return view('admin.candidatures.index', compact('offre'));
     }
 
@@ -68,14 +176,17 @@ class CandidatureController extends Controller
         return back()->with('success', 'La session a été marquée comme effectuée.');
     }
 
-    public function show($id)
+   public function show($id)
     {
         $candidature = Candidature::with('candidat', 'offre')->findOrFail($id);
         $toutesCandidatures = Candidature::orderBy('id')->pluck('id')->toArray();
         $numero = array_search($candidature->id, $toutesCandidatures) + 1;
 
-        return view('admin.candidatures.show', compact('candidature', 'numero'));
+        $statut = $candidature->statut; // récupère le statut ici
+
+        return view('admin.candidatures.show', compact('candidature', 'numero', 'statut'));
     }
+
 
     public function create(int $offreId)
     {
@@ -85,16 +196,17 @@ class CandidatureController extends Controller
 
     public function store(Request $request, int $offreId)
     {
+
         $request->validate([
             'nom' => 'required|string|max:255',
             'prenoms' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'telephone' => 'nullable|string|max:30',
-            'quartier' => 'nullable|string|max:255',
-            'ville' => 'nullable|string|max:255',
+            'telephone' => 'required|string|max:30',
+            'quartier' => 'required|string|max:255',
+            'ville' => 'required|string|max:255',
             'type_depot' => 'required|in:stage professionnel,stage académique,stage de préembauche',
-            'cv_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'lm_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'cv_fichier' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'lm_fichier' => 'required|file|mimes:pdf,doc,docx|max:2048',
             'lr_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
@@ -201,13 +313,13 @@ class CandidatureController extends Controller
             $badges[] = '🎓 Profil académique avancé';
         }
         if ($candidature->cv_fichier) {
-            $badges[] = '📄 CV fourni';
+            $badges[] = 'CV fourni';
         }
         if ($candidature->lr_fichier) {
-            $badges[] = '💬 Recommandation présente';
+            $badges[] = 'Recommandation présente';
         }
         if ($candidature->candidat->type_depot === 'stage professionnel') {
-            $badges[] = '💼 Cherche un stage professionnel';
+            $badges[] = 'Cherche un stage professionnel';
         }
         $badges[] = $score > 80 ? 'Très bon profil' : 'Profil à vérifier';
 
@@ -216,4 +328,26 @@ class CandidatureController extends Controller
             'badges' => $badges,
         ]);
     }
+    // Afficher les candidatures retenues
+    public function dossiersRetenus()
+    {
+        $candidatures = Candidature::with(['candidat', 'offre'])
+            ->where('statut', 'retenu')
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.dossiers.dossiersretenu.retenus', ['candidatures' => $candidatures,'statut' => 'retenu',]);
+    }
+
+    // Afficher les candidatures validées
+    public function dossiersValides()
+    {
+        $candidatures = Candidature::with(['candidat', 'offre'])
+            ->where('statut', 'valide')
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.dossiers.dossiersvalide.valides', compact('candidatures'));
+    }
+
 }

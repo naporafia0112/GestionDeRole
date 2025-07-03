@@ -16,6 +16,7 @@
 		<link href="{{asset ('assets/css/config/default/app.min.css') }}" rel="stylesheet" type="text/css" id="app-style"/>
 		<!-- icons -->
 		<link href="{{asset('assets/css/icons.min.css')}}" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     </head>
 
@@ -51,7 +52,7 @@
                     <!-- Email Address -->
                     <div class="mb-3">
                         <x-input-label class="form-label" for="email" :value="__('Adresse mail')" />
-                        <x-text-input id="email" class="form-control" type="email" name="email" :value="old('email')" placeholder="Enter your email" required autofocus autocomplete="username" />
+                        <x-text-input id="email" class="form-control" type="email" name="email" :value="old('email')" placeholder="Enter your email"  autofocus autocomplete="username" />
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
@@ -65,7 +66,7 @@
                         name="password"
                         class="form-control @error('password') is-invalid @enderror"
                         placeholder="Enter your password"
-                        required
+
                         autocomplete="current-password"
                     >
                     <div class="input-group-text" data-password="false" style="cursor: pointer;">
@@ -116,6 +117,26 @@
 
         <!-- App js -->
         <script src="{{ asset('assets/js/app.min.js') }}"></script>
+
+        <!-- SweetAlert2 CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        @if ($errors->any())
+        <script>
+            let errorMessages = `
+                @foreach ($errors->all() as $message)
+                    <li>{{ $message }}</li>
+                @endforeach
+            `;
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Champs obligatoires',
+                html: `<ul style="text-align: left;">${errorMessages}</ul>`,
+                confirmButtonColor: '#d33'
+            });
+        </script>
+        @endif
 
     </body>
 

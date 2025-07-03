@@ -39,15 +39,15 @@ File: Main Css File
   font-weight: 700; }
 
 :root {
-  --ct-link-color:                                    #6658dd;
-  --ct-link-hover-color:                              #473e9b;
+  --ct-link-color:                                    #14a03e;
+  --ct-link-hover-color:                              #14a03e;
   --ct-border-color:                                  #dee2e6;
   --ct-box-shadow:                                    0px 0px 35px 0px rgba(154, 161, 171, 0.15);
   --ct-box-shadow-sm:                                 0 0.75rem 6rem rgba(56, 65, 74, 0.03);
   --ct-box-shadow-lg:                                 0 0 45px 0 rgba(0, 0, 0, 0.12);
   --ct-box-shadow-inset:                              inset 0 1px 2px rgba(0, 0, 0, 0.075);
   --ct-component-active-color:                        #fff;
-  --ct-component-active-bg:                           #6658dd;
+  --ct-component-active-bg:                           #14a03e;
   --ct-text-muted:                                    #98a6ad;
   --ct-blockquote-footer-color:                       #98a6ad;
   --ct-hr-color:                                      #e5e8eb;
@@ -164,7 +164,7 @@ File: Main Css File
   --ct-accordion-color:                                #6c757d;
   --ct-accordion-border-color:                         rgba(0, 0, 0, 0.125);
   --ct-accordion-button-active-bg:                     #f0eefc;
-  --ct-accordion-button-active-color:                  #5c4fc7;
+  --ct-accordion-button-active-color:                  #14a03e;
   --ct-accordion-button-focus-border-color:            var(--ct-input-focus-border-color);
   --ct-accordion-button-focus-box-shadow:              0 0 0 0.15rem var(--ct-input-btn-focus-color);
   --ct-tooltip-color:                                  #fff;
@@ -193,7 +193,7 @@ File: Main Css File
   --ct-progress-bg:                                    #eef0f2;
   --ct-progress-box-shadow:                            var(--ct-box-shadow-inset);
   --ct-progress-bar-color:                             #fff;
-  --ct-progress-bar-bg:                                #6658dd;
+  --ct-progress-bar-bg:                                #14a03e;
   --ct-list-group-color:                               ;
   --ct-list-group-bg:                                  #fff;
   --ct-list-group-border-color:                        rgba(0, 0, 0, 0.125);
@@ -222,9 +222,9 @@ File: Main Css File
   --ct-bg-leftbar:                                      #fff;
   --ct-bg-leftbar-dark:                                 #38414a;
   --ct-bg-leftbar-brand:                                #4a81d4;
-  --ct-bg-leftbar-gradient:                             #683ba9;
+  --ct-bg-leftbar-gradient:                             #14a03e;
   --ct-twocolumn-sidebar-bg:                            #fff;
-  --ct-twocolumn-sidebar-iconview-bg:                   #6658dd;
+  --ct-twocolumn-sidebar-iconview-bg:                   #14a03e;
   --ct-menu-item-color-dark:                            #9097a7;
   --ct-menu-item-hover-color-dark:                      #c8cddc;
   --ct-menu-item-active-color-dark:                     #fff;
@@ -240,7 +240,7 @@ File: Main Css File
   --ct-box-shadow-condensed:                            3px 5px 10px 0 rgba(154, 161, 171, 0.2);
   --ct-footer-bg:                                       #eeeff3;
   --ct-auth-bg:                                         #fff;
-  --ct-auth-bg-alt:                                     #6658dd;
+  --ct-auth-bg-alt:                                     #14a03e;
   --ct-apex-grid-color:                                 #f9f9fd;
   --ct-chat-primary-user-bg:                            #fef5e4;
   --ct-chat-secondary-user-bg:                          #f1f3fa;
@@ -263,7 +263,7 @@ body[data-layout-color="dark"] {
   --ct-box-shadow-lg:                                 0 0 45px 0 rgba(0, 0, 0, 0.12);
   --ct-box-shadow-inset:                              inset 0 -.1rem 0 rgba(0, 0, 0, 0.075);
   --ct-component-active-color:                        #fff;
-  --ct-component-active-bg:                           #6658dd;
+  --ct-component-active-bg:                           #14a03e;
   --ct-text-muted:                                    #8c98a5;
   --ct-blockquote-footer-color:                       #cedeef;
   --ct-hr-color:                                      #424e5a;

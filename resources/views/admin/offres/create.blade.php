@@ -140,8 +140,8 @@
                                     @enderror
                                 </div>
                                 <!-- Boutons de soumission -->
-                                <div class="text-center mt-3">
-                                    <button type="submit" class="btn btn-primary">
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success">
                                         {{ isset($offre) ? 'Mettre à jour' : 'Enregistrer' }}
                                     </button>
                                     <a href="{{ route('offres.index') }}" class="btn btn-light">Annuler</a>

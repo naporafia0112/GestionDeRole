@@ -45,7 +45,7 @@
 
                                 {{-- Quartier --}}
                                 <div class="mb-3">
-                                    <label for="quartier" class="form-label">Quartier</label>
+                                    <label for="quartier" class="form-label">Quartier <span class="text-danger">*</span></label>
                                     <input type="text" id="quartier" name="quartier" value="{{ old('quartier') }}" class="form-control @error('quartier') is-invalid @enderror">
                                     @error('quartier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
@@ -58,7 +58,7 @@
 
                                  {{-- Ville --}}
                                 <div class="mb-3">
-                                    <label for="ville" class="form-label">Ville</label>
+                                    <label for="ville" class="form-label">Ville <span class="text-danger">*</span></label>
                                     <input type="text" id="ville" name="ville" value="{{ old('ville') }}" class="form-control @error('ville') is-invalid @enderror">
                                     @error('ville') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
@@ -76,14 +76,14 @@
 
                                 {{-- CV --}}
                                 <div class="mb-3">
-                                    <label for="cv_fichier" class="form-label">CV (prénom_nom.pdf)</label>
+                                    <label for="cv_fichier" class="form-label">CV (prénom_nom.pdf) <span class="text-danger">*</span></label>
                                     <input type="file" id="cv_fichier" name="cv_fichier" class="form-control @error('cv_fichier') is-invalid @enderror">
                                     @error('cv_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 {{-- Lettre de motivation --}}
                                 <div class="mb-3">
-                                    <label for="lm_fichier" class="form-label">Lettre de motivation(prénom_nom.pdf)</label>
+                                    <label for="lm_fichier" class="form-label">Lettre de motivation(prénom_nom.pdf) <span class="text-danger">*</span></label>
                                     <input type="file" id="lm_fichier" name="lm_fichier" class="form-control @error('lm_fichier') is-invalid @enderror">
                                     @error('lm_fichier') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
@@ -96,7 +96,7 @@
                                 </div>
 
                                 <div class="text-end mt-4">
-                                    <a href="{{ route('vitrine.show', $offre->id) }}}}" class="btn btn-sm btn-link">
+                                    <a href="{{ route('vitrine.show', $offre->id) }}" class="btn btn-sm btn-link">
                                         <i class="bi bi-arrow-left"></i> Retour
                                     </a>
                                     <button type="submit" class="btn btn-primary">

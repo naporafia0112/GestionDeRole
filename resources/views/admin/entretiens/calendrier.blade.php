@@ -22,14 +22,6 @@
                         </div>
                     </div>
                 </div>
-                     <!-- Bouton de création -->
-                    <div class="row mb-2">
-                        <div class="col-sm-4">
-                            <a href="{{ route('entretiens.create') }}" class="btn btn-sm me-1 btn-outline-primary mb-3">
-                                <i class="mdi mdi-calendar-clock"></i> Planifier entretien
-                            </a>
-                        </div>
-                    </div>
                     <div id="calendar"></div>
                 </div>
             </div>
@@ -83,7 +75,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a id="btn-edit-entretien" href="#" class="btn btn-primary">Modifier</a>
+                <a id="btn-edit-entretien" href="#" class="btn btn-success">Modifier</a>
+                <a id="btn-candidatures-entretien" href="#" class="btn btn-ligth">Candidatures</a>
                 <button id="btn-cancel-entretien" class="btn btn-danger">Annuler</button>
             </div>
         </div>
@@ -141,7 +134,12 @@ $(document).ready(function () {
                     $('#modal-commentaire').text(data.commentaire || 'Aucun commentaire');
 
                     $('#btn-edit-entretien').attr('href', '/entretiens/' + event.id + '/edit');
-
+                    // Bouton vers la page des candidatures de l'offre
+                    if (data.offre_id) {
+                        $('#btn-candidatures-entretien').attr('href', '/offres/' + data.offre_id + '/candidatures');
+                    } else {
+                        $('#btn-candidatures-entretien').hide(); // ou disable si pas d’offre
+                    }
                     $('#btn-cancel-entretien').off('click').on('click', function () {
                         Swal.fire({
                             title: 'Voulez-vous annuler cet entretien ?',

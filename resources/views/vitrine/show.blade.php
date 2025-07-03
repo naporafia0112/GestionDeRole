@@ -22,7 +22,7 @@
                                 </a>
                             </div>
                             <div class="col-auto">
-                                <a href="{{ route('candidature.create', $offre->id) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ route('candidature.create', $offre->id) }}" class="btn btn-primary rounded-pill px-4">
                                     <i class="mdi mdi-pencil"></i> Postuler à l'offre
                                 </a>
                             </div>

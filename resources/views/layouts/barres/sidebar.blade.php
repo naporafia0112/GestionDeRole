@@ -49,7 +49,8 @@
                 @if (Auth::user()->hasRole('RH'))
                     <li class="menu-title mt-2">RH</li>
                     <li><a href="{{ route('offres.index') }}"><i data-feather="file-text"></i> <span> Offres </span></a></li>
-                    <li><a href="#"><i data-feather="users"></i> <span> Tuteurs </span></a></li>
+                    <li><a href="{{ route('candidatures.index') }}"><i data-feather="folder"></i> <span> Candidatures </span></a></li>
+                    <li><a href="{{ route('tuteurs.afficher') }}"><i data-feather="users"></i> <span> Tuteurs </span></a></li>
                     <li><a href="{{ route('entretiens.index') }}"><i data-feather="clipboard"></i> <span> Entretiens </span></a></li>
                     <li><a href="{{ route('entretiens.calendrier') }}"><i data-feather="calendar"></i> <span> Calendrier </span></a></li>
                 @endif
@@ -99,6 +100,8 @@
                             </ul>
                         </div>
                     </li>
+
+
                     <li>
                         <a href="#menu-documents" data-bs-toggle="collapse">
                             <i data-feather="clipboard"></i> <span> Rapports & Documents </span> <span class="menu-arrow"></span>

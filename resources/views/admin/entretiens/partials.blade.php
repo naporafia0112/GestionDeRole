@@ -40,20 +40,8 @@
                         <a href="{{ route('entretiens.show', $entretien->id) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
                             <i class="mdi mdi-eye"></i>
                         </a>
-                        @if ($entretien->statut == 'prevu')
-                            <form action="{{ route('entretiens.annuler', $entretien->id) }}" method="POST" class="d-inline-block ms-1" onsubmit="return confirm('Confirmer l\'annulation de cet entretien ?');">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Annuler l'entretien">
-                                    <i class="mdi mdi-cancel"></i>
-                                </button>
-                            </form>
-                        @elseif($entretien->statut !== 'annule')
-                            <a href="{{ route('entretiens.edit', $entretien->id) }}" class="btn btn-sm btn-warning" title="Modifier">
-                                <i class="mdi mdi-square-edit-outline"></i>
-                            </a>
-                        @endif
                     </td>
+
                 </tr>
             @empty
                 <tr>

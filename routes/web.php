@@ -11,6 +11,8 @@ use App\Http\Controllers\{
     EntretienController,
     DashboardController,
     StageController,
+    OllamaTestController,
+    CVAnalyzerController,
 };
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
@@ -44,22 +46,24 @@ Route::middleware(['auth'])->group(function () {
         ->name('candidatures.preview')->whereNumber('id');
     Route::get('/candidatures/{id}', [CandidatureController::class, 'show'])
         ->name('candidatures.show')->whereNumber('id');
-    Route::get('/candidatures/{id}/analyser-ia', [CandidatureController::class, 'analyserIA'])
-        ->name('candidatures.analyser_ia');
-    Route::post('/candidatures/analyser', [CandidatureController::class, 'analyser'])
-        ->name('candidatures.analyser');
+
 
     // Actions sur les candidatures : rejeter, retenir, valider, effectuer
     Route::patch('/candidatures/{id}/rejeter', [CandidatureController::class, 'rejeter'])
         ->name('candidatures.reject');
     Route::patch('/candidatures/{id}/retenir', [CandidatureController::class, 'retenir'])
         ->name('candidatures.retenir');
-    Route::patch('/candidatures/{id}/valider', [CandidatureController::class, 'valider'])
+    Route::post('/candidatures/{id}/valider', [CandidatureController::class, 'valider'])
         ->name('candidatures.valider');
     Route::patch('/candidatures/{id}/effectuee', [CandidatureController::class, 'effectuee'])
         ->name('candidatures.effectuee');
+    Route::post('/candidatures/{id}/analyze', [CandidatureController::class, 'analyze'])->name('candidatures.analyze');
+    Route::get('candidatures/retenus', [CandidatureController::class, 'dossiersRetenus'])->name('candidatures.retenus');
+    Route::get('candidatures/valides', [CandidatureController::class, 'dossiersValides'])->name('candidatures.valides');
 
     Route::resource('stages', StageController::class);
+    Route::get('/tuteurs', [StageController::class,'affichertutteur'])->name('tuteurs.afficher');
+
 
     // Liste candidatures d'une offre (pour admin/RH)
     Route::get('/offres/{offre}/candidatures', [CandidatureController::class, 'index'])
@@ -92,6 +96,18 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('user', UserController::class);
     });
+
+    Route::get('/cv/analyze', [CVAnalyzerController::class, 'form'])->name('cv.form');
+    Route::post('/cv/analyze', [CVAnalyzerController::class, 'analyze'])->name('cv.analyze');
+
+});
+
+Route::prefix('ollama')->group(function () {
+    Route::get('/test', [OllamaTestController::class, 'index'])->name('ollama.test');
+    Route::get('/connection', [OllamaTestController::class, 'testConnection']);
+    Route::get('/models', [OllamaTestController::class, 'listModels']);
+    Route::post('/analyze', [OllamaTestController::class, 'analyzeCV']);
+    Route::get('/sample-test', [OllamaTestController::class, 'testWithSampleCV']);
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

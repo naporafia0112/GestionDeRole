@@ -47,27 +47,45 @@ class EntretienController extends Controller
 }
 
     // Formulaire de création d’un entretien
-    public function create()
+    public function create(Request $request)
     {
-        $candidats = Candidat::all();
-        $offres = Offre::all();
+        $candidats = Candidat::whereHas('candidatures', function ($query) {
+            $query->where('statut', 'retenu');
+        })->get();
 
-        return view('admin.entretiens.create', compact('candidats', 'offres'));
+        // Récupérer les ids passés en GET pour pré-remplissage
+        $id_candidat = $request->query('id_candidat');
+        $id_offre = $request->query('id_offre');
+
+        $offres = $id_offre ? Offre::where('id', $id_offre)->get() : Offre::all();
+
+
+        return view('admin.entretiens.create', compact('candidats', 'offres', 'id_candidat', 'id_offre'));
     }
+
+
 
     // Enregistrement d’un entretien avec validation et gestion d'erreurs
     public function store(Request $request)
     {
+        $now = Carbon::now(); // heure actuelle
+        $entretienDateTime = Carbon::parse($request->date . ' ' . $request->heure);
+
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date|after_or_equal:today',
+            'date' => 'required|date',
             'heure' => 'required',
-            'lieu' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
+            'lieu' => ['required', 'string', 'min:3', 'max:255', 'regex:/^(?=.*[a-zA-Z])(?=.{3,})(?!.*(.)\1{2,})[a-zA-Z\s\-\'éèàâçùêôîï]+$/u'],
             'statut' => 'nullable|string|in:prevu,en_cours,effectuee,termine,annule',
             'commentaire' => 'nullable|string',
             'id_candidat' => 'required|exists:candidats,id',
             'id_offre' => 'required|exists:offres,id',
         ]);
+
+        $validator->after(function ($validator) use ($entretienDateTime, $now) {
+            if ($entretienDateTime->lte($now->copy()->addHour())) {
+                $validator->errors()->add('date', 'La date et l\'heure doivent être au moins une heure après l\'heure actuelle.');
+            }
+        });
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -76,15 +94,15 @@ class EntretienController extends Controller
         }
 
         try {
-            $debut = $request->date . ' ' . $request->heure;
-            $fin = date('Y-m-d H:i:s', strtotime($debut) + 3600);
+            $debut = $entretienDateTime;
+            $fin = $debut->copy()->addHour();
 
             Entretien::create([
                 'date' => $request->date,
                 'heure' => $request->heure,
                 'lieu' => $request->lieu,
                 'type' => $request->type,
-                'statut' => $request->statut ?? 'prévu',
+                'statut' =>'prévu',
                 'commentaire' => $request->commentaire,
                 'id_candidat' => $request->id_candidat,
                 'id_offre' => $request->id_offre,
@@ -138,16 +156,26 @@ class EntretienController extends Controller
     // Mise à jour avec validation, gestion d'erreurs, alertes
     public function update(Request $request, $id)
     {
+        $now = Carbon::now();
+        $entretienDateTime = Carbon::parse($request->date . ' ' . $request->heure);
+
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date|after_or_equal:today',
+            'date' => 'required|date',
             'heure' => 'required',
-            'lieu' => 'required|string|max:255',
+            'lieu' => ['required', 'string', 'min:3', 'max:255','regex:/^(?=.*[a-zA-Z])(?=.{3,})(?!.*(.)\1{2,})[a-zA-Z\s\-\'éèàâçùêôîï]+$/u'],
             'type' => 'required|string|max:255',
             'statut' => 'required|string|in:prevu,en_cours,effectuee,termine,annule',
             'commentaire' => 'nullable|string',
             'id_candidat' => 'required|exists:candidats,id',
             'id_offre' => 'required|exists:offres,id',
         ]);
+
+        // Règle personnalisée pour date + heure > now + 1h
+        $validator->after(function ($validator) use ($entretienDateTime, $now) {
+            if ($entretienDateTime->lte($now->copy()->addHour())) {
+                $validator->errors()->add('date', 'La date et l\'heure doivent être au moins une heure après l\'heure actuelle.');
+            }
+        });
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -158,8 +186,8 @@ class EntretienController extends Controller
         try {
             $entretien = Entretien::findOrFail($id);
 
-            $debut = $request->date . ' ' . $request->heure;
-            $fin = date('Y-m-d H:i:s', strtotime($debut) + 3600);
+            $debut = $entretienDateTime;
+            $fin = $debut->copy()->addHour();
 
             $entretien->update([
                 'date' => $request->date,
@@ -214,7 +242,6 @@ class EntretienController extends Controller
    public function showJson($id)
     {
    $entretien = Entretien::with(['candidat', 'offre'])->findOrFail($id);
-
         return response()->json([
             'title' => $entretien->type,
             'date' => \Carbon\Carbon::parse($entretien->date)->format('d/m/Y'),
@@ -225,6 +252,7 @@ class EntretienController extends Controller
             'commentaire' => $entretien->commentaire,
             'candidat' => $entretien->candidat ? $entretien->candidat->nom . ' ' . $entretien->candidat->prenom : '',
             'offre' => $entretien->offre ? $entretien->offre->titre : '',
+            'offre_id' => $entretien->offre ? $entretien->offre->id : null, // <-- ajouté ici
         ]);
     }
 

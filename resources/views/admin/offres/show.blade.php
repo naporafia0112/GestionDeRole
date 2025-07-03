@@ -35,8 +35,15 @@
                                     <i class="mdi mdi-keyboard-backspace"></i> Retour
                                 </a>
                             </div>
+                            @if($offre->est_publie)
+                             <div class="col-auto">
+                                 <a href="{{ route('offres.candidatures', $offre->id) }}" class="btn btn-sm btn-secondary" title="Candidatures">
+                                    <i class="mdi mdi-account-multiple"></i>Voir les candidatures
+                                </a>
+                            </div>
+                            @endif
                             <div class="col-auto">
-                                <a href="{{ route('offres.edit', $offre->id) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ route('offres.edit', $offre->id) }}" class="btn btn-sm btn-warning">
                                     <i class="mdi mdi-pencil"></i> Modifier
                                 </a>
                             </div>

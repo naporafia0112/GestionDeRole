@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Localisation extends Model
 {
     use HasFactory;
-     protected $fillable = ['pays']; // autorise l'ajout en masse
+     protected $fillable = ['pays'];
 
     public function offres()
     {

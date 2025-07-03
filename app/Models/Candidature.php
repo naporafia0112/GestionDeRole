@@ -19,6 +19,8 @@ class Candidature extends Model
         'lm_fichier',
         'lr_fichier',
         'uuid',
+        'score',
+        'commentaire',
     ];
 
     public const STATUTS = [
@@ -26,7 +28,6 @@ class Candidature extends Model
         'retenu'     => 'Retenu',
         'valide'     => 'Validé',
         'rejete'     => 'Rejeté',
-        'effectuee'  => 'Effectuée',
     ];
 
     protected $casts = [
@@ -49,4 +50,10 @@ class Candidature extends Model
     {
         return $this->belongsTo(Offre::class);
     }
+    public function entretien()
+    {
+        return $this->hasOne(Entretien::class, 'id_candidat', 'candidat_id')
+                    ->where('id_offre', $this->offre_id);
+    }
+
 }

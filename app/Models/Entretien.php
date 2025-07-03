@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Entretien extends Model
 {
     use HasFactory;
+    
     public const TYPES = [
         'présentiel' => 'Présentiel',
         'en_ligne'   => 'En ligne',
