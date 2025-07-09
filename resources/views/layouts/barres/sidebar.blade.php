@@ -32,31 +32,16 @@
             </p>
         </div>
 
-        <!--- Sidebar menu -->
+        <!-- Sidebar menu -->
         <div id="sidebar-menu">
             <ul id="side-menu">
-                <li class="menu-title">Navigation</li>
 
-                <!-- Dashboard -->
-                <li>
-                    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <i data-feather="airplay"></i>
-                        <span> Tableau de bord </span>
-                    </a>
-                </li>
-
-                <!-- RH -->
-                @if (Auth::user()->hasRole('RH'))
-                    <li class="menu-title mt-2">RH</li>
-                    <li><a href="{{ route('offres.index') }}"><i data-feather="file-text"></i> <span> Offres </span></a></li>
-                    <li><a href="{{ route('candidatures.index') }}"><i data-feather="folder"></i> <span> Candidatures </span></a></li>
-                    <li><a href="{{ route('tuteurs.afficher') }}"><i data-feather="users"></i> <span> Tuteurs </span></a></li>
-                    <li><a href="{{ route('entretiens.index') }}"><i data-feather="clipboard"></i> <span> Entretiens </span></a></li>
-                    <li><a href="{{ route('entretiens.calendrier') }}"><i data-feather="calendar"></i> <span> Calendrier </span></a></li>
-                @endif
-
-                <!-- ADMIN -->
+                <!-- Tableau de bord spécifique -->
                 @if (Auth::user()->hasRole('ADMIN'))
+                    <li class="menu-title">ADMIN</li>
+                    <li>
+                        <a href=""><i data-feather="airplay"></i><span> Tableau de bord </span></a>
+                    </li>
                     <li class="menu-title mt-2">Administration</li>
                     <li>
                         <a href="#menu-admin" data-bs-toggle="collapse" class="{{ request()->routeIs('roles.*') || request()->routeIs('user.*') ? 'active' : '' }}">
@@ -68,59 +53,68 @@
                                 <li><a href="{{ route('user.index') }}">Utilisateurs</a></li>
                             </ul>
                         </div>
+                        <li><a href="{{ route('departements.index') }}"><i data-feather="grid"></i> <span>Les départements </span></a></li>
                     </li>
-                @endif
 
-                <!-- DIRECTEUR -->
-                @if (Auth::user()->hasRole('DIRECTEUR'))
-                    <li class="menu-title mt-2">Directeur</li>
-                    <li><a href="#"><i data-feather="file-text"></i> <span> Gérer Rapports </span></a></li>
-                    <li><a href="#"><i data-feather="database"></i> <span> Gérer Données </span></a></li>
-                @endif
-
-                <!-- TUTEUR -->
-                @if (Auth::user()->hasRole('TUTEUR'))
-                    <li class="menu-title mt-2">Tuteur</li>
-                    <li><a href="#"><i data-feather="briefcase"></i> <span> Gérer Stage </span></a></li>
-                    <li><a href="#"><i data-feather="file-text"></i> <span> Gérer Rapports </span></a></li>
-                @endif
-
-                <!-- Autres rôles (sauf ADMIN) -->
-                @if (!Auth::user()->hasRole('ADMIN'))
-                    <li class="menu-title mt-2">Gestion</li>
+                @elseif (Auth::user()->hasRole('RH'))
+                    <li class="menu-title">RH</li>
+                    <!-- DASHBOARD -->
                     <li>
-                        <a href="#menu-stages" data-bs-toggle="collapse" class="collapsed">
-                            <i data-feather="briefcase"></i> <span> Stages </span> <span class="menu-arrow"></span>
-                        </a>
-                        <div class="collapse" id="menu-stages">
-                            <ul class="nav-second-level">
-                                <li><a href="{{ route('stages.index') }}">Académique</a></li>
-                                <li><a href="#">Professionnel</a></li>
-                                <li><a href="#">Pré-embauche</a></li>
-                            </ul>
-                        </div>
+                        <a href="{{ route('dashboard.RH') }}"><i data-feather="airplay"></i><span> Tableau de bord </span></a>
                     </li>
 
+                    <!-- OFFRES -->
+                    <li class="menu-title mt-2">OFFRES</li>
+                    <li><a href="{{ route('offres.index') }}"><i data-feather="file-text"></i> <span> Mes Offres </span></a></li>
+                    <li><a href="{{ route('candidatures.index') }}"><i data-feather="users"></i> <span> Candidatures </span></a></li>
 
+                    <!-- PLANIFICATION -->
+                    <li class="menu-title mt-2">PLANIFICATION</li>
+                    <li><a href="{{ route('entretiens.index') }}"><i data-feather="clipboard"></i> <span> Entretiens </span></a></li>
+                    <li><a href="{{ route('entretiens.calendrier') }}"><i data-feather="calendar"></i> <span> Calendrier </span></a></li>
+                    <li><a href="{{ route('candidatures.retenus') }}"><i data-feather="plus-circle"></i> <span> Planifier Entretien </span></a></li>
+
+                    <!-- STAGES -->
+                    <li class="menu-title mt-2">STAGES</li>
+                    <li><a href="{{ route('rh.stages.attente_tuteur') }}"><i data-feather="user-plus"></i> <span> Affectation Tuteur </span></a></li>
+                    <li><a href="{{ route('rh.stages.en_cours') }}"><i data-feather="briefcase"></i> <span> Stages en cours </span></a></li>
+
+                    <!-- RAPPORTS -->
+                    <li class="menu-title mt-2">RAPPORTS</li>
+                    <li><a href="{{ route('stages.rh.candidats_en_stage') }}"><i data-feather="list"></i> <span> Liste Candidats </span></a></li>
+                    <li><a href="#"><i data-feather="file"></i> <span> Liste Entretiens </span></a></li>
+                    <li><a href="#"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
+                    <li><a href="{{ route('rapport.form') }}"><i data-feather="activity"></i> <span> Situation </span></a></li>
+
+                @elseif (Auth::user()->hasRole('DIRECTEUR'))
+                    <li class="menu-title">DIRECTEUR</li>
                     <li>
-                        <a href="#menu-documents" data-bs-toggle="collapse">
-                            <i data-feather="clipboard"></i> <span> Rapports & Documents </span> <span class="menu-arrow"></span>
-                        </a>
-                        <div class="collapse" id="menu-documents">
-                            <ul class="nav-second-level">
-                                <li><a href="#">Rapports des Tuteurs</a></li>
-                                <li><a href="#">Rapports des Stagiaires</a></li>
-                                <li><a href="#">Attestations</a></li>
-                                <li><a href="#">Conventions</a></li>
-                            </ul>
-                        </div>
+                        <a href="{{ route('dashboard.directeur') }}"><i data-feather="airplay"></i><span> Tableau de bord </span></a>
                     </li>
-                    <li>
-                        <a href="#"><i data-feather="mail"></i> <span> Notifications </span></a>
-                    </li>
+                    <li class="menu-title">TUTEUR</li>
+                    <li><a href="{{ route('directeur.tuteurs') }}"><i data-feather="users"></i> <span> Mes Tuteurs </span></a></li>
+                    <li><a href="{{ route('directeur.stages') }}"><i data-feather="user-check"></i> <span> Attribuer Tuteur </span></a></li>
+
+                    <li class="menu-title mt-2">STAGES</li>
+                    <li><a href="{{ route('stages.candidats_en_cours') }}"><i data-feather="file-text"></i> <span> Candidats </span></a></li>
+                    <li><a href="{{ route('stages.en_cours') }}"><i data-feather="database"></i> <span> Stages en cours </span></a></li>
+
+                    <li class="menu-title mt-2">RAPPORTS</li>
+                    <li><a href="#"><i data-feather="file"></i> <span> Rapports </span></a></li>
+
+                @elseif (Auth::user()->hasRole('TUTEUR'))
+                    <li class="menu-title">TUTEUR</li>
+                    <li><a href="{{ route('dashboard.tuteur') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>
+                    <li class="menu-title mt-2">STAGES</li>
+                    <li><a href="{{ route('stages.candidats_tuteurs') }}"><i data-feather="file-text"></i> <span>Liste des candidats </span></a></li>
+                    <li class="menu-title mt-2">RAPPORTS</li>
+                    <li><a href=""><i data-feather="activity"></i> <span> Rapports candidats </span></a></li>
+                @else
+                    <li class="menu-title">Navigation</li>
+                    <li><a href="{{ route('dashboard') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>
                 @endif
 
-                  <!--Bouton Déconnexion -->
+                <!-- Déconnexion -->
                 <li class="mt-3">
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
                         <i data-feather="log-out"></i>
@@ -132,6 +126,7 @@
                 </li>
             </ul>
         </div>
+
         <!-- End Sidebar -->
         <div class="clearfix"></div>
     </div>

@@ -1,8 +1,13 @@
 @extends('layouts.home')
 
+@push('styles')
+<link href="{{ asset('assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/libs/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container mt-4">
-   <div class="card shadow-sm">
+    <div class="card shadow-sm">
         <div class="card-body">
             <div class="row mb-2">
                 <div class="col-12">
@@ -14,15 +19,18 @@
                                 <li class="breadcrumb-item active">Liste des candidatures</li>
                             </ol>
                         </div>
-                        <h4 class="page-title">
-                            Liste des candidatures pour l'offre : <strong>{{ $offre->titre }}</strong>
+                        <h4 class="page-title-left">
+                            <strong>{{ $offre->titre }}</strong>
                         </h4>
                     </div>
                 </div>
-
                 <div class="col-sm-6 mt-2">
+                    <button id="btn-preselectionner" class="btn btn-warning">
+                        <i class="mdi mdi-filter-check-outline"></i> Préselectionner
+                    </button>
                 </div>
                 <div class="col-12 col-sm-6 text-sm-end mt-2">
+                    <label for="statut-filter" class="form-label d-inline me-2">Filtrer par statut :</label>
                     <select id="statut-filter" class="form-select w-auto d-inline-block">
                         <option value="">Tous les statuts</option>
                         <option value="retenu">Retenu</option>
@@ -78,23 +86,15 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex align-items-center gap-2">
-
-                                            {{-- Retenir --}}
                                             @if($statut === 'en_cours')
-                                                <form action="{{ route('candidatures.retenir', $candidature->id) }}"
-                                                    method="POST" class="d-inline confirm-action"
-                                                    data-message="Confirmer la retenue de cette candidature ?">
+                                                <form action="{{ route('candidatures.retenir', $candidature->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer la retenue de cette candidature ?">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button class="btn btn-sm btn-outline-success me-1" type="submit" title="Retenir">
                                                         <i class="mdi mdi-check-circle-outline"></i>
                                                     </button>
                                                 </form>
-
-                                                {{-- Rejeter --}}
-                                                <form action="{{ route('candidatures.reject', $candidature->id) }}"
-                                                    method="POST" class="d-inline confirm-action"
-                                                    data-message="Confirmer le rejet de cette candidature ?">
+                                                <form action="{{ route('candidatures.reject', $candidature->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer le rejet de cette candidature ?">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button class="btn btn-sm btn-outline-danger" type="submit" title="Rejeter">
@@ -102,38 +102,29 @@
                                                     </button>
                                                 </form>
                                             @endif
-
-                                            {{-- Planifier entretien --}}
-                                            @if($statut === 'retenu')
-                                                <a href="{{ route('entretiens.create', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}"
-                                                    class="btn btn-sm btn-outline-info"
-                                                    title="Planifier entretien">
-                                                    <i class="mdi mdi-calendar-check-outline"></i>
-                                                </a>
-                                            @endif
-
-                                            {{-- Analyser --}}
                                             @if($statut !== 'rejete')
                                                 <button class="btn btn-sm btn-outline-primary analyze-btn" data-id="{{ $candidature->id }}" title="Analyser">
                                                     <i class="mdi mdi-robot"></i>
                                                 </button>
-                                               <a href="{{ route('candidatures.show', $candidature->id) }}" class="btn btn-sm btn-info" title="Voir détails">
+                                                <a href="{{ route('candidatures.show', $candidature->id) }}" class="btn btn-sm btn-info" title="Voir détails">
                                                     <i class="fe-eye"></i>
-                                                </a>                                                
+                                                </a>
                                             @endif
-                                            {{-- Valider (si score >= 80 et statut = retenu) --}}
-                                            @if($candidature->statut === 'retenu' && $candidature->score >= 80)
+                                            @if($candidature->statut === 'retenu')
+                                                <a href="{{ route('entretiens.create', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}" class="btn btn-sm btn-outline-info" title="Planifier entretien">
+                                                    <i class="mdi mdi-calendar-check-outline"></i>
+                                                </a>
+                                            @endif
+                                            @if($candidature->statut === 'retenu' )
                                                 <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}" class="d-inline">
                                                     @csrf
-                                                    <button class="btn btn-sm btn-success confirm-validate" type="button" title="Valider">
+                                                    <button class="btn btn-sm btn-success confirm-validate" type="submit" title="Valider">
                                                         <i class="mdi mdi-check"></i>
                                                     </button>
                                                 </form>
                                             @endif
-
                                         </div>
                                     </td>
-
                                 </tr>
                             @endforeach
                         </tbody>
@@ -144,181 +135,163 @@
     </div>
 </div>
 @endsection
-@push('scripts')
-<script>
-    $(document).ready(function () {
-        // Confirmation pour les actions via formulaire avec data-message
-        $('.confirm-action').on('submit', function (e) {
-            e.preventDefault();
-            const form = this;
-            const message = $(form).data('message') || "Êtes-vous sûr de vouloir continuer ?";
-
-            Swal.fire({
-                title: 'Confirmation',
-                text: message,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Oui, confirmer',
-                cancelButtonText: 'Annuler',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-2',
-                    cancelButton: 'btn btn-secondary'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-
-        // Confirmation spéciale pour le bouton "Valider"
-        $('.confirm-validate').on('click', function (e) {
-            e.preventDefault();
-            const form = $(this).closest('form')[0];
-
-            Swal.fire({
-                title: 'Valider la candidature ?',
-                text: "Cette action validera définitivement cette candidature.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Oui, valider',
-                cancelButtonText: 'Annuler',
-                customClass: {
-                    confirmButton: 'btn btn-success me-2',
-                    cancelButton: 'btn btn-outline-secondary'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-    });
-</script>
-@endpush
-
-@push('styles')
-<link href="{{ asset('assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
-<link href="{{ asset('assets/libs/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css') }}" rel="stylesheet">
-@endpush
 
 @push('scripts')
 <script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js') }}"></script>
-
 <script>
-    $(document).ready(function () {
-        var table = $('#candidatures-datatable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+$(document).ready(function () {
+    var table = $('#candidatures-datatable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        },
+        responsive: true,
+        order: [[3, 'desc']],
+        columnDefs: [{ orderable: false, targets: [6] }]
+    });
+
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        var selectedStatut = $('#statut-filter').val();
+        if (!selectedStatut) return true;
+        var row = table.row(dataIndex).node();
+        var statutCell = row.querySelector('td[data-statut]');
+        return statutCell && statutCell.getAttribute('data-statut') === selectedStatut;
+    });
+
+    $('#statut-filter').on('change', function () {
+        table.draw();
+    });
+
+    $('.confirm-action').on('submit', function (e) {
+        e.preventDefault();
+        const form = this;
+        Swal.fire({
+            title: 'Confirmation',
+            text: $(form).data('message') || "Confirmer ?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, confirmer',
+            cancelButtonText: 'Annuler',
+            customClass: {
+                confirmButton: 'btn btn-primary me-2',
+                cancelButton: 'btn btn-secondary'
             },
-            responsive: true,
-            order: [[3, 'desc']],
-            columnDefs: [{ orderable: false, targets: [6] }]
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
         });
+    });
 
-        // Filtrage par statut
-        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-            var selectedStatut = $('#statut-filter').val();
-            if (!selectedStatut) return true;
-            var row = table.row(dataIndex).node();
-            var statutCell = row.querySelector('td[data-statut]');
-            if (statutCell) {
-                return statutCell.getAttribute('data-statut') === selectedStatut;
-            }
-            return true;
+    $('.confirm-validate').on('click', function (e) {
+        e.preventDefault();
+        const form = $(this).closest('form')[0];
+        Swal.fire({
+            title: 'Valider la candidature ?',
+            text: "Cette action validera définitivement cette candidature.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, valider',
+            cancelButtonText: 'Annuler',
+            customClass: {
+                confirmButton: 'btn btn-success me-2',
+                cancelButton: 'btn btn-outline-secondary'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
         });
+    });
 
-        $('#statut-filter').on('change', function () {
-            table.draw();
-        });
-
-        // Analyse IA toutes les candidatures
-        $('#analyzeAllBtn').click(function () {
-            const btn = $(this);
-            btn.prop('disabled', true).text('Analyse en cours...');
-
-            const candidatures = @json($offre->candidatures);
-
-            let promises = [];
-
-            candidatures.forEach(candidature => {
-                let p = fetch(`/candidatures/${candidature.id}/analyze`, {
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    }
+    $('#btn-preselectionner').click(function () {
+        Swal.fire({
+            title: 'Confirmer la présélection ?',
+            text: "Les 20 meilleurs profils seront retenus automatiquement.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, continuer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $(this).prop('disabled', true).text('Préselection en cours...');
+                $.post("{{ route('candidatures.preselectionner', $offre->id) }}", {
+                    _token: '{{ csrf_token() }}'
                 })
-                .then(res => {
-                    if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-                    return res.json();
-                })
-                .then(data => {
-                    $('.score-' + candidature.id).text(data.score + ' / 100');
-                    $('.commentaire-' + candidature.id).text(data.commentaire);
-                })
-                .catch(() => {
-                    $('.score-' + candidature.id).text("Erreur");
-                    $('.commentaire-' + candidature.id).text("Analyse échouée");
+                .done(() => Swal.fire('Succès', 'Préselection terminée.', 'success').then(() => location.reload()))
+                .fail(() => {
+                    Swal.fire('Erreur', 'Echec de la préselection.', 'error');
+                    $(this).prop('disabled', false).text('Préselectionner');
                 });
-
-                promises.push(p);
-            });
-
-            Promise.all(promises).finally(() => {
-                btn.prop('disabled', false).text('Analyser toutes les candidatures');
-            });
+            }
         });
+    });
 
-        // Analyse IA pour un seul CV
-        $('.analyze-btn').click(function () {
-            const btn = $(this);
-            const id = btn.data('id');
+    $('#analyzeAllBtn').click(function () {
+        const btn = $(this);
+        btn.prop('disabled', true).text('Analyse en cours...');
+        const candidatures = @json($offre->candidatures);
+        let promises = [];
 
-            btn.prop('disabled', true);
-            const originalHtml = btn.html();
-            btn.html('<i class="mdi mdi-loading mdi-spin"></i>');
-
-            fetch(`/candidatures/${id}/analyze`, {
-                method: 'POST',
+        candidatures.forEach(candidature => {
+            let p = fetch(`/candidatures/${candidature.id}/analyze`, {
+                method: "POST",
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json',
                 }
             })
             .then(res => {
-            if (!res.ok) {
-                if(res.status === 404) {
-                    throw new Error('Fichier introuvable');
-                } else {
-                    throw new Error('Erreur HTTP ' + res.status);
-                }
-            }
-            return res.json();
-        })
+                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                return res.json();
+            })
             .then(data => {
-                $('.score-' + id).text(data.score + ' / 100');
-                $('.commentaire-' + id).text(data.commentaire);
+                $('.score-' + candidature.id).text(data.score + ' / 100');
+                $('.commentaire-' + candidature.id).text(data.commentaire);
             })
-            .catch((error) => {
-            if(error.message === 'Fichier introuvable') {
-                $('.score-' + id).text('Erreur');
-                $('.commentaire-' + id).text('Fichier introuvable');
-            } else {
-                $('.score-' + id).text('Erreur');
-                $('.commentaire-' + id).text('Analyse échouée');
-            }
-            })
-            .finally(() => {
-                btn.prop('disabled', false);
-                btn.html(originalHtml);
+            .catch(() => {
+                $('.score-' + candidature.id).text("Erreur");
+                $('.commentaire-' + candidature.id).text("Analyse échouée");
             });
+            promises.push(p);
+        });
+
+        Promise.all(promises).finally(() => {
+            btn.prop('disabled', false).text('Analyser toutes les candidatures');
         });
     });
+
+    $('.analyze-btn').click(function () {
+        const btn = $(this);
+        const id = btn.data('id');
+        btn.prop('disabled', true);
+        const originalHtml = btn.html();
+        btn.html('<i class="mdi mdi-loading mdi-spin"></i>');
+
+        fetch(`/candidatures/${id}/analyze`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(res.status === 404 ? 'Fichier introuvable' : 'Erreur HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            $('.score-' + id).text(data.score + ' / 100');
+            $('.commentaire-' + id).text(data.commentaire);
+        })
+        .catch((error) => {
+            $('.score-' + id).text('Erreur');
+            $('.commentaire-' + id).text(error.message);
+        })
+        .finally(() => {
+            btn.prop('disabled', false);
+            btn.html(originalHtml);
+        });
+    });
+});
 </script>
 @endpush

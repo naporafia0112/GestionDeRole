@@ -38,23 +38,35 @@
                     <!-- Nom -->
                     <div class="mb-3">
                         <label for="name" class="form-label">Nom complet</label>
-                        <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                        <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" >
                     </div>
 
                     <!-- Email -->
                     <div class="mb-3">
                         <label for="email" class="form-label">Adresse email</label>
-                        <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                        <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" >
                     </div>
 
                     <!-- Rôle -->
                     <div class="mb-3">
                         <label for="roles" class="form-label">Rôle</label>
-                        <select name="roles[]" id="roles" class="form-select" required>
+                        <select name="roles[]" id="roles" class="form-select" >
                             @foreach($roles as $role)
                                 <option value="{{ $role->id }}"
                                     {{ in_array($role->id, $user->roles->pluck('id')->toArray()) ? 'selected' : '' }}>
                                     {{ $role->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <!-- Champ Département ajouté -->
+                    <div class="mb-3">
+                        <label for="id_departement" class="form-label">Département</label>
+                        <select id="id_departement" name="id_departement" class="form-select">
+                            <option value="">-- Choisir un département --</option>
+                            @foreach($departements as $departement)
+                                <option value="{{ $departement->id }}" {{ old('id_departement') == $departement->id ? 'selected' : '' }}>
+                                    {{ $departement->nom }}
                                 </option>
                             @endforeach
                         </select>

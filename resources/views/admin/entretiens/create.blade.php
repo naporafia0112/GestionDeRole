@@ -28,7 +28,7 @@
 
                     <form id="entretienForm" method="POST" action="{{ route('entretiens.store') }}">
                         @csrf
-
+                        <span class="text-success">La date doit être une date ultérieure de 1h á la date actuel !</span>
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="mb-3">
@@ -49,7 +49,7 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="lieu" class="form-label">Lieu<span class="text-danger">*</span></label>
-                                    <input type="text" name="lieu" id="lieu" class="form-control" value="{{ old('lieu') }}">
+                                    <input type="text" name="lieu" id="lieu" class="form-control" value="{{ old('lieu') }}" placeholder="Ex: Lomé">
                                 </div>
                             </div>
 

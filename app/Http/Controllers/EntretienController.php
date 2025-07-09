@@ -14,13 +14,25 @@ class EntretienController extends Controller
     // Affiche la vue calendrier (avec FullCalendar)
     public function calendrier()
     {
-        return view('admin.entretiens.calendrier');
+        $statutsFiltres = [
+        'prevu' => 'Prévu',
+        'en_cours' => 'En cours',
+        'effectuee' => 'Effectuée',
+        'termine' => 'Terminé',
+        'annule' => 'Annulé',
+    ];
+
+        return view('admin.entretiens.calendrier',compact('statutsFiltres'));
     }
 
     // Fournit les événements JSON pour FullCalendar (ajax)
     public function getEvents(Request $request)
 {
     $entretiens = Entretien::all();
+    Entretien::where('statut', 'prevu')
+        ->where('date_fin', '<', Carbon::now())
+        ->update(['statut' => 'annule']);
+
 
     $events = $entretiens->map(function ($e) {
         // Définir une couleur selon le statut
@@ -122,6 +134,10 @@ class EntretienController extends Controller
     // Liste des entretiens par statut
     public function index()
     {
+        Entretien::where('statut', 'prevu')
+        ->where('date_fin', '<', Carbon::now())
+        ->update(['statut' => 'annule']);
+
         $entretiensPrevus = Entretien::where('statut', 'prevu')->orderBy('date')->get();
         $entretiensAnnules = Entretien::where('statut', 'annule')->orderBy('date')->get();
         $entretiensEncours = Entretien::where('statut', 'en_cours')->orderBy('date')->get();
@@ -145,70 +161,66 @@ class EntretienController extends Controller
     }
 
     // Formulaire édition
-    public function edit($id)
+   public function edit($id)
     {
         $entretien = Entretien::findOrFail($id);
         $candidats = Candidat::all();
         $offres = Offre::all();
-        return view('admin.entretiens.edit', compact('entretien', 'candidats', 'offres'));
+
+        $statutsFiltres = collect(Entretien::STATUTS)
+        ->reject(function ($label, $value) {
+            return in_array($value, ['prevu']);
+        });
+
+        return view('admin.entretiens.edit', compact('entretien', 'candidats', 'offres', 'statutsFiltres'));
     }
 
-    // Mise à jour avec validation, gestion d'erreurs, alertes
-    public function update(Request $request, $id)
-    {
-        $now = Carbon::now();
-        $entretienDateTime = Carbon::parse($request->date . ' ' . $request->heure);
 
+    // Mise à jour avec validation, gestion d'erreurs, alertes
+    public function update(Request $request, Entretien $entretien)
+    {
+        // Combiner date et heure
+        $dateInput = $request->input('date');
+        $heureInput = $request->input('heure');
+
+        $entretienDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $dateInput . ' ' . $heureInput);
+        $now = Carbon::now();
+
+        // Validation de base
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
-            'heure' => 'required',
-            'lieu' => ['required', 'string', 'min:3', 'max:255','regex:/^(?=.*[a-zA-Z])(?=.{3,})(?!.*(.)\1{2,})[a-zA-Z\s\-\'éèàâçùêôîï]+$/u'],
-            'type' => 'required|string|max:255',
-            'statut' => 'required|string|in:prevu,en_cours,effectuee,termine,annule',
-            'commentaire' => 'nullable|string',
-            'id_candidat' => 'required|exists:candidats,id',
-            'id_offre' => 'required|exists:offres,id',
+            'date'   => ['required', 'date'],
+            'heure'  => ['required'],
+            'statut' => ['required', 'in:planifiee,en_attente,effectuee'],
         ]);
 
-        // Règle personnalisée pour date + heure > now + 1h
-        $validator->after(function ($validator) use ($entretienDateTime, $now) {
-            if ($entretienDateTime->lte($now->copy()->addHour())) {
-                $validator->errors()->add('date', 'La date et l\'heure doivent être au moins une heure après l\'heure actuelle.');
+        // Règles personnalisées
+        $validator->after(function ($validator) use ($entretienDateTime, $now, $request) {
+
+            if ($request->statut === 'effectuee' && $entretienDateTime->gte($now)) {
+                $validator->errors()->add('date', 'Un entretien effectué doit avoir une date antérieure à l\'heure actuelle.');
+            }
+
+            if ($request->statut !== 'effectuee' && $entretienDateTime->lte($now->copy()->addHour())) {
+                $validator->errors()->add('date', 'Pour un entretien à venir, la date doit être au moins une heure après maintenant.');
             }
         });
 
+        // En cas d’erreurs
         if ($validator->fails()) {
             return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+                            ->withErrors($validator)
+                            ->withInput();
         }
 
-        try {
-            $entretien = Entretien::findOrFail($id);
+        // Mise à jour
+        $entretien->date = $request->input('date');
+        $entretien->heure = $request->input('heure');
+        $entretien->statut = $request->input('statut');
+        $entretien->save();
 
-            $debut = $entretienDateTime;
-            $fin = $debut->copy()->addHour();
-
-            $entretien->update([
-                'date' => $request->date,
-                'heure' => $request->heure,
-                'lieu' => $request->lieu,
-                'type' => $request->type,
-                'statut' => $request->statut,
-                'commentaire' => $request->commentaire,
-                'id_candidat' => $request->id_candidat,
-                'id_offre' => $request->id_offre,
-                'date_debut' => $debut,
-                'date_fin' => $fin,
-            ]);
-
-            return redirect()->route('entretiens.calendrier')
-                ->with('success', 'Entretien modifié avec succès.');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la mise à jour : ' . $e->getMessage())
-                ->withInput();
-        }
+        // Redirection avec message de succès
+        return redirect()->route('entretiens.index')
+                        ->with('success', 'Entretien mis à jour avec succès.');
     }
 
     // Suppression avec gestion d’erreurs et alertes
@@ -241,10 +253,10 @@ class EntretienController extends Controller
     // Retour JSON pour affichage modal / ajax (si besoin)
    public function showJson($id)
     {
-   $entretien = Entretien::with(['candidat', 'offre'])->findOrFail($id);
+        $entretien = Entretien::with(['candidat', 'offre'])->findOrFail($id);
         return response()->json([
             'title' => $entretien->type,
-            'date' => \Carbon\Carbon::parse($entretien->date)->format('d/m/Y'),
+            'date' => \Carbon\Carbon::parse($entretien->date)->format('Y-m-d'),
             'heure' => $entretien->heure,
             'lieu' => $entretien->lieu,
             'type' => $entretien->type,

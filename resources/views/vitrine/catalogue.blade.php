@@ -30,8 +30,12 @@
                                         <i class="bi bi-briefcase-fill me-2" style="color: #3498db;"></i>
                                         {{ $offre->titre }}
                                     </h5>
+                                    <div class="ms-auto">
+                                        <a href="{{ route('vitrine.show', $offre->id) }}" class="btn btn-primary rounded-pill px-4">
+                                            Voir détail
+                                        </a>
+                                    </div>
                                 </div>
-
                                 <p class="card-text text-muted mb-3">{{ Str::limit($offre->description, 150) }}</p>
 
                                 <div class="d-flex flex-wrap gap-3">
@@ -39,16 +43,11 @@
                                         <i class="bi bi-geo-alt-fill me-2" style="color: #e74c3c;"></i>
                                         <span>{{ $offre->localisation->pays ?? 'Non précisé' }}</span>
                                     </div>
-                                    <div class="d-flex align-items-center text-muted">
+                                    <!--div class="d-flex align-items-center text-muted">
                                         <i class="bi bi-clock-fill me-2" style="color: #f39c12;"></i>
                                         <span>Expire le {{ $offre->date_limite->format('d/m/Y') }}</span>
-                                    </div>
+                                    </div-->
                                 </div>
-                            </div>
-                            <div class="mt-3 mt-md-0">
-                                <a href="{{ route('vitrine.show', $offre->id) }}" class="btn btn-primary rounded-pill px-4">
-                                    Voir détail <i class="bi bi-arrow-right ms-2"></i>
-                                </a>
                             </div>
                         </div>
                     </div>

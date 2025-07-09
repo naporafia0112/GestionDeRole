@@ -23,4 +23,5 @@ class Candidat extends Model
     {
         return $this->hasMany(Candidature::class);
     }
+    
 }

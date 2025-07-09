@@ -36,7 +36,7 @@
                                     <label for="name" class="form-label">Nom du rôle</label>
                                     <input type="text" name="name" id="name"
                                            class="form-control @error('name') is-invalid @enderror"
-                                           value="{{ old('name', $role->name) }}" required>
+                                           value="{{ old('name', $role->name) }}" >
                                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 

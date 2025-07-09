@@ -51,24 +51,22 @@
                                                         <td>{{ $user->email }}</td>
                                                         <td class="text-center">
                                                             <div class="col-sm-6 col-md-4 col-lg-3">
+                                                                <div class="d-flex gap-1">
                                                                 <a href="{{ route('user.show', $user) }}" class="btn btn-sm btn-info" title="Details">
                                                                     <i class="fe-eye"></i>
                                                                 </a>
                                                            {{-- @if(auth()->user()->hasPermission('modifier_utilisateur'))  --}}
                                                             <a href="{{ route('user.edit', $user->id) }}" class="btn btn-sm btn-warning"> <i class="mdi mdi-square-edit-outline"></i></a>
                                                            {{--@endif--}}
-
-                                                                <a href="javascript:void(0);"
-                                                                class="btn btn-sm btn-danger"
-                                                                title="Supprimer"
-                                                                onclick="if(confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) { document.getElementById('delete-form-{{ $user->id }}').submit(); }">
-                                                                <i class="mdi mdi-delete"></i>
-                                                                </a>
-
-                                                                <form id="delete-form-{{ $user->id }}" action="{{ route('user.destroy', $user) }}" method="POST" style="display: none;">
+                                                                <form id="delete-form-{{ $user->id }}" action="{{ route('user.destroy', $user) }}" method="POST" >
                                                                     @csrf
                                                                     @method('DELETE')
+                                                                     <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete({{ $user->id }})" title="Supprimer">
+                                                                        <i class="mdi mdi-delete"></i>
+                                                                    </button>
+
                                                                 </form>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -89,6 +87,50 @@
                         </div>
 
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        const table = $('#offres-datatable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+            },
+            columnDefs: [
+                { orderable: false, targets: 5 }
+            ],
+            order: [[2, 'desc']],
+            responsive: true
+        });
+
+        $('#statut-filter').on('change', function () {
+            const val = $(this).val();
+            table.column(4).search(val).draw();
+        });
+    });
+
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Supprimer cet utilisateur ?',
+            text: "Cette action est irréversible.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e3342f',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+</script>
+
+@endpush
 
 @push('styles')
 {{-- Pour que les icônes fonctionnent, assurez-vous d'inclure Font Awesome dans votre layout principal (layouts/app.blade.php) --}}

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Offre;
 use App\Models\Localisation;
 use App\Models\User;
+use App\Models\Candidature;
 class VitrineController extends Controller
 {
     /**
@@ -80,5 +81,10 @@ class VitrineController extends Controller
 {
     return view('vitrine.consulter');
 }
+    public function suivi($uuid)
+    {
+        $candidature = Candidature::with('candidat')->where('uuid', $uuid)->firstOrFail();
+        return view('vitrine.recherche', compact('candidature'));
+    }
 
 }

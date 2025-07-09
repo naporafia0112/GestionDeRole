@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Departement;
+use App\Models\Role;
 
 class User extends Authenticatable
 {
@@ -14,6 +16,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'id_departement',
     ];
 
     protected $hidden = [
@@ -76,5 +79,12 @@ class User extends Authenticatable
             }
         }
         return false;
+    }
+    public function departement() {
+        return $this->belongsTo(Departement::class, 'id_departement');
+    }
+
+    public function direction() {
+        return $this->hasOne(Departement::class, 'id_directeur');
     }
 }

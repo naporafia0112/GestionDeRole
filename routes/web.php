@@ -13,7 +13,11 @@ use App\Http\Controllers\{
     StageController,
     OllamaTestController,
     CVAnalyzerController,
+    DepartementController,
+    RapportController
 };
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ProjetCreateMail;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // Routes publiques
@@ -24,14 +28,16 @@ Route::get('/catalogue', [VitrineController::class, 'catalogue'])->name('vitrine
 Route::get('/offres/{id}/postuler', [CandidatureController::class, 'create'])->name('candidature.create');
 Route::post('/offres/{id}/postuler', [CandidatureController::class, 'store'])->name('candidature.store');
 
-Route::get('/candidatures/suivi/{uuid}', [CandidatureController::class, 'suivi'])->name('candidatures.suivi');
+Route::get('/candidatures/suivi/{uuid}', [VitrineController::class, 'suivi'])->name('candidatures.suivi');
 Route::post('/candidatures/recherche', [CandidatureController::class, 'recherche'])->name('candidatures.recherche');
 
 // Routes accessibles uniquement aux utilisateurs connectés
 Route::middleware(['auth'])->group(function () {
-
     // Tableau de bord
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/directeur', [DashboardController::class, 'dashboardDirecteur'])->name('dashboard.directeur');
+    Route::get('/dashboard/rh', [DashboardController::class, 'dashboardRH'])->name('dashboard.RH');
+    Route::get('/dashboard/tuteur', [DashboardController::class, 'dashboardTuteur'])->name('dashboard.tuteur');
 
     // Profil utilisateur
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -60,14 +66,42 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/candidatures/{id}/analyze', [CandidatureController::class, 'analyze'])->name('candidatures.analyze');
     Route::get('candidatures/retenus', [CandidatureController::class, 'dossiersRetenus'])->name('candidatures.retenus');
     Route::get('candidatures/valides', [CandidatureController::class, 'dossiersValides'])->name('candidatures.valides');
+    Route::post('/offres/{offre}/preselectionner', [CandidatureController::class, 'preselectionner'])->name('candidatures.preselectionner');
 
+    // Routes personnalisées pour les types de stages
+
+    Route::get('stages/academiques', [StageController::class, 'stagesAcademiques'])->name('stages.academiques');
+    Route::get('stages/professionnels', [StageController::class, 'stagesProfessionnels'])->name('stages.professionnels');
+    Route::get('stages/preembauche', [StageController::class, 'stagesPreembauche'])->name('stages.preembauche');
+    Route::middleware(['auth', 'role:DIRECTEUR'])->group(function () {
+    Route::get('/directeur/stages', [StageController::class, 'stagesParDepartement'])->name('directeur.stages');
+    });
+    Route::post('/stages/{stage}/affecter-tuteur', [StageController::class, 'affecterTuteur'])->name('stages.affecterTuteur');
+
+    Route::get('/directeur/stages/en-cours', [StageController::class, 'stagesAvecTuteur'])->name('stages.en_cours');
+    Route::get('/directeur/tuteurs', [StageController::class, 'listerTuteursDepartement'])->name('directeur.tuteurs');
+    Route::get('/directeur/candidats-stages-en-cours', [StageController::class, 'candidatsStagesEnCours'])->name('stages.candidats_en_cours');
+    Route::get('/rh/stages/attente-tuteur', [StageController::class, 'stagesEnAttentePourRH'])
+    ->name('rh.stages.attente_tuteur');
+    Route::get('/rh/stages/en-cours', [StageController::class, 'stagesEnCoursPourRH'])
+    ->name('rh.stages.en_cours');
+    Route::get('/stages/rh/candidats-en-stage', [StageController::class, 'candidatsEnStage'])
+        ->name('stages.rh.candidats_en_stage');
+    Route::get('/tuteur/liste-candidats', [StageController::class, 'candidatsTuteur'])->name('stages.candidats_tuteurs');
+    Route::get('/candidats/{id}/details/tuteur', [StageController::class, 'details_candidat_encours_tuteur'])->name('candidats.details');
+    Route::get('/candidats/{id}/details/directeur', [StageController::class, 'details_candidat_encours_directeur'])->name('candidats.details.directeur');
+
+    // Ensuite seulement, ajoute la ressource générale
     Route::resource('stages', StageController::class);
-    Route::get('/tuteurs', [StageController::class,'affichertutteur'])->name('tuteurs.afficher');
+
+    Route::get('/tuteurs', [StageController::class, 'affecterTuteur'])->name('tuteurs.afficher');
 
 
     // Liste candidatures d'une offre (pour admin/RH)
     Route::get('/offres/{offre}/candidatures', [CandidatureController::class, 'index'])
         ->name('offres.candidatures');
+    Route::get('/rapports/export', [RapportController::class, 'form'])->name('rapport.form');
+    Route::get('/rapports/generer', [RapportController::class, 'generer'])->name('rapport.generer');
 
     // Routes Entretiens accessibles uniquement aux RH et ADMIN
     Route::middleware(['role:RH,ADMIN'])->prefix('entretiens')->name('entretiens.')->group(function () {
@@ -95,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:ADMIN'])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('user', UserController::class);
+        Route::resource('departements', DepartementController::class)->except(['show', 'edit', 'create']);
     });
 
     Route::get('/cv/analyze', [CVAnalyzerController::class, 'form'])->name('cv.form');
@@ -108,9 +143,22 @@ Route::prefix('ollama')->group(function () {
     Route::get('/models', [OllamaTestController::class, 'listModels']);
     Route::post('/analyze', [OllamaTestController::class, 'analyzeCV']);
     Route::get('/sample-test', [OllamaTestController::class, 'testWithSampleCV']);
+    Route::get('/preselection-test', [OllamaTestController::class, 'preselectionTest']);
+});
+
+Route::get('/test-mail', function () {
+    $data = [
+        'titre' => 'Projet Test',
+        'description' => 'Ceci est un projet de test sans base de données.',
+        'objectifs' => 'Envoyer un email sans utiliser Eloquent.'
+    ];
+
+    Mail::to('naporafia0@gmail.com')->send(new ProjetCreateMail($data));
+
+    return "Email envoyé avec succès !";
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// 🔐 Auth routes (login, logout, register, reset, etc.)
+// Auth routes (login, logout, register, reset, etc.)
 require __DIR__ . '/auth.php';

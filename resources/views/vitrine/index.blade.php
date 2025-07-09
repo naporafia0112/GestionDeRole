@@ -5,29 +5,34 @@
 
 <!-- Hero Section avec fond animé -->
 <!-- Hero Section avec fond animé - Version compacte -->
-<section id="hero" class="hero section light-background position-relative">
-  <div class="background-slider">
-    <div class="slider-track">
-      <img src="{{ asset('assets-vitrine/img/fond3.jpg') }}" alt="fond1">
-      <img src="{{ asset('assets-vitrine/img/fond4.jpg') }}" alt="fond2">
-    </div>
+<section id="hero" class="hero section position-relative">
+<!--img src="{{ asset('assets-vitrine/img/gif.gif') }}" alt="GIF animé" class="top-right-gif"-->
+  <!-- GIF animé en fond -->
+  <div class="animated-gif-background">
+    <img src="{{ asset('assets-vitrine/img/fond7.jpg') }}" alt="Background animation" class="gif-bg">
+    <div class="color-overlay"></div>
   </div>
 
   <div class="container position-relative z-2" data-aos="fade-up" data-aos-delay="100">
     <div class="row gy-5">
       <div class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center text-white">
-        <h2 class="mb-3">Suivi de candidature</h2>
-        <p class="mb-4">Entrez votre identifiant unique pour suivre l'état de votre candidature</p>
+        <!-- Titre avec effet de vague -->
+        <h2 class="mb-3 wave-text">Suivi de candidature</h2>
+
+        <!-- Texte avec apparition caractère par caractère -->
+        <p class="mb-4 typed-text">Entrez votre identifiant unique pour suivre l'état de votre candidature</p>
+
+        <!-- Formulaire avec effet "morphing" -->
         <div class="d-flex mt-0">
-          <form action="{{ route('candidatures.recherche') }}" method="POST" class="w-100">
+          <form action="{{ route('candidatures.recherche') }}" method="POST" class="w-100 morphing-form">
             @csrf
-            <div class="input-group input-group-lg" style="max-width: 500px;"> <!-- Limite la largeur max -->
-              <input type="text" name="uuid" class="form-control rounded-pill-start"
+            <div class="input-group input-group-lg" style="max-width: 500px;">
+              <input type="text" name="uuid" class="form-control rounded-pill-start hover-float"
                      placeholder="Votre UUID (ex: ABC123)" value="{{ old('uuid') }}"
-                     style="height: 44px; font-size: 0.9rem;"> <!-- Taille réduite -->
-              <button type="submit" class="btn btn-primary rounded-pill-end px-3"
-                      style="height: 44px; font-size: 0.9rem;"> <!-- Taille réduite -->
-                <i class="bi bi-search me-1"></i>Suivre <!-- Icône + texte compact -->
+                     style="height: 44px; font-size: 0.9rem;">
+              <button type="submit" class="btn btn-primary rounded-pill-end px-3 hover-grow"
+                      style="height: 44px; font-size: 0.9rem;">
+                <i class="bi bi-search me-1"></i>Suivre
               </button>
             </div>
           </form>

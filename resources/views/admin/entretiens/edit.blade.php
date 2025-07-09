@@ -75,9 +75,42 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="mb-3">
+                                    <label for="id_candidat" class="form-label">Candidat</label>
+                                    <select class="form-control" disabled>
+                                        @foreach ($candidats as $candidat)
+                                            <option value="{{ $candidat->id }}" {{ $entretien->id_candidat == $candidat->id ? 'selected' : '' }}>
+                                                {{ $candidat->nom }} {{ $candidat->prenom }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <!-- champ hidden pour envoyer la vraie valeur -->
+                                    <input type="hidden" name="id_candidat" value="{{ $entretien->id_candidat }}">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="id_offre" class="form-label">Offre</label>
+                                    <select class="form-control" disabled>
+                                        @foreach ($offres as $offre)
+                                            <option value="{{ $offre->id }}" {{ $entretien->id_offre == $offre->id ? 'selected' : '' }}>
+                                                {{ $offre->titre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <!-- champ hidden pour envoyer la vraie valeur -->
+                                    <input type="hidden" name="id_offre" value="{{ $entretien->id_offre }}">
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
                                     <label for="statut" class="form-label">Statut</label>
-                                    <select name="statut" id="statut" class="selectize-select" >
-                                        @foreach(App\Models\Entretien::STATUTS as $value => $label)
+                                    <select name="statut" id="statut" class="selectize-select">
+                                        <option value="">Sélectionner un statut</option>
+                                        @foreach($statutsFiltres as $value => $label)
                                             <option value="{{ $value }}" {{ old('statut', $entretien->statut) == $value ? 'selected' : '' }}>
                                                 {{ $label }}
                                             </option>
@@ -85,39 +118,13 @@
                                     </select>
                                 </div>
                             </div>
-
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="commentaire" class="form-label">Commentaire</label>
-                                    <textarea name="commentaire" id="commentaire" class="form-control">{{ old('commentaire', $entretien->commentaire) }}</textarea>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-lg-6">
+                            <div class="col-12">
                                 <div class="mb-3">
-                                    <label for="id_candidat" class="form-label">Candidat</label>
-                                    <select name="id_candidat" id="id_candidat" class="selectize-select" >
-                                        @foreach ($candidats as $candidat)
-                                            <option value="{{ $candidat->id }}" {{ old('id_candidat', $entretien->id_candidat) == $candidat->id ? 'selected' : '' }}>
-                                                {{ $candidat->nom }} {{ $candidat->prenom }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="id_offre" class="form-label">Offre</label>
-                                    <select name="id_offre" id="id_offre" class="selectize-select" >
-                                        @foreach ($offres as $offre)
-                                            <option value="{{ $offre->id }}" {{ old('id_offre', $entretien->id_offre) == $offre->id ? 'selected' : '' }}>
-                                                {{ $offre->titre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <label for="commentaire" class="form-label">Commentaire</label>
+                                    <textarea name="commentaire" id="commentaire" class="form-control" rows="4">{{ old('commentaire') }}</textarea>
                                 </div>
                             </div>
                         </div>

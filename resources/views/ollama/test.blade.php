@@ -14,7 +14,8 @@
         <div class="mb-3">
             <button class="btn btn-primary me-2" onclick="testConnection()">Tester la connexion</button>
             <button class="btn btn-info me-2" onclick="getModels()">Lister les modèles</button>
-            <button class="btn btn-success" onclick="sampleTest()">Tester un exemple de CV</button>
+            <button class="btn btn-success me-2" onclick="sampleTest()">Tester un exemple de CV</button>
+            <button class="btn btn-warning" onclick="testPreselection()">Tester présélection IA (20 meilleurs)</button>
         </div>
 
         <form id="cvForm" onsubmit="analyzeCV(event)">
@@ -46,7 +47,7 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('output').textContent = data.response || JSON.stringify(data);
+                document.getElementById('output').textContent = data.response || JSON.stringify(data, null, 2);
             });
         }
 
@@ -70,7 +71,18 @@
             fetch('/ollama/sample-test')
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('output').textContent = data.response || JSON.stringify(data);
+                    document.getElementById('output').textContent = data.response || JSON.stringify(data, null, 2);
+                });
+        }
+
+        function testPreselection() {
+            fetch('/ollama/preselection-test')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('output').textContent = data.response || JSON.stringify(data, null, 2);
+                })
+                .catch(err => {
+                    document.getElementById('output').textContent = "Erreur : " + err;
                 });
         }
     </script>

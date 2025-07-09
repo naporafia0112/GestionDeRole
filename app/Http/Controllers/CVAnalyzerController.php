@@ -54,7 +54,7 @@ Et voici un CV extrait :
 
 Analyse la pertinence de ce candidat pour cette offre.
 
-✅ Réponds uniquement en JSON avec :
+ Réponds uniquement en JSON avec :
 - un champ "score" (sur 100)
 - un champ "commentaire" avec une seule phrase très courte (moins de 20 mots).
 

@@ -694,15 +694,12 @@ section,
   }
 
   .slider-track img {
-    width: 50%;
+    width: 20%;
     height: 100vh;
     object-fit: cover;
   }
 
-  @keyframes scroll-background {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
+
 
   .hero {
     position: relative;
@@ -743,7 +740,119 @@ section,
     color: #29a9d4;
   }
 
+/* Conteneur principal */
+.hero {
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
 
+/* Style pour le GIF animé en fond */
+.animated-gif-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.gif-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1.5;
+}
+
+.color-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0,82,165,0.5) 0%, rgba(0,180,216,0.5) 100%);
+  z-index: 2;
+}
+.top-right-gif {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 80px;       /* ajuste selon la taille désirée */
+  height: auto;
+  z-index: 3;        /* doit être au-dessus des autres éléments */
+  pointer-events: none; /* pour ne pas gêner les clics en-dessous */
+}
+
+
+/* Effet de vague sur le texte */
+.wave-text {
+  position: relative;
+  display: inline-block;
+  animation: wave 3s ease-in-out infinite;
+}
+
+@keyframes wave {
+  50%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Texte tapé au clavier */
+.typed-text {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid white;
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: white; }
+}
+
+/* Effet de morphing sur le formulaire */
+.morphing-form {
+  perspective: 1000px;
+}
+
+.morphing-form .input-group {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.morphing-form:hover .input-group {
+  transform: translateY(-5px) rotateX(5deg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Effet de flottement sur l'input */
+.hover-float {
+  transition: transform 0.3s ease;
+}
+
+.hover-float:hover {
+  transform: translateY(-3px);
+}
+
+/* Effet de croissance sur le bouton */
+.hover-grow {
+  transition: transform 0.3s ease;
+}
+
+.hover-grow:hover {
+  transform: scale(1.05);
+}
+
+/* Ajustement z-index pour le contenu */
+.container.position-relative.z-2 {
+  z-index: 3;
+}
 
 /*--------------------------------------------------------------
 # About Section
@@ -1358,10 +1467,10 @@ section,
 }
 /* *******FOOTER******** */
 .footer {
-  background-color: rgba(9, 99, 195, 0.8);
+  background-color: rgba(9, 99, 195, 0.5);
   color: white;
   font-family: var(--default-font, 'Roboto', sans-serif);
-  padding: 1rem 1rem;
+  padding: 0.5rem 1rem;
   text-align: center;
   box-shadow: 0 -2px 5px rgba(251, 251, 251, 0.901);
   margin-top: 2rem;

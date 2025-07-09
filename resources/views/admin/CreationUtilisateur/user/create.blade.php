@@ -42,28 +42,39 @@
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Nom complet</label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="{{ old('name') }}" required>
+                                        value="{{ old('name') }}" >
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Adresse email</label>
                                     <input type="email" class="form-control" id="email" name="email"
-                                        value="{{ old('email') }}" required>
+                                        value="{{ old('email') }}" >
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Mot de passe</label>
-                                    <input type="password" class="form-control" name="password" required>
+                                    <input type="password" class="form-control" name="password" >
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="password_confirmation" class="form-label">Confirmation mot de passe</label>
-                                    <input type="password" class="form-control" name="password_confirmation" required>
+                                    <input type="password" class="form-control" name="password_confirmation" >
                                 </div>
-
+                                <!-- Champ Département ajouté -->
+                                <div class="mb-3">
+                                    <label for="id_departement" class="form-label">Département</label>
+                                    <select id="id_departement" name="id_departement" class="form-select">
+                                        <option value="">-- Choisir un département --</option>
+                                        @foreach($departements as $departement)
+                                            <option value="{{ $departement->id }}" {{ old('id_departement') == $departement->id ? 'selected' : '' }}>
+                                                {{ $departement->nom }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="mb-3">
                                     <label for="role_id" class="form-label">Rôle</label>
-                                    <select id="role_id" name="role_id" class="form-select" required>
+                                    <select id="role_id" name="role_id" class="form-select" >
                                         <option value="">Sélectionnez un rôle...</option>
                                         @foreach($roles as $role)
                                             <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>

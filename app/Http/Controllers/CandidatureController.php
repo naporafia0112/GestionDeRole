@@ -16,6 +16,8 @@ use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Mail\CandidatureConfirmationMail;
+
 
 class CandidatureController extends Controller
 {
@@ -41,38 +43,23 @@ class CandidatureController extends Controller
                 return response()->json(['score' => 0, 'commentaire' => 'CV introuvable.'], 404);
             }
 
-            // Analyse du contenu du CV avec Smalot
             $parser = new Parser();
             $cvText = $parser->parseFile($cvPath)->getText();
 
             $jobDescription = $candidature->offre->description;
 
-            // Création du prompt pour l'IA
             $prompt = <<<EOT
-            Tu es un recruteur. Voici une offre d'emploi :
+                Tu es un recruteur. Voici une offre d'emploi :
 
-            {$jobDescription}
+                {$jobDescription}
 
-            Et voici un CV extrait :
+                Et voici un CV extrait :
 
-            {$cvText}
+                {$cvText}
 
-            Analyse la pertinence de ce candidat pour cette offre.
+                Peux-tu analyser ce profil et lui donner une note sur 10 pour un poste de développeur web junior ?
 
-            Réponds uniquement en JSON :
-            {
-            "score": 80,
-            "commentaire": "Bon profil mais manque de DevOps"
-            } si tu ne trouves aucune information pertinente, réponds en JSON :
-            {
-            "score": 0,
-            "commentaire": "Aucune information pertinente trouvée."
-            } et si tu ne trouves pas de CV, réponds en JSON :
-            {
-            "score": 0,
-            "commentaire": "Aucun CV trouvé."
-            }
-            EOT;
+                EOT;
 
             // Appel à l'API IA
             $response = Http::timeout(120)->post(config('ollama.url') . '/api/generate', [
@@ -124,6 +111,111 @@ class CandidatureController extends Controller
         }
     }
 
+public function preselectionner($offreId)
+{
+    try {
+        $offre = Offre::with('candidatures.candidat')->findOrFail($offreId);
+
+        $parser = new Parser();
+        $cvs = [];
+
+        foreach ($offre->candidatures as $candidature) {
+            $cvPath = storage_path('app/public/' . $candidature->cv_fichier);
+            if (!file_exists($cvPath)) {
+                Log::warning("CV manquant pour la candidature ID {$candidature->id}");
+                continue;
+            }
+
+            try {
+                $text = $parser->parseFile($cvPath)->getText();
+                // Inclure l'ID réel dans le prompt
+                $cvs[] = "---CV ID {$candidature->id}---\n" . $text;
+            } catch (\Exception $e) {
+                Log::error("Erreur parsing CV ID {$candidature->id} : " . $e->getMessage());
+            }
+        }
+
+        if (empty($cvs)) {
+            return response()->json(['message' => 'Aucun CV valide à analyser (PDFs manquants ou illisibles).'], 422);
+        }
+
+        $cvContent = implode("\n", $cvs);
+
+        $prompt = <<<EOT
+Tu es un recruteur.
+
+Voici une offre d'emploi :
+
+Titre : {$offre->titre}
+
+Description :
+{$offre->description}
+
+Tâche :
+1. Analyse les CV suivants.
+2. Donne une note sur 100 à chacun.
+3. Classe-les.
+4. Retiens les 20 meilleurs en "selectionnes", les autres en "rejetes".
+
+Voici maintenant une liste de CV :
+
+{$cvContent}
+
+Peux-tu faire une pré-sélection des CV et attribuer une note sur 100 à chaque profil avec un commentaire ?
+Réponds uniquement en JSON :
+{
+  "selectionnes": [
+    { "id": 123, "score": 92, "commentaire": "..." }
+  ],
+  "rejetes": [
+    { "id": 456, "score": 45, "commentaire": "..." }
+  ]
+}
+EOT;
+
+        $response = Http::timeout(120)->post(config('ollama.url') . '/api/generate', [
+            'model' => config('ollama.model'),
+            'prompt' => $prompt,
+            'stream' => false,
+        ]);
+
+        if (!$response->successful()) {
+            Log::error("Erreur lors de la requête à l’IA : " . $response->body());
+            return response()->json(['message' => 'Erreur lors de la communication avec l’IA.'], 500);
+        }
+
+        $reponseBrute = $response->json()['response'] ?? '';
+
+        try {
+            $json = json_decode($reponseBrute, true);
+            if (!is_array($json)) {
+                throw new \Exception("JSON invalide");
+            }
+        } catch (\Throwable $e) {
+            Log::error("Erreur de décodage JSON : " . $reponseBrute);
+            return response()->json(['message' => 'Réponse IA non exploitable.'], 500);
+        }
+
+        foreach (['selectionnes' => 'retenu', 'rejetes' => 'rejete'] as $groupe => $statut) {
+            foreach ($json[$groupe] ?? [] as $item) {
+                $id = $item['id'] ?? null;
+
+                if ($id && $offre->candidatures->contains('id', $id)) {
+                    $candidature = $offre->candidatures->firstWhere('id', $id);
+                    $candidature->score = $item['score'] ?? 0;
+                    $candidature->commentaire = $item['commentaire'] ?? '';
+                    $candidature->statut = $statut;
+                    $candidature->save();
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Préselection terminée avec succès.']);
+    } catch (\Exception $e) {
+        Log::critical("Échec de la présélection : " . $e->getMessage());
+        return response()->json(['message' => 'Une erreur est survenue : ' . $e->getMessage()], 500);
+    }
+}
 
     /**
      * Liste des candidatures liées à une offre.
@@ -164,8 +256,12 @@ class CandidatureController extends Controller
         $candidature->statut = 'valide';
         $candidature->save();
 
-        return back()->with('success', 'La candidature a été validée.');
+        return redirect()->route('stages.create', [
+            'id_candidature' => $candidature->id,
+            'id_offre' => $candidature->offre_id,
+        ])->with('success', 'Candidature validée. Vous pouvez maintenant créer un stage.');
     }
+
 
     public function effectuee($id)
     {
@@ -196,7 +292,6 @@ class CandidatureController extends Controller
 
     public function store(Request $request, int $offreId)
     {
-
         $request->validate([
             'nom' => 'required|string|max:255',
             'prenoms' => 'required|string|max:255',
@@ -220,7 +315,7 @@ class CandidatureController extends Controller
             $lmPath = $request->file('lm_fichier')?->store('candidatures/lm', 'public');
             $lrPath = $request->file('lr_fichier')?->store('candidatures/lr', 'public');
 
-            Candidature::create([
+            $candidature = Candidature::create([
                 'offre_id' => $offreId,
                 'candidat_id' => $candidat->id,
                 'statut' => 'en_cours',
@@ -228,9 +323,12 @@ class CandidatureController extends Controller
                 'lm_fichier' => $lmPath,
                 'lr_fichier' => $lrPath,
             ]);
+
+            // Envoyer l'email de confirmation au candidat
+            Mail::to($candidat->email)->send(new CandidatureConfirmationMail($candidature));
         });
 
-        return redirect()->route('vitrine.show', $offreId)->with('success', 'Votre candidature a été envoyée avec succès.');
+        return redirect()->route('vitrine.show', $offreId)->with('success', 'Votre candidature a été envoyée avec succès. Un mail de confirmation vous a été envoyé.');
     }
 
     public function recherche(Request $request)
@@ -269,7 +367,7 @@ class CandidatureController extends Controller
         return Storage::disk('public')->download($path);
     }
 
-    public function analyser(Request $request)
+    /*public function analyser(Request $request)
     {
         $criteres = $request->input('criteres', []);
         $prompt = $this->construirePrompt($criteres);
@@ -327,7 +425,7 @@ class CandidatureController extends Controller
             'score' => $score,
             'badges' => $badges,
         ]);
-    }
+    }*/
     // Afficher les candidatures retenues
     public function dossiersRetenus()
     {
@@ -336,7 +434,7 @@ class CandidatureController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('admin.dossiers.dossiersretenu.retenus', ['candidatures' => $candidatures,'statut' => 'retenu',]);
+        return view('admin.entretiens.retenus', ['candidatures' => $candidatures,'statut' => 'retenu',]);
     }
 
     // Afficher les candidatures validées
@@ -349,5 +447,5 @@ class CandidatureController extends Controller
 
         return view('admin.dossiers.dossiersvalide.valides', compact('candidatures'));
     }
-
+  
 }

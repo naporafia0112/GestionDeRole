@@ -19,6 +19,7 @@ class Candidature extends Model
         'lm_fichier',
         'lr_fichier',
         'uuid',
+
         'score',
         'commentaire',
     ];
@@ -54,6 +55,10 @@ class Candidature extends Model
     {
         return $this->hasOne(Entretien::class, 'id_candidat', 'candidat_id')
                     ->where('id_offre', $this->offre_id);
+    }
+    public function stage()
+    {
+        return $this->hasOne(Stage::class, 'id_candidature');
     }
 
 }

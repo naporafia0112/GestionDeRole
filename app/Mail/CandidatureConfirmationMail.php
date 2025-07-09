@@ -2,12 +2,12 @@
 
 namespace App\Mail;
 
+use App\Models\Candidature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Candidature;
 
-class CandidatureRecueMail extends Mailable
+class CandidatureConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,7 +20,8 @@ class CandidatureRecueMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Confirmation de réception de votre candidature')
-                    ->view('emails.candidature.recue'); // crée cette vue simple !
+        return $this->subject('Confirmation de votre candidature')
+                    ->view('emails.candidature-confirmation')
+                    ->with(['candidature' => $this->candidature]);
     }
 }

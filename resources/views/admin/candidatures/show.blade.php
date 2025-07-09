@@ -56,9 +56,9 @@
                                 @endif
 
                                 @if($statut === 'valide')
-                                    <a href="{{ route('stages.create', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}"
-                                        class="btn btn-sm btn-success mb-2">
-                                        <i class="fas fa-plus me-1"></i> Créer un stage
+                                <a href="{{ route('stages.create', ['id_candidature' => $candidature->id]) }}"
+                                    class="btn btn-sm btn-success mb-2">
+                                    <i class="fas fa-plus me-1"></i> Créer un stage
                                     </a>
                                 @endif
 
@@ -70,13 +70,19 @@
                                             <i class="mdi mdi-close-circle-outline"></i>
                                         </button>
                                     </form>--}}
-                                    <a href="{{ route('entretiens.create', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}"
+                                    <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}" class="d-inline">
+                                        @csrf
+                                        <button class="btn btn-sm btn-success confirm-validate" type="submit" title="Valider">
+                                            <i class="mdi mdi-check"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('entretiens.create', ['id_candidat' => $candidature->candidat->id, 'offre_id' => $candidature->offre->id]) }}"
                                         class="btn btn-sm btn-outline-info"
                                         title="Planifier entretien">
                                         <i class="mdi mdi-calendar-check-outline"></i>
                                     </a>
                                     <button class="btn btn-sm btn-outline-primary analyze-btn" data-id="{{ $candidature->id }}" title="Analyser">
-                                                <i class="mdi mdi-robot"></i>
+                                        <i class="mdi mdi-robot"></i>
                                     </button>
                                 @endif
                             </div>
