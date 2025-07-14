@@ -9,8 +9,9 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('entretiens.calendrier') }}">Calendrier</a></li>
+                                <li class="breadcrumb-item"><a href="">Planifier un entretiens</a></li>
                             </ol>
                         </div>
                         <h4 class="page-title">Formulaire de planification d'entretiens</h4>
@@ -33,14 +34,13 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="date" class="form-label">Date<span class="text-danger">*</span></label>
-                                    <input type="date" name="date" id="date" class="form-control" value="{{ old('date') }}">
-                                </div>
+                                    <input type="date" name="date" id="date" class="form-control" value="{{ old('date', $date ?? '') }}">                                </div>
                             </div>
 
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="heure" class="form-label">Heure<span class="text-danger">*</span></label>
-                                    <input type="time" name="heure" id="heure" class="form-control" value="{{ old('heure') }}">
+                                    <input type="time" name="heure" id="heure" class="form-control" value="{{ old('heure',$heure??'') }}">
                                 </div>
                             </div>
                         </div>

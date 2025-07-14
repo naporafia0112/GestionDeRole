@@ -31,7 +31,7 @@
                                         {{ $offre->titre }}
                                     </h5>
                                     <div class="ms-auto">
-                                        <a href="{{ route('vitrine.show', $offre->id) }}" class="btn btn-primary rounded-pill px-4">
+                                        <a href="{{ route('vitrine.detailcatalogue', $offre->id) }}" class="btn btn-primary rounded-pill px-4">
                                             Voir détail
                                         </a>
                                     </div>

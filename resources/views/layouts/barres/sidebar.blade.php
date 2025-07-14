@@ -66,8 +66,9 @@
                     <!-- OFFRES -->
                     <li class="menu-title mt-2">OFFRES</li>
                     <li><a href="{{ route('offres.index') }}"><i data-feather="file-text"></i> <span> Mes Offres </span></a></li>
+                    <li class="menu-title mt-2">CANDIDATURES</li>
                     <li><a href="{{ route('candidatures.index') }}"><i data-feather="users"></i> <span> Candidatures </span></a></li>
-
+                    <li><a href="{{ route('admin.candidatures.spontanees.index') }}"><i data-feather="users"></i> <span> Candidatures Libre </span></a></li>
                     <!-- PLANIFICATION -->
                     <li class="menu-title mt-2">PLANIFICATION</li>
                     <li><a href="{{ route('entretiens.index') }}"><i data-feather="clipboard"></i> <span> Entretiens </span></a></li>
@@ -78,13 +79,13 @@
                     <li class="menu-title mt-2">STAGES</li>
                     <li><a href="{{ route('rh.stages.attente_tuteur') }}"><i data-feather="user-plus"></i> <span> Affectation Tuteur </span></a></li>
                     <li><a href="{{ route('rh.stages.en_cours') }}"><i data-feather="briefcase"></i> <span> Stages en cours </span></a></li>
-
+                    <li><a href="{{ route('rh.stages.termines') }}"><i data-feather="briefcase"></i> <span> Stages terminés </span></a></li>
                     <!-- RAPPORTS -->
                     <li class="menu-title mt-2">RAPPORTS</li>
                     <li><a href="{{ route('stages.rh.candidats_en_stage') }}"><i data-feather="list"></i> <span> Liste Candidats </span></a></li>
-                    <li><a href="#"><i data-feather="file"></i> <span> Liste Entretiens </span></a></li>
-                    <li><a href="#"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
-                    <li><a href="{{ route('rapport.form') }}"><i data-feather="activity"></i> <span> Situation </span></a></li>
+                    <li><a href="{{ route('entretiens.liste') }}"><i data-feather="file"></i> <span> Liste Entretiens </span></a></li>
+                    <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
+                    <li><a href="#"><i data-feather="activity"></i> <span> Situation </span></a></li>
 
                 @elseif (Auth::user()->hasRole('DIRECTEUR'))
                     <li class="menu-title">DIRECTEUR</li>
@@ -93,22 +94,24 @@
                     </li>
                     <li class="menu-title">TUTEUR</li>
                     <li><a href="{{ route('directeur.tuteurs') }}"><i data-feather="users"></i> <span> Mes Tuteurs </span></a></li>
-                    <li><a href="{{ route('directeur.stages') }}"><i data-feather="user-check"></i> <span> Attribuer Tuteur </span></a></li>
+                    <li><a href="{{ route('directeur.stages') }}"><i data-feather="user-check"></i> <span> Attribuer Tuteur @if(!empty($nombreStagesAttente) && $nombreStagesAttente > 0)
+                    <span class="badge bg-danger ms-2">{{ $nombreStagesAttente }}</span>@endif </span></a></li>
 
                     <li class="menu-title mt-2">STAGES</li>
                     <li><a href="{{ route('stages.candidats_en_cours') }}"><i data-feather="file-text"></i> <span> Candidats </span></a></li>
                     <li><a href="{{ route('stages.en_cours') }}"><i data-feather="database"></i> <span> Stages en cours </span></a></li>
 
                     <li class="menu-title mt-2">RAPPORTS</li>
-                    <li><a href="#"><i data-feather="file"></i> <span> Rapports </span></a></li>
-
+                    <li><a href="{{ route('directeur.formulaires.liste') }}"><i data-feather="file"></i> <span> Rapports </span></a></li>
+                    <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
                 @elseif (Auth::user()->hasRole('TUTEUR'))
                     <li class="menu-title">TUTEUR</li>
                     <li><a href="{{ route('dashboard.tuteur') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>
                     <li class="menu-title mt-2">STAGES</li>
                     <li><a href="{{ route('stages.candidats_tuteurs') }}"><i data-feather="file-text"></i> <span>Liste des candidats </span></a></li>
+                    <li><a href="{{ route('tuteur.stages.en_cours') }}"><i data-feather="briefcase"></i> <span> Stages en cours </span></a></li>
                     <li class="menu-title mt-2">RAPPORTS</li>
-                    <li><a href=""><i data-feather="activity"></i> <span> Rapports candidats </span></a></li>
+                    <li><a href="{{ route('tuteur.formulaires.affichage') }}"><i data-feather="activity"></i> <span> Rapports candidats </span></a></li>
                 @else
                     <li class="menu-title">Navigation</li>
                     <li><a href="{{ route('dashboard') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>

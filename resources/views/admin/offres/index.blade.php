@@ -9,7 +9,7 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
                             </ol>
                         </div>

@@ -17,7 +17,7 @@ class EntretienController extends Controller
         $statutsFiltres = [
         'prevu' => 'Prévu',
         'en_cours' => 'En cours',
-        'effectuee' => 'Effectuée',
+        'effectuee' => 'Effectué',
         'termine' => 'Terminé',
         'annule' => 'Annulé',
     ];
@@ -25,38 +25,49 @@ class EntretienController extends Controller
         return view('admin.entretiens.calendrier',compact('statutsFiltres'));
     }
 
-    // Fournit les événements JSON pour FullCalendar (ajax)
+        // Fournit les événements JSON pour FullCalendar (ajax)
     public function getEvents(Request $request)
-{
-    $entretiens = Entretien::all();
-    Entretien::where('statut', 'prevu')
-        ->where('date_fin', '<', Carbon::now())
-        ->update(['statut' => 'annule']);
+    {
+        $entretiens = Entretien::all();
 
+        // Met à jour les entretiens prévus mais expirés
+        Entretien::where('statut', 'prevu')
+            ->where('date_fin', '<', Carbon::now())
+            ->update(['statut' => 'annule']);
 
-    $events = $entretiens->map(function ($e) {
-        // Définir une couleur selon le statut
-        $color = match (strtolower($e->statut)) {
-            'prévu', 'prevu'    => '#0d6efd', // bleu
-            'en cours'          => '#ffc107', // jaune
-            'effectuee'          => '#198754', // vert foncé
-            'termine'           => '#20c997', // vert clair
-            'annulé', 'annule'  => '#dc3545', // rouge
-            default             => '#6c757d', // gris (statut inconnu)
-        };
-
-        return [
-            'id'     => $e->id,
-            'title'  => $e->type,
-            'statut' => $e->statut,
-            'start'  => $e->date_debut,
-            'end'    => $e->date_fin,
-            'color'  => $color,
+        // Libellés lisibles des statuts
+        $libelles = [
+            'prevu'      => 'Prévu',
+            'en_cours'   => 'En cours',
+            'effectuee'  => 'Effectué',
+            'termine'    => 'Terminé',
+            'annule'     => 'Annulé',
         ];
-    });
 
-    return response()->json($events);
-}
+        // Construction des événements
+        $events = $entretiens->map(function ($e) use ($libelles) {
+            $color = match (strtolower($e->statut)) {
+                'prevu'     => '#0d6efd', // bleu
+                'en_cours'  => '#ffc107', // jaune
+                'effectuee' => '#198754', // vert foncé
+                'termine'   => '#20c997', // vert clair
+                'annule'    => '#dc3545', // rouge
+                default     => '#6c757d', // gris
+            };
+
+            return [
+                'id'     => $e->id,
+                'title'  => $e->type,
+                'statut' => $libelles[$e->statut] ?? ucfirst($e->statut),
+                'start'  => $e->date_debut,
+                'end'    => $e->date_fin,
+                'color'  => $color,
+            ];
+        });
+
+        return response()->json($events);
+    }
+
 
     // Formulaire de création d’un entretien
     public function create(Request $request)
@@ -68,11 +79,13 @@ class EntretienController extends Controller
         // Récupérer les ids passés en GET pour pré-remplissage
         $id_candidat = $request->query('id_candidat');
         $id_offre = $request->query('id_offre');
+        $date = $request->query('date');
+        $heure = $request->query('heure');
 
         $offres = $id_offre ? Offre::where('id', $id_offre)->get() : Offre::all();
 
 
-        return view('admin.entretiens.create', compact('candidats', 'offres', 'id_candidat', 'id_offre'));
+        return view('admin.entretiens.create', compact('candidats', 'offres', 'id_candidat', 'id_offre','date','heure'));
     }
 
 
@@ -152,6 +165,22 @@ class EntretienController extends Controller
             'entretiensTermines'
         ));
     }
+    public function liste_entretiens_export()
+    {
+
+         // Met à jour les entretiens prévus expirés en annulés
+        Entretien::where('statut', 'prevu')
+            ->where('date_fin', '<', Carbon::now())
+            ->update(['statut' => 'annule']);
+
+        // Récupère tous les entretiens, ordonnés par date, avec leurs relations utiles
+        $entretiens = Entretien::with(['candidat', 'offre'])
+            ->orderBy('date', 'desc')
+            ->paginate(20);
+
+        // Envoie la collection à la vue
+        return view('admin.entretiens.liste_entretiens', compact('entretiens'));
+    }
 
     // Afficher un entretien spécifique
     public function show($id)
@@ -177,25 +206,30 @@ class EntretienController extends Controller
 
 
     // Mise à jour avec validation, gestion d'erreurs, alertes
-    public function update(Request $request, Entretien $entretien)
+    public function update(Request $request, $id)
     {
-        // Combiner date et heure
+        // 1. Chargement explicite de l'entretien
+        $entretien = Entretien::findOrFail($id);
+
+        // 2. Combiner date et heure
         $dateInput = $request->input('date');
         $heureInput = $request->input('heure');
-
+        if (strlen($heureInput) === 5) { // format "HH:mm"
+            $heureInput .= ':00';
+        }
         $entretienDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $dateInput . ' ' . $heureInput);
         $now = Carbon::now();
 
-        // Validation de base
+        // 3. Validation
         $validator = Validator::make($request->all(), [
             'date'   => ['required', 'date'],
             'heure'  => ['required'],
-            'statut' => ['required', 'in:planifiee,en_attente,effectuee'],
+            'statut' => ['required', 'in:prevu,en_cours,effectuee,termine,annule'],
+            'lieu'   => ['required_if:type,présentiel', 'string'], // Validation pour le lieu
         ]);
 
         // Règles personnalisées
         $validator->after(function ($validator) use ($entretienDateTime, $now, $request) {
-
             if ($request->statut === 'effectuee' && $entretienDateTime->gte($now)) {
                 $validator->errors()->add('date', 'Un entretien effectué doit avoir une date antérieure à l\'heure actuelle.');
             }
@@ -205,37 +239,33 @@ class EntretienController extends Controller
             }
         });
 
-        // En cas d’erreurs
         if ($validator->fails()) {
             return redirect()->back()
                             ->withErrors($validator)
                             ->withInput();
         }
 
-        // Mise à jour
-        $entretien->date = $request->input('date');
-        $entretien->heure = $request->input('heure');
-        $entretien->statut = $request->input('statut');
-        $entretien->save();
+        // 4. Mise à jour garantie (UPDATE, pas INSERT)
+        $updateData = [
+            'date' => $request->input('date'),
+            'heure' => $request->input('heure'),
+            'statut' => $request->input('statut'),
+            'lieu' => $request->input('lieu', $entretien->lieu), // Garde l'ancienne valeur si non fournie
+        ];
 
-        // Redirection avec message de succès
+        // 5. Debug avant sauvegarde (optionnel)
+        logger()->info('Mise à jour entretien', [
+            'id' => $entretien->id,
+            'data' => $updateData,
+            'exists' => $entretien->exists
+        ]);
+
+        $entretien->update($updateData);
+
+        // 6. Redirection
         return redirect()->route('entretiens.index')
                         ->with('success', 'Entretien mis à jour avec succès.');
     }
-
-    // Suppression avec gestion d’erreurs et alertes
-    public function destroy($id)
-    {
-        try {
-            Entretien::destroy($id);
-            return redirect()->route('entretiens.calendrier')
-                ->with('success', 'Entretien supprimé avec succès.');
-        } catch (\Exception $e) {
-            return redirect()->route('entretiens.calendrier')
-                ->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
-        }
-    }
-
     // Annulation avec alertes
     public function annuler($id)
     {
@@ -260,9 +290,9 @@ class EntretienController extends Controller
             'heure' => $entretien->heure,
             'lieu' => $entretien->lieu,
             'type' => $entretien->type,
-            'statut' => $entretien->statut,
+            'statut' => Entretien::STATUTS[$entretien->statut] ?? $entretien->statut,
             'commentaire' => $entretien->commentaire,
-            'candidat' => $entretien->candidat ? $entretien->candidat->nom . ' ' . $entretien->candidat->prenom : '',
+            'candidat' => $entretien->candidat ? $entretien->candidat->nom . ' ' . $entretien->candidat->prenoms : '',
             'offre' => $entretien->offre ? $entretien->offre->titre : '',
             'offre_id' => $entretien->offre ? $entretien->offre->id : null, // <-- ajouté ici
         ]);
@@ -318,4 +348,56 @@ class EntretienController extends Controller
             }
         }
     }
+    public function slots()
+    {
+        $debutHeure = 8;
+        $finHeure = 18;
+        $interval = 30; // minutes
+        $jours = 5;
+
+        $slots = [];
+        $now = Carbon::now()->addHours(2); // **On ajoute 2h ici**
+        $entretienExistants = Entretien::select('date', 'heure')->get();
+
+        for ($i = 0; $i < $jours; $i++) {
+            $date = $now->copy()->addDays($i);
+            if ($date->isWeekend()) continue;
+
+            for ($h = $debutHeure; $h < $finHeure; $h++) {
+                for ($m = 0; $m < 60; $m += $interval) {
+                    $heure = sprintf('%02d:%02d', $h, $m);
+                    $dateStr = $date->format('Y-m-d');
+
+                    $slotDateTime = Carbon::createFromFormat('Y-m-d H:i', $dateStr . ' ' . $heure);
+
+                    // On filtre pour ne garder que les créneaux à +2h minimum
+                    if ($slotDateTime->lt($now)) {
+                        continue;
+                    }
+
+                    // Vérifie que le créneau n'existe pas déjà
+                    $existe = $entretienExistants->contains(function ($e) use ($dateStr, $heure) {
+                        return $e->date == $dateStr && $e->heure == $heure;
+                    });
+
+                    if (!$existe) {
+                        $slots[] = [
+                            'date' => $dateStr,
+                            'heure' => $heure,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return response()->json($slots);
+    }
+    public function showSlotsPage(Request $request)
+    {
+        $id_candidat = $request->query('id_candidat');
+        $id_offre = $request->query('id_offre');
+
+        return view('admin.entretiens.creneaux', compact('id_candidat', 'id_offre'));
+    }
+
 }

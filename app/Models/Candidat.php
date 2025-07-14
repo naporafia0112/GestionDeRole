@@ -23,5 +23,11 @@ class Candidat extends Model
     {
         return $this->hasMany(Candidature::class);
     }
-    
+    public function candidatureValidee()
+    {
+        return $this->hasOne(Candidature::class)
+                    ->where('statut', 'valide');
+    }
+
+
 }

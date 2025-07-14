@@ -8,7 +8,7 @@
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item"><a href="">DIPRH</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('rh.stages.en_cours') }}">Stages académiques</a></li>
+                        <li class="breadcrumb-item"><a href="{{route('tuteur.stages.en_cours')}}">Stages en cours</a></li>
                         <li class="breadcrumb-item active"><strong>Détails du stage</strong></li>
                     </ol>
                 </div>
@@ -25,9 +25,6 @@
                     <div class="float-sm-end mb-2 mb-sm-0">
                         <div class="row g-2">
                             <div class="col-auto">
-                                <a href="{{ route('rh.stages.en_cours') }}" class="btn btn-sm btn-link">
-                                    <i class="mdi mdi-keyboard-backspace"></i> Retour
-                                </a>
                             </div>
 
                         </div>
@@ -156,17 +153,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Description et objectifs -->
-                    <div class="mt-3">
-                        <h5><strong>Description et objectifs</strong></h5>
-                        <div class="p-3 bg-light rounded">
-                            @if($stage->description)
-                                {!! nl2br(e($stage->description)) !!}
-                            @else
-                                <p class="text-muted">Aucune description fournie</p>
-                            @endif
-                        </div>
                     </div>
                 </div>
             </div>

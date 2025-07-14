@@ -14,6 +14,14 @@ class OffreController extends Controller
 {
     public function index()
     {
+        // Publier automatiquement les offres dont la date est dépassée
+        Offre::where('est_publie', false)
+            ->where('date_publication', '<=', now())
+            ->update([
+                'est_publie' => true,
+                'statut' => 'publie',
+            ]);
+
         $offres = Offre::with('localisation')->orderByDesc('created_at')->paginate(5);
         return view('admin.offres.index', compact('offres'));
     }
@@ -169,7 +177,7 @@ class OffreController extends Controller
         $localisations = Localisation::all();
         return view('admin.offres.edit', compact('offre', 'localisations', 'statuts'));
     }
-    
+
 
     public function publish(Offre $offre)
     {

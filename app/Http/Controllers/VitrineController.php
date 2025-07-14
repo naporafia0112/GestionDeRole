@@ -52,6 +52,15 @@ class VitrineController extends Controller
         return view('vitrine.show', compact('offre'));
     }
 
+    public function detailcatalogue(Offre $offre)
+    {
+        if (!$offre->est_publie) {
+            abort(404); // ou redirect avec erreur
+        }
+
+        return view('vitrine.detail-catalogue', compact('offre'));
+    }
+
 
     /**
      * Show the form for editing the specified resource.

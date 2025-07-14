@@ -13,7 +13,7 @@
                                 <div class="page-title-box">
                                     <div class="page-title-right">
                                         <ol class="breadcrumb m-0">
-                                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                                            <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                             <li class="breadcrumb-item"><a href="">Liste des tuteurs</a></li>
                                         </ol>
                                     </div>

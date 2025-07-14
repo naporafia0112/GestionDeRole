@@ -9,7 +9,7 @@
                         <div class="page-title-box">
                             <div class="page-title-right">
                                 <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                                    <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                     <li class="breadcrumb-item"><a href="{{ route('rh.stages.en_cours') }}">Liste des stages en cours</a></li>
                                 </ol>
                             </div>
@@ -79,6 +79,11 @@
                                                     <a href="{{ route('stages.show', $stage->id) }}" class="btn btn-sm btn-info" title="Voir">
                                                         <i class="fe-eye"></i>
                                                     </a>
+
+                                                        <a href="{{ route('stages.edit', $stage->id) }}" class="btn btn-success btn-sm">
+                                                            <i class="mdi mdi-check-circle-outline"></i> Terminer stage
+                                                        </a>
+                                               
                                                 </td>
                                             </tr>
                                         @endforeach

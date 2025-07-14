@@ -11,7 +11,7 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href={{ route('offres.index') }}>Offres</a></li>
                                 <li class="breadcrumb-item active">{{ isset($offre) ? 'Modifier' : 'Créer' }} une offre</li>
                             </ol>
@@ -140,7 +140,7 @@
                                     @enderror
                                 </div>
                                 <!-- Boutons de soumission -->
-                                <div class="">
+                                <div class="text-end">
                                     <button text-end type="submit" class="btn btn-success">
                                         {{ isset($offre) ? 'Mettre à jour' : 'Enregistrer' }}
                                     </button>

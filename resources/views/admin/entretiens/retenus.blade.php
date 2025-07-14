@@ -38,13 +38,25 @@
                             <td>{{ $candidature->offre->titre ?? '---' }}</td>
                             <td>{{ $candidature->created_at->format('d/m/Y') }}</td>
                             <td class="text-center">
-                               @if($statut === 'retenu')
-                                <a href="{{ route('entretiens.create', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}"
-                                    class="btn btn-sm btn-outline-info"
-                                    title="Planifier entretien">
-                                    <i class="mdi mdi-calendar-check-outline"></i> Planifier entretien
-                                </a>
+                            @if($candidature->statut === 'retenu')
+                                @if($candidature->entretien && $candidature->entretien->statut === 'effectuee')
+                                    <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}">
+                                        @csrf
+                                        <button class="btn btn-sm btn-success confirm-validate">
+                                            <i class="mdi mdi-check"></i> Valider
+                                        </button>
+                                    </form>
+                                @else
+                                    <!-- Debug : Affiche pourquoi le bouton n'apparaît pas -->
+                                    <span class="badge bg-warning">
+                                        @if(!$candidature->entretien)
+                                            Pas d'entretien
+                                        @else
+                                            Statut: {{ $candidature->entretien->statut }}
+                                        @endif
+                                    </span>
                                 @endif
+                            @endif
                             </td>
                         </tr>
                     @endforeach

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Stage;
 use App\Models\User;
+use App\Models\ReponseFormulaire;
 use App\Models\Candidature;
 use Illuminate\Http\Request;
 use App\Models\Departement;
@@ -110,38 +111,110 @@ class StageController extends Controller
 
 
     /**
-     * Détail d’un stage.
+     *Détail d’un stage.
      */
     public function show(Stage $stage)
-{
-    $numero = Stage::where('id', '<=', $stage->id)->count();
+    {
+        $numero = Stage::where('id', '<=', $stage->id)->count();
 
-    $stage->load([
-        'candidature' => function($query) {
-            $query->with(['candidat' => function($q) {
-                // Solution alternative pour gérer les candidats supprimés
-                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
-                    $q->withTrashed();
-                }
-            }]);
-        },
-        'tuteur',
-        'departement'
-    ]);
+        $stage->load([
+            'candidature' => function($query) {
+                $query->with(['candidat' => function($q) {
+                    // Solution alternative pour gérer les candidats supprimés
+                    if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                        $q->withTrashed();
+                    }
+                }]);
+            },
+            'tuteur',
+            'departement'
+        ]);
 
-    // Solution de repli si la candidature ou le candidat n'existe pas
-    $candidat = $stage->candidature->candidat ?? null;
+        // Solution de repli si la candidature ou le candidat n'existe pas
+        $candidat = $stage->candidature->candidat ?? null;
 
-    // Alternative plus explicite:
-    // $candidat = $stage->candidature ? ($stage->candidature->candidat ?? null) : null;
+        // Alternative plus explicite:
+        // $candidat = $stage->candidature ? ($stage->candidature->candidat ?? null) : null;
 
-    return view('admin.stages.details', [
-        'stage' => $stage,
-        'numero' => $numero,
-        'candidat' => $candidat,
-        'departement' => $stage->departement
-    ]);
-}
+        return view('admin.stages.rh.details', [
+            'stage' => $stage,
+            'numero' => $numero,
+            'candidat' => $candidat,
+            'departement' => $stage->departement
+        ]);
+    }
+
+    public function detailstagedirecteur(Stage $stage)
+    {
+        $numero = Stage::where('id', '<=', $stage->id)->count();
+
+        $stage->load([
+            'candidature' => function($query) {
+                $query->with(['candidat' => function($q) {
+                    if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                        $q->withTrashed();
+                    }
+                }]);
+            },
+            'tuteur',
+            'departement'
+        ]);
+
+        $candidat = $stage->candidature->candidat ?? null;
+
+        $cvValide = null;
+        if ($candidat) {
+            // Récupérer la candidature validée du candidat
+            $candidatureValidee = $candidat->candidatures()->where('statut', 'valide')->first();
+            if ($candidatureValidee) {
+                $cvValide = $candidatureValidee->cv_fichier;
+            }
+        }
+
+        return view('admin.stages.directeurs.detail_stage', [
+            'stage' => $stage,
+            'numero' => $numero,
+            'candidat' => $candidat,
+            'departement' => $stage->departement,
+            'cvValide' => $cvValide,
+        ]);
+    }
+
+    public function detailstagetuteur(Stage $stage)
+    {
+        $numero = Stage::where('id', '<=', $stage->id)->count();
+
+        $stage->load([
+            'candidature' => function($query) {
+                $query->with(['candidat' => function($q) {
+                    if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                        $q->withTrashed();
+                    }
+                }]);
+            },
+            'tuteur',
+            'departement'
+        ]);
+
+        $candidat = $stage->candidature->candidat ?? null;
+
+        $cvValide = null;
+        if ($candidat) {
+            // Récupérer la candidature validée du candidat
+            $candidatureValidee = $candidat->candidatures()->where('statut', 'valide')->first();
+            if ($candidatureValidee) {
+                $cvValide = $candidatureValidee->cv_fichier;
+            }
+        }
+
+        return view('admin.stages.tuteur.detail_stage_tuteur', [
+            'stage' => $stage,
+            'numero' => $numero,
+            'candidat' => $candidat,
+            'departement' => $stage->departement,
+            'cvValide' => $cvValide,
+        ]);
+    }
 
 
     /**
@@ -183,58 +256,40 @@ class StageController extends Controller
 
         $departements = Departement::all();
 
-        return view('admin.stages.modifier', compact('stage', 'tuteurs', 'departements'));
+        return view('admin.stages.terminer', compact('stage', 'tuteurs', 'departements'));
     }
 
     /**
      * Mise à jour d’un stage.
      */
-    public function update(Request $request, Stage $stage)
-{
-    $request->validate([
-        'date_debut' => 'required|date',
-        'date_fin' => [
-            'required',
-            'date',
-            'after_or_equal:date_debut',
-            function ($attribute, $value, $fail) use ($request) {
-                if ($request->has('date_debut')) {
-                    $dateDebut = \Carbon\Carbon::parse($request->input('date_debut'));
-                    $dateFin = \Carbon\Carbon::parse($value);
+   public function update(Request $request, Stage $stage)
+    {
+        $request->validate([
+            'rapport_stage_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'note_finale' => 'nullable|numeric|min:0|max:20',
+        ]);
 
-                    if ($dateFin->lt($dateDebut->copy()->addMonth())) {
-                        $fail('La date de fin doit être au moins 1 mois après la date de début.');
-                    }
-                }
-            },
-        ],
-        'sujet' => 'required|string|max:255',
-        'lieu' => ['required', 'string', 'max:255', 'regex:/^[\pL\s\',.-]+$/u'],
-        'id_departement' => 'required|exists:departements,id',
-        'remuneration' => [
-            'nullable',
-            'numeric',
-            'min:10',
-            function ($attribute, $value, $fail) {
-                if ($value % 10 !== 0) {
-                    $fail('La rémunération doit être un multiple de 10.');
-                }
-            }
-        ],
-    ]);
+        $data = [];
 
-    $stage->update([
-        'date_debut' => $request->date_debut,
-        'date_fin' => $request->date_fin,
-        'sujet' => $request->sujet,
-        'lieu' => $request->lieu,
-        'id_departement' => $request->id_departement,
-        'remuneration' => $request->remuneration,
-    ]);
+        // Upload du rapport
+        if ($request->hasFile('rapport_stage_fichier')) {
+            $path = $request->file('rapport_stage_fichier')->store('rapports', 'public');
+            $data['rapport_stage_fichier'] = $path;
+        }
 
-    return redirect()->route('stages.show', $stage->id)
-        ->with('success', 'Stage modifié avec succès.');
-}
+        // Note finale
+        if ($request->filled('note_finale')) {
+            $data['note_finale'] = $request->note_finale;
+        }
+
+        // Statut = terminé
+        $data['statut'] = Stage::STATUTS['TERMINE'];
+
+        $stage->update($data);
+
+        return redirect()->route('rh.stages.en_cours', $stage->id)
+            ->with('success', 'Le stage a été terminé avec succès.');
+    }
 
     /**
      * Suppression d’un stage.
@@ -404,6 +459,22 @@ public function stagesEnCoursPourRH()
 
     return view('admin.stages.rh.en_cours', compact('typesDepot', 'stagesParType'));
 }
+    public function stagesEnCoursPourtuteur()
+    {
+        $tuteur = Auth::user();
+
+        if (!$tuteur->hasRole('TUTEUR')) {
+            abort(403);
+        }
+
+        $stages = Stage::whereNotNull('id_tuteur') // tuteur affecté
+            ->where('id_departement', $tuteur->id_departement)
+            ->with(['candidature.candidat', 'tuteur', 'formulaire']) // on ajoute la relation 'formulaire'
+            ->latest()
+            ->get();
+
+        return view('admin.stages.tuteur.en_cours', compact('stages'));
+    }
 
     public function candidatsEnStage()
     {
@@ -487,7 +558,43 @@ public function stagesEnCoursPourRH()
     }
 
     return view('admin.stages.directeurs.details_candidat_directeur', compact('candidat', 'stage', 'progression'));
-}
+    }
+    public function validerParDirecteur($reponseId)
+    {
 
+        $reponse = ReponseFormulaire::findOrFail($reponseId);
 
+        // Ici, récupérer le stage lié à la réponse
+        $stage = $reponse->stage ?? null; // à adapter selon relation
+
+        if (!$stage) {
+            return response()->json(['success' => false, 'message' => 'Stage non trouvé'], 404);
+        }
+
+        $user = Auth::user();
+
+        if (!$user->hasRole('DIRECTEUR')) {
+            return response()->json(['success' => false, 'message' => 'Accès refusé'], 403);
+        }
+
+        $stage->update(['validation_directeur' => true]);
+
+        return response()->json(['success' => true]);
+    }
+    public function stagesTerminesPourRH()
+    {
+        $stagesTermines = Stage::with(['candidature.candidat', 'candidature.offre', 'tuteur'])
+            ->where('statut', 'termine')
+            ->get()
+            ->groupBy(function ($stage) {
+                return $stage->type_depot ?? 'inconnu';
+            });
+
+        $typesDepot = $stagesTermines->keys();
+
+        return view('admin.stages.rh.stagestermines', [
+            'stagesParType' => $stagesTermines,
+            'typesDepot' => $typesDepot,
+        ]);
+    }
 }

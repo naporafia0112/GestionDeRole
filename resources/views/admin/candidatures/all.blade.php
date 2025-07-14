@@ -4,20 +4,39 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
-            <div class="row mb-2 align-items-center">
-                <div class="col-6">
-                    <h4 class="page-title">Toutes les candidatures</h4>
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
+                                <li class="breadcrumb-item">Liste des candidatures</a></li>
+                            </ol>
+                        </div>
+                        <h4 class="page-title">
+                            <strong>Liste des offres</strong>
+                        </h4>
+                    </div>
                 </div>
-                <div class="col-6 text-end">
-                    <select id="statut-filter" class="form-select w-auto d-inline-block">
-                        <option value="">Tous les statuts</option>
-                        <option value="retenu">Retenu</option>
-                        <option value="valide">Validé</option>
-                        <option value="rejete">Rejeté</option>
-                        <option value="en_cours">Non traité</option>
-                    </select>
-                </div>
-            </div>
+
+            {{-- Tabs Bootstrap filtrant par statut --}}
+            <ul class="nav nav-tabs mb-4" id="candidatureTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-statut="" type="button">Toutes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-statut="retenu" type="button">Retenus</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-statut="valide" type="button">Validés</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-statut="rejete" type="button">Rejetés</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-statut="en_cours" type="button">Non traités</button>
+                </li>
+            </ul>
 
             <div class="table-responsive">
                 <table id="candidatures-datatable" class="table table-bordered table-striped align-middle">
@@ -62,10 +81,12 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{-- pagination Laravel si tu ne veux pas tout charger d'un coup --}}
+
+                {{-- pagination Laravel --}}
                 <div class="mt-3">
                     {{ $candidatures->links() }}
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -97,16 +118,19 @@
             ]
         });
 
-        // filtre personnalisé par statut
+        // Fonction filtre personnalisé par statut
         $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-            let statut = $('#statut-filter').val();
-            if (!statut) return true;
+            let statutFilter = $('#candidatureTabs .nav-link.active').data('statut');
+            if (!statutFilter) return true; // aucune sélection = tout afficher
             let row = table.row(dataIndex).node();
             let td = row.querySelector('td[data-statut]');
-            return td && td.getAttribute('data-statut') === statut;
+            return td && td.getAttribute('data-statut') === statutFilter;
         });
 
-        $('#statut-filter').on('change', function () {
+        // Changement onglet -> changement filtre + redraw table
+        $('#candidatureTabs .nav-link').on('click', function () {
+            $('#candidatureTabs .nav-link').removeClass('active');
+            $(this).addClass('active');
             table.draw();
         });
     });

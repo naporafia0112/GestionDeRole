@@ -222,12 +222,32 @@ EOT;
      */
     public function index($offreId)
     {
-        $offre = Offre::with([
-            'candidatures.entretien',
-            'candidatures.candidat'
-        ])->findOrFail($offreId);
-        return view('admin.candidatures.index', compact('offre'));
+        // 1. Récupération de l'offre avec ses candidatures et leurs entretiens (filtrés par offre)
+        $offre = Offre::with(['candidatures' => function($query) use ($offreId) {
+            $query->with(['entretien' => function($q) use ($offreId) {
+                $q->where('id_offre', $offreId); // Assure qu'on filtre par l'offre actuelle
+            }, 'candidat']); // Ajout de 'candidat' pour les infos du candidat
+        }])->findOrFail($offreId);
+
+        // 2. Groupement des candidatures par statut (pour affichage tabulé, par exemple)
+        $candidaturesParStatut = $offre->candidatures->groupBy('statut');
+
+        // 3. Récupération des candidatures "retenues" dont l'entretien est "effectuee" pour cette offre
+       $retenuesEffectuees = Candidature::where('statut', 'retenu')
+        ->where('offre_id', $offreId)
+        ->whereHas('entretien', function ($q) use ($offreId) {
+            $q->where('statut', 'effectuee')
+            ->where('id_offre', $offreId);
+        })
+        ->with(['entretien', 'candidat', 'offre'])
+        ->latest()
+        ->paginate(10);
+
+
+        return view('admin.candidatures.index', compact('offre', 'candidaturesParStatut', 'retenuesEffectuees'));
     }
+
+
 
     /**
      * Rejeter une candidature
@@ -274,7 +294,7 @@ EOT;
 
    public function show($id)
     {
-        $candidature = Candidature::with('candidat', 'offre')->findOrFail($id);
+        $candidature = Candidature::with('candidat', 'offre', 'entretien')->findOrFail($id);
         $toutesCandidatures = Candidature::orderBy('id')->pluck('id')->toArray();
         $numero = array_search($candidature->id, $toutesCandidatures) + 1;
 
@@ -447,5 +467,5 @@ EOT;
 
         return view('admin.dossiers.dossiersvalide.valides', compact('candidatures'));
     }
-  
+
 }

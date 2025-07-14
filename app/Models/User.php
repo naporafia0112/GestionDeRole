@@ -87,4 +87,13 @@ class User extends Authenticatable
     public function direction() {
         return $this->hasOne(Departement::class, 'id_directeur');
     }
+    public function formulairesCrees()
+    {
+        return $this->hasMany(Formulaire::class, 'cree_par');
+    }
+    public function stages()
+    {
+        return $this->hasMany(\App\Models\Stage::class, 'id_tuteur');
+    }
+
 }

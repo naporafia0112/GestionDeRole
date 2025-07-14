@@ -14,7 +14,7 @@
                                 <div>
                                     <h4 class="page-title">Créer un Stage</h4>
                                     <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                         <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
                                         <li class="breadcrumb-item"><a href="{{ route('offres.candidatures', $candidature->offre->id) }}">Liste des candidatures</a></li>
                                         <li class="breadcrumb-item active">Créer un Stage</li>

@@ -42,7 +42,7 @@
                                     <td>{{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($stage->date_fin)->format('d/m/Y') }}</td>
                                     <td>
-                                        <a href="{{ route('stages.show', $stage->id) }}" class="btn btn-sm btn-info" title="Voir">
+                                        <a href="{{ route('directeur.stages.details', $stage->id) }}" class="btn btn-sm btn-info" title="Voir">
                                             <i class="fe-eye"></i>
                                         </a>
                                     </td>

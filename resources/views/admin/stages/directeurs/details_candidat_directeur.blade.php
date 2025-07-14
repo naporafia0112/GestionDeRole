@@ -75,6 +75,8 @@
         </div>
 
         <!-- Colonne Progression du stage -->
+
+        <!-- Colonne Progression du stage -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-0 py-3">
@@ -99,18 +101,19 @@
                             </div>
                         </div>
 
+                        <!-- BARRE DE PROGRESSION FIXÉE -->
                         <div class="progression-container">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted small">Avancement</span>
                                 <span class="fw-bold">{{ $progression ?? 0 }}% complété</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-gradient"
-                                     role="progressbar"
-                                     style="width: {{ $progression ?? 0 }}%;"
-                                     aria-valuenow="{{ $progression ?? 0 }}"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100">
+                           <div class="progress">
+                                <div class="progress-bar"
+                                    role="progressbar"
+                                    style="width: {{ $progression }}%;"
+                                    aria-valuenow="{{ $progression }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100">
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mt-1">
@@ -118,9 +121,10 @@
                                 <small class="text-muted">Fin</small>
                             </div>
                         </div>
+
                         <div class="text-center mt-4">
                             <button class="btn btn-outline bg-dark" data-bs-toggle="modal" data-bs-target="#calendarModal">
-                                <span class="text-light"><i class="bi bi-calendar3 me-1"></i>Voir le calendrier</span></label>
+                                <span class="text-light"><i class="bi bi-calendar3 me-1"></i>Voir le calendrier</span>
                             </button>
                         </div>
                     @else
@@ -193,14 +197,22 @@
     }
 
     .progress {
-        border-radius: 100px;
-        background-color: #f1f5f9;
+    height: 10px;
+    background-color: #e0e0e0; /* gris clair */
+    border-radius: 10px;
+    overflow: hidden; /* pour arrondir correctement le contenu */
     }
 
-    .progress-bar.bg-gradient {
-        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        transition: width 0.4s ease;
+
+    .progress-bar .bg-gradient {
+    height: 100%;
+    background-color: #10b981; /* vert */
+    width: 0; /* sera modifié en inline style */
+    transition: width 0.4s ease;
+    border-radius: 10px 0 0 10px; /* arrondir côté gauche seulement */
     }
+
+
 
     .empty-state {
         color: var(--text-light);

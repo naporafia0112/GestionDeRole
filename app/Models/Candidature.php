@@ -53,9 +53,9 @@ class Candidature extends Model
     }
     public function entretien()
     {
-        return $this->hasOne(Entretien::class, 'id_candidat', 'candidat_id')
-                    ->where('id_offre', $this->offre_id);
+        return $this->hasOne(Entretien::class, 'id_candidat', 'candidat_id');
     }
+
     public function stage()
     {
         return $this->hasOne(Stage::class, 'id_candidature');

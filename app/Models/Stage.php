@@ -20,18 +20,21 @@ class Stage extends Model
         'statut',
         'id_departement',
         'note_finale',
+        'validation_directeur',
+        'rapport_stage_fichier',
     ];
 
     const STATUTS = [
         'EN_ATTENTE' => 'en_attente',
         'EN_COURS'   => 'en_cours',
-        'TERMINE'    => 'termine',
+        'TERMINE'    => 'Termine',
         'ANNULE'     => 'annule',
     ];
     protected $casts = [
         'date_debut' => 'datetime',
         'date_fin' => 'datetime',
     ];
+
 
     /**
      * Candidat lié au stage
@@ -71,6 +74,12 @@ class Stage extends Model
     public function departement()
     {
         return $this->belongsTo(Departement::class, 'id_departement');
+    }
+
+    // Stage.php
+    public function formulaire()
+    {
+        return $this->hasOne(Formulaire::class);
     }
 
 }

@@ -14,7 +14,7 @@
                             <div class="page-title-box">
                                 <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="#">DIPRH</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                         <li class="breadcrumb-item active">Calendrier des entretiens</li>
                                     </ol>
                                 </div>
@@ -30,31 +30,97 @@
 </div>
 
 <!-- Modal Détails Entretien -->
+<!-- Modal Détails Entretien Modernisé -->
 <div class="modal fade" id="entretienDetailModal" tabindex="-1" aria-labelledby="entretienDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Détails de l'entretien</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-gradient-primary text-white py-3">
+                <h5 class="modal-title d-flex align-items-center">
+                    <i class="mdi mdi-calendar-account-outline me-2 fs-4"></i>
+                    <span>Détails de l'entretien</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-4"><p class="text-muted">Candidat</p><h5 id="modal-candidat-nom">Chargement...</h5></div>
-                    <div class="col-md-4"><p class="text-muted">Offre</p><h5 id="modal-offre-titre">Chargement...</h5></div>
-                    <div class="col-md-4"><p class="text-muted">Date & Heure</p><h5 id="modal-date-heure">Chargement...</h5></div>
-                    <div class="col-md-4 mt-3"><p class="text-muted">Lieu</p><h5 id="modal-lieu">Chargement...</h5></div>
-                    <div class="col-md-4 mt-3"><p class="text-muted">Type</p><h5 id="modal-type">Chargement...</h5></div>
-                    <div class="col-md-4 mt-3"><p class="text-muted">Statut</p><h5 id="modal-statut">Chargement...</h5></div>
-                    <div class="col-md-12 mt-3">
-                        <p class="text-muted">Commentaire</p>
-                        <div class="card p-2 bg-light" id="modal-commentaire">Chargement...</div>
+
+            <div class="modal-body px-4 py-4">
+                <!-- En-tête résumé -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 id="modal-candidat-nom" class="mb-0 fw-bold text-dark">Chargement...</h4>
+                        <small class="text-muted" id="modal-offre-titre">Chargement...</small>
+                    </div>
+                    <div>
+                        <span class="badge rounded-pill bg-success text-dark border" id="modal-statut-badge">
+                            <i class="mdi mdi-circle-medium me-1"></i><span id="modal-statut">Chargement...</span>
+                        </span>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <a id="btn-edit-entretien" href="#" class="btn btn-success">Modifier</a>
-                <a id="btn-candidatures-entretien" href="#" class="btn btn-ligth">Candidatures</a>
-                <button id="btn-cancel-entretien" class="btn btn-danger">Annuler</button>
+
+                <!-- Infos principales -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded bg-light-subtle p-3 d-flex align-items-start h-100">
+                            <div class="me-3 text-primary">
+                                <i class="mdi mdi-calendar-clock fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Date & Heure</div>
+                                <div class="fs-6 fw-semibold text-dark" id="modal-date-heure">Chargement...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded bg-light-subtle p-3 d-flex align-items-start h-100">
+                            <div class="me-3 text-primary">
+                                <i class="mdi mdi-map-marker fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Lieu</div>
+                                <div class="fs-6 fw-semibold text-dark" id="modal-lieu">Chargement...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Type entretien -->
+                    <div class="col-md-6">
+                        <div class="border rounded bg-light-subtle p-3 d-flex align-items-start h-100">
+                            <div class="me-3 text-primary">
+                                <i class="mdi mdi-account-tie fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Type d'entretien</div>
+                                <div class="fs-6 fw-semibold text-dark" id="modal-type">Chargement...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Commentaire à côté -->
+                    <div class="col-md-6">
+                        <div class="border rounded bg-light-subtle p-3 d-flex align-items-start h-100">
+                            <div class="me-3 text-primary">
+                                <i class="mdi mdi-comment-text-outline fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Commentaire</div>
+                                <div class="fs-6 fw-semibold text-dark" id="modal-commentaire">Aucun commentaire</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
+                <div class="d-flex gap-2">
+                    <a id="btn-candidatures-entretien" href="#" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-account-multiple-outline me-1"></i> Voir candidatures
+                    </a>
+                    <button id="btn-cancel-entretien" class="btn btn-outline-danger">
+                        <i class="mdi mdi-cancel me-1"></i> Annuler
+                    </button>
+                    <a id="btn-edit-entretien" href="#" class="btn btn-primary">
+                        <i class="mdi mdi-pencil-outline me-1"></i> Modifier
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -165,7 +231,7 @@ $(document).ready(function () {
                     $('#modal-type').text(data.type || 'Non défini');
                     $('#modal-statut').text(data.statut || 'Non défini');
                     $('#modal-commentaire').text(data.commentaire || 'Aucun commentaire');
-                    
+
                     const dateToSet = data.date || new Date().toISOString().split('T')[0];
 
                     $('#btn-edit-entretien').off('click').on('click', function () {

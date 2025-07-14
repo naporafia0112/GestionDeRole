@@ -9,7 +9,7 @@
             <div class="page-title-box">
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('offres.candidatures', $candidature->offre->id) }}">Candidatures</a></li>
                         <li class="breadcrumb-item active"><strong>Détails de la candidature</strong></li>
@@ -55,12 +55,12 @@
                                     </form>
                                 @endif
 
-                                @if($statut === 'valide')
+                                {{--@if($statut === 'valide')
                                 <a href="{{ route('stages.create', ['id_candidature' => $candidature->id]) }}"
                                     class="btn btn-sm btn-success mb-2">
                                     <i class="fas fa-plus me-1"></i> Créer un stage
                                     </a>
-                                @endif
+                                @endif--}}
 
                                 @if($statut === 'retenu')
                                     {{--<form action="{{ route('candidatures.reject', $candidature->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer le rejet de cette candidature ?">
@@ -142,8 +142,18 @@
                             <p><strong>{{ $candidature->candidat->quartier ?? '-' }}</strong></p>
                         </div>
                         <div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Entretients :</strong></label>
-                            <p><strong></strong></p>
+                            <label class="mt-2 mb-1"><strong>Statut de l'entretien :</strong></label>
+                            @if($candidature->entretien)
+                                @if($candidature->entretien->statut === 'effectuee')
+                                    <span class="badge bg-success">Effectué</span>
+                                @elseif($candidature->entretien->statut === 'programme')
+                                    <span class="badge bg-warning text-dark">Programmé</span>
+                                @else
+                                    <span class="badge bg-secondary">{{ ucfirst($candidature->entretien->statut) }}</span>
+                                @endif
+                            @else
+                                <span class="badge bg-secondary">Non programmé</span>
+                            @endif
                         </div>
                     </div>
 

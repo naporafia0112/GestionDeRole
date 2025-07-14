@@ -4,8 +4,21 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
-            <h4 class="mb-4">Stages en attente de tuteurs</h4>
-
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="#">Stages en attente de tuteurs</a></li>
+                            </ol>
+                        </div>
+                        <h4 class="page-title">
+                            <strong>Liste des stages en attente de tuteurs</strong>
+                        </h4>
+                    </div>
+                </div>
+            </div>
             @if ($stages->isEmpty())
                 <div class="alert alert-info">Aucun stage en attente de tuteur pour le moment.</div>
             @else

@@ -10,7 +10,7 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href=#>Liste des entretiens</a></li>
                             </ol>
                         </div>

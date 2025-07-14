@@ -14,7 +14,9 @@ use App\Http\Controllers\{
     OllamaTestController,
     CVAnalyzerController,
     DepartementController,
-    RapportController
+    RapportController,
+    FormulaireController,
+    CandidatureSpontaneeController
 };
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjetCreateMail;
@@ -24,13 +26,15 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 Route::get('/', [VitrineController::class, 'index'])->name('vitrine.index');
 Route::get('/vitrine/{offre}', [VitrineController::class, 'show'])->name('vitrine.show');
 Route::get('/catalogue', [VitrineController::class, 'catalogue'])->name('vitrine.catalogue');
+Route::get('/vitrine/catalogue/{offre}', [VitrineController::class, 'detailcatalogue'])->name('vitrine.detailcatalogue');
 
 Route::get('/offres/{id}/postuler', [CandidatureController::class, 'create'])->name('candidature.create');
 Route::post('/offres/{id}/postuler', [CandidatureController::class, 'store'])->name('candidature.store');
 
 Route::get('/candidatures/suivi/{uuid}', [VitrineController::class, 'suivi'])->name('candidatures.suivi');
 Route::post('/candidatures/recherche', [CandidatureController::class, 'recherche'])->name('candidatures.recherche');
-
+Route::get('/candidature-spontanee', [CandidatureSpontaneeController::class, 'create'])->name('candidature.spontanee.form');
+Route::post('/candidature-spontanee', [CandidatureSpontaneeController::class, 'store'])->name('candidature.spontanee.store');
 // Routes accessibles uniquement aux utilisateurs connectés
 Route::middleware(['auth'])->group(function () {
     // Tableau de bord
@@ -68,15 +72,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('candidatures/valides', [CandidatureController::class, 'dossiersValides'])->name('candidatures.valides');
     Route::post('/offres/{offre}/preselectionner', [CandidatureController::class, 'preselectionner'])->name('candidatures.preselectionner');
 
+    //CANDIDATURES SPONTANNÉES
+    Route::get('/admin/candidatures-spontanees', [CandidatureSpontaneeController::class, 'index'])
+        ->name('admin.candidatures.spontanees.index');
+    Route::get('/candidatures/spontanees/{id}', [CandidatureSpontaneeController::class, 'show'])
+        ->name('candidatures.spontanees.show')->whereNumber('id');
     // Routes personnalisées pour les types de stages
 
     Route::get('stages/academiques', [StageController::class, 'stagesAcademiques'])->name('stages.academiques');
     Route::get('stages/professionnels', [StageController::class, 'stagesProfessionnels'])->name('stages.professionnels');
     Route::get('stages/preembauche', [StageController::class, 'stagesPreembauche'])->name('stages.preembauche');
-    Route::middleware(['auth', 'role:DIRECTEUR'])->group(function () {
+
+    // Routes du DIRECTEUR
+    Route::middleware(['role:DIRECTEUR'])->group(function () {
     Route::get('/directeur/stages', [StageController::class, 'stagesParDepartement'])->name('directeur.stages');
-    });
+    Route::get('/formulaires/create', [FormulaireController::class, 'create'])->name('formulairedynamique.creation');
+    Route::post('/formulaires', [FormulaireController::class, 'store'])->name('formulaires.store');
     Route::post('/stages/{stage}/affecter-tuteur', [StageController::class, 'affecterTuteur'])->name('stages.affecterTuteur');
+    Route::get('/directeur/formulaires', [FormulaireController::class, 'listeformulairesdirecteur'])->name('directeur.formulaires.liste');
+    Route::get('/directeur/formulaires/{formulaire}', [FormulaireController::class, 'detailformdirecteur'])->name('directeur.formulaires.reponses');
+    Route::get('/directeur/reponses/{reponse}', [FormulaireController::class, 'reponseDetail'])->name('directeur.reponses.details');
+    });
 
     Route::get('/directeur/stages/en-cours', [StageController::class, 'stagesAvecTuteur'])->name('stages.en_cours');
     Route::get('/directeur/tuteurs', [StageController::class, 'listerTuteursDepartement'])->name('directeur.tuteurs');
@@ -85,18 +101,29 @@ Route::middleware(['auth'])->group(function () {
     ->name('rh.stages.attente_tuteur');
     Route::get('/rh/stages/en-cours', [StageController::class, 'stagesEnCoursPourRH'])
     ->name('rh.stages.en_cours');
+    Route::get('/rh/stages/termines', [StageController::class, 'stagesTerminesPourRH'])->name('rh.stages.termines');
+    Route::get('/tuteur/stages/en-cours', [StageController::class, 'stagesEnCoursPourtuteur'])
+    ->name('tuteur.stages.en_cours');
     Route::get('/stages/rh/candidats-en-stage', [StageController::class, 'candidatsEnStage'])
         ->name('stages.rh.candidats_en_stage');
     Route::get('/tuteur/liste-candidats', [StageController::class, 'candidatsTuteur'])->name('stages.candidats_tuteurs');
     Route::get('/candidats/{id}/details/tuteur', [StageController::class, 'details_candidat_encours_tuteur'])->name('candidats.details');
     Route::get('/candidats/{id}/details/directeur', [StageController::class, 'details_candidat_encours_directeur'])->name('candidats.details.directeur');
+    Route::get('/directeur/stages/{stage}', [StageController::class, 'detailstagedirecteur'])
+    ->name('directeur.stages.details');
+    Route::get('/tuteur/stages/{stage}', [StageController::class, 'detailstagetuteur'])
+    ->name('tuteur.stages.details');
+    Route::patch('/stages/{reponse}/valider-par-directeur', [StageController::class, 'validerParDirecteur'])
+    ->name('stages.valider_par_directeur');
 
     // Ensuite seulement, ajoute la ressource générale
     Route::resource('stages', StageController::class);
 
     Route::get('/tuteurs', [StageController::class, 'affecterTuteur'])->name('tuteurs.afficher');
 
-
+    Route::get('/tuteur/formulaires', [FormulaireController::class, 'affichageformulaire'])->name('tuteur.formulaires.affichage');
+    Route::get('/tuteur/formulaires/{formulaire}', [FormulaireController::class, 'details'])->name('tuteur.formulaires.details');
+    Route::post('/tuteur/formulaires/{formulaire}', [FormulaireController::class, 'storereponse'])->name('tuteur.formulaires.store');
     // Liste candidatures d'une offre (pour admin/RH)
     Route::get('/offres/{offre}/candidatures', [CandidatureController::class, 'index'])
         ->name('offres.candidatures');
@@ -117,6 +144,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/{id}/annuler', [EntretienController::class, 'annuler'])->name('annuler');
         Route::post('/action', [EntretienController::class, 'action'])->name('action');
         Route::get('/{id}/show-json', [EntretienController::class, 'showJson'])->name('show-json');
+        Route::get('/entretiens', [EntretienController::class, 'liste_entretiens_export'])->name('liste');
+        // web.php
+        Route::get('/slots', [EntretienController::class, 'slots'])->name('slots');
+        Route::get('/creneaux', [EntretienController::class, 'showSlotsPage'])->name('slots.page');
     });
 
     // Routes Offres accessibles aux RH et ADMIN
