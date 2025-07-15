@@ -48,8 +48,8 @@
                                     <tbody>
                                         @foreach ($stagesParType[$typeDepot] as $stage)
                                             <tr>
-                                                <td>{{ $stage->candidature->candidat->nom ?? '' }} {{ $stage->candidature->candidat->prenoms ?? '' }}</td>
-                                                <td>{{ $stage->candidature->offre->titre ?? '---' }}</td>
+                                                <td>{{ $stage->candidat->nom ?? '' }} {{ $stage->candidat->prenoms ?? '' }}</td>
+                                                <td>{{ $stage->candidature->offre->titre ?? 'Pas d\'offre' }}</td>
                                                 <td>{{ $stage->tuteur->name ?? 'Non défini' }}</td>
                                                 <td>{{ ucfirst(str_replace('_', ' ', $stage->statut)) }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') ?? '---' }}</td>

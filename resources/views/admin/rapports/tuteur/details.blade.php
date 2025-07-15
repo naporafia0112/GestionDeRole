@@ -51,7 +51,7 @@
                                     <option value="">-- Sélectionnez un stage --</option>
                                     @foreach(Auth::user()->stages as $stage)
                                         <option value="{{ $stage->id }}" {{ old('stage_id') == $stage->id ? 'selected' : '' }}>
-                                            {{ $stage->candidature->candidat->nom ?? 'Nom inconnu' }} {{ $stage->candidature->candidat->prenoms ?? '' }} - {{ $stage->candidature->offre->titre ?? 'Offre inconnue' }}
+                                            {{ $stage->candidat->nom ?? 'Nom inconnu' }} {{ $stage->candidat->prenoms ?? '' }} - {{ $stage->candidature->offre->titre ?? 'Offre inconnue' }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -63,54 +63,63 @@
                             <!-- Champs dynamiques -->
                             @foreach ($formulaire->champs as $champ)
                                 <div class="mb-3">
-                                    <label for="champ_{{ $champ->id }}" class="form-label">
-                                        {{ $champ->label }}
+                                    <label class="form-label">{{ $champ->label }}
                                         @if($champ->requis)
                                             <span class="text-danger">*</span>
                                         @endif
                                     </label>
 
+                                    @php
+                                        $name = "champs[{$champ->id}]";
+                                        $required = $champ->requis ? 'required' : '';
+                                        $options = $champ->options ? array_map('trim', explode(',', $champ->options)) : [];
+                                    @endphp
+
                                     @switch($champ->type)
                                         @case('text')
-                                            <input type="text" class="form-control @error('champs.'.$champ->id) is-invalid @enderror" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" value="{{ old('champs.'.$champ->id) }}" @if($champ->requis) required @endif>
+                                            <input type="text" name="{{ $name }}" class="form-control" {{ $required }}>
                                             @break
 
                                         @case('textarea')
-                                            <textarea class="form-control @error('champs.'.$champ->id) is-invalid @enderror" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" rows="4" @if($champ->requis) required @endif>{{ old('champs.'.$champ->id) }}</textarea>
+                                            <textarea name="{{ $name }}" class="form-control" rows="3" {{ $required }}></textarea>
                                             @break
 
                                         @case('number')
-                                            <input type="number" class="form-control @error('champs.'.$champ->id) is-invalid @enderror" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" value="{{ old('champs.'.$champ->id) }}" @if($champ->requis) required @endif>
+                                            <input type="number" name="{{ $name }}" class="form-control" {{ $required }}>
                                             @break
 
                                         @case('date')
-                                            <input type="date" class="form-control @error('champs.'.$champ->id) is-invalid @enderror" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" value="{{ old('champs.'.$champ->id) }}" @if($champ->requis) required @endif>
+                                            <input type="date" name="{{ $name }}" class="form-control" {{ $required }}>
                                             @break
 
                                         @case('select')
-                                            <select class="form-select @error('champs.'.$champ->id) is-invalid @enderror" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" @if($champ->requis) required @endif>
-                                                <option value="">-- Choisissez --</option>
-                                                @foreach($champ->options ?? [] as $option)
-                                                    <option value="{{ $option }}" {{ old('champs.'.$champ->id) == $option ? 'selected' : '' }}>{{ $option }}</option>
+                                            <select name="{{ $name }}" class="form-select" {{ $required }}>
+                                                <option value="">-- Choisir --</option>
+                                                @foreach ($options as $opt)
+                                                    <option value="{{ $opt }}">{{ $opt }}</option>
                                                 @endforeach
                                             </select>
                                             @break
 
                                         @case('checkbox')
-                                            <div class="form-check">
-                                                <input class="form-check-input @error('champs.'.$champ->id) is-invalid @enderror" type="checkbox" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" value="1" {{ old('champs.'.$champ->id) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="champ_{{ $champ->id }}">
-                                                    {{ $champ->label }}
-                                                </label>
-                                            </div>
+                                            @foreach ($options as $opt)
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="{{ $name }}[]" value="{{ $opt }}" class="form-check-input" id="chk_{{ $champ->id }}_{{ $loop->index }}">
+                                                    <label class="form-check-label" for="chk_{{ $champ->id }}_{{ $loop->index }}">{{ $opt }}</label>
+                                                </div>
+                                            @endforeach
+                                            @break
+
+                                        @case('file')
+                                            <input type="file" name="{{ $name }}" class="form-control" {{ $required }}>
                                             @break
 
                                         @default
-                                            <input type="text" class="form-control @error('champs.'.$champ->id) is-invalid @enderror" id="champ_{{ $champ->id }}" name="champs[{{ $champ->id }}]" value="{{ old('champs.'.$champ->id) }}">
+                                            <input type="text" name="{{ $name }}" class="form-control" {{ $required }}>
                                     @endswitch
 
-                                    @error('champs.'.$champ->id)
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @error("champs.{$champ->id}")
+                                        <div class="text-danger">{{ $message }}</div>
                                     @enderror
                                 </div>
                             @endforeach

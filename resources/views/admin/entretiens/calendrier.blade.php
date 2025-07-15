@@ -30,6 +30,7 @@
 </div>
 
 <!-- Modal Détails Entretien -->
+<!-- Modal Détails Entretien Modernisé -->
 <div class="modal fade" id="entretienDetailModal" tabindex="-1" aria-labelledby="entretienDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-lg border-0">
@@ -40,6 +41,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body px-4 py-4">
                 <!-- En-tête résumé -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -93,7 +95,7 @@
                         </div>
                     </div>
 
-                    <!-- Commentaire -->
+                    <!-- Commentaire à côté -->
                     <div class="col-md-6">
                         <div class="border rounded bg-light-subtle p-3 d-flex align-items-start h-100">
                             <div class="me-3 text-primary">
@@ -107,18 +109,17 @@
                     </div>
                 </div>
 
-                <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
-                    <div class="d-flex gap-2">
-                        <a id="btn-candidatures-entretien" href="#" class="btn btn-outline-secondary">
-                            <i class="mdi mdi-account-multiple-outline me-1"></i> Voir candidatures
-                        </a>
-                        <button id="btn-cancel-entretien" class="btn btn-outline-danger">
-                            <i class="mdi mdi-cancel me-1"></i> Annuler
-                        </button>
-                        <a id="btn-edit-entretien" href="#" class="btn btn-primary">
-                            <i class="mdi mdi-pencil-outline me-1"></i> Modifier
-                        </a>
-                    </div>
+            <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
+                <div class="d-flex gap-2">
+                    <a id="btn-candidatures-entretien" href="#" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-account-multiple-outline me-1"></i> Voir candidatures
+                    </a>
+                    <button id="btn-cancel-entretien" class="btn btn-outline-danger">
+                        <i class="mdi mdi-cancel me-1"></i> Annuler
+                    </button>
+                    <a id="btn-edit-entretien" href="#" class="btn btn-primary">
+                        <i class="mdi mdi-pencil-outline me-1"></i> Modifier
+                    </a>
                 </div>
             </div>
         </div>
@@ -162,13 +163,14 @@
                         </div>
                         <div class="col-lg-6 mb-3">
                             <label>Statut</label>
-                            <select class="form-control" name="statut" id="edit-statut">
+                           <select class="form-control" name="statut" id="edit-statut">
                                 @foreach($statutsFiltres as $value => $label)
                                     @if(!in_array($value, ['prevu','en_cours']))
                                         <option value="{{ $value }}">{{ $label }}</option>
                                     @endif
                                 @endforeach
                             </select>
+
                         </div>
                         <div class="col-12 mb-3">
                             <label>Commentaire</label>
@@ -261,13 +263,16 @@ $(document).ready(function () {
                         $('#modalEditEntretien').modal('show');
                     });
 
-                    let lienCandidature = '#';
+                    let lienCandidature = '#'; // valeur par défaut
+
                     if (data.offre_id) {
                         lienCandidature = '/offres/' + data.offre_id + '/candidatures';
                     } else if (data.candidature_spontanee_id) {
                         lienCandidature = '/candidatures/spontanees/' + data.candidature_spontanee_id;
                     }
+
                     $('#btn-candidatures-entretien').attr('href', lienCandidature);
+
 
                     $('#btn-cancel-entretien').off('click').on('click', function () {
                         Swal.fire({
@@ -319,23 +324,7 @@ $(document).ready(function () {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                let form = $(this);
-                let url = form.attr('action');
-                let data = form.serialize();
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: data,
-                    success: function(response) {
-                        $('#modalEditEntretien').modal('hide');
-                        $('#calendar').fullCalendar('refetchEvents');
-                        Swal.fire('Succès', 'Entretien modifié avec succès', 'success');
-                    },
-                    error: function() {
-                        Swal.fire('Erreur', 'Une erreur est survenue lors de la modification.', 'error');
-                    }
-                });
+                this.submit();
             }
         });
     });

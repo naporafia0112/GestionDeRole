@@ -28,6 +28,9 @@ class Candidat extends Model
         return $this->hasOne(Candidature::class)
                     ->where('statut', 'valide');
     }
-
+    public function candidatureSpontanees()
+    {
+        return $this->hasMany(CandidatureSpontanee::class, 'candidat_id');
+    }
 
 }

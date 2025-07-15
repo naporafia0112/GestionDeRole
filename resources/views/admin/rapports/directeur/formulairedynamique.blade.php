@@ -28,41 +28,39 @@
             <!-- formulaire -->
             <div class="row">
                 <div class="col-12">
+                    <form id="formulaire-creation" action="{{ route('formulaires.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
 
+                        <!-- titre -->
+                        <div class="mb-3">
+                            <label for="titre" class="form-label">Titre du formulaire <span class="text-danger">*</span></label>
+                            <input type="text" name="titre" id="titre" class="form-control @error('titre') is-invalid @enderror" value="{{ old('titre') }}" required>
+                            @error('titre')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                            <form id="formulaire-creation" action="{{ route('formulaires.store') }}" method="POST">
-                                @csrf
+                        <hr>
+                        <h5>Champs du formulaire <span class="text-danger">*</span></h5>
+                        <div id="champs-container"></div>
 
-                                <!-- titre -->
-                                <div class="mb-3">
-                                    <label for="titre" class="form-label">Titre du formulaire <span class="text-danger">*</span></label>
-                                    <input type="text" name="titre" id="titre" class="form-control @error('titre') is-invalid @enderror" value="{{ old('titre') }}" required>
-                                    @error('titre')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <button type="button" onclick="ajouterChamp()" class="btn btn-secondary mt-2 mb-3">
+                            <i data-feather="plus" class="me-1"></i> Ajouter un champ
+                        </button>
 
-                                <hr>
-                                <h5>Champs du formulaire <span class="text-danger">*</span></h5>
-                                <div id="champs-container"></div>
-
-                                <button type="button" onclick="ajouterChamp()" class="btn btn-secondary mt-2 mb-3">
-                                    <i data-feather="plus" class="me-1"></i> Ajouter un champ
-                                </button>
-
-                                <div class="text-end">
-                                    <button type="button" id="confirm-submit" class="btn btn-primary">
-                                        Créer le formulaire
-                                    </button>
-                                    <a href="{{ route('directeur.formulaires.liste') }}" class="btn btn-light ms-2">Annuler</a>
-                                </div>
-                            </form>
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card -->
-                </div> <!-- end col -->
-            </div> <!-- end row -->
-        </div> <!-- end container-fluid -->
-    </div> <!-- end content -->
+                        <div class="text-end">
+                            <button type="button" id="confirm-submit" class="btn btn-primary">
+                                Créer le formulaire
+                            </button>
+                            <a href="{{ route('directeur.formulaires.liste') }}" class="btn btn-light ms-2">Annuler</a>
+                        </div>
+                    </form>
+                </div> <!-- end card-body -->
+            </div> <!-- end card -->
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+</div> <!-- end container-fluid -->
+</div> <!-- end content -->
 </div> <!-- end container -->
 @endsection
 
@@ -101,14 +99,14 @@
         }
 
         const html = `
-        <div class="border rounded p-3 mb-3">
+        <div class="border rounded p-3 mb-3 champ-item">
             <div class="mb-3">
                 <label class="form-label">Label <span class="text-danger">*</span></label>
                 <input type="text" name="champs[${index}][label]" class="form-control" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Type <span class="text-danger">*</span></label>
-                <select name="champs[${index}][type]" class="form-select" required>
+                <select name="champs[${index}][type]" class="form-select type-select" required>
                     <option value="">-- Sélectionner un type --</option>
                     <option value="text">Texte</option>
                     <option value="textarea">Zone de texte</option>
@@ -116,7 +114,12 @@
                     <option value="date">Date</option>
                     <option value="checkbox">Case à cocher</option>
                     <option value="select">Liste déroulante</option>
+                    <option value="file">Fichier</option>
                 </select>
+            </div>
+            <div class="mb-3 options-container" style="display:none;">
+                <label class="form-label">Options (séparées par une virgule) <span class="text-danger">*</span></label>
+                <textarea name="champs[${index}][options]" class="form-control" rows="3" placeholder="Ex: Option 1, Option 2, Option 3"></textarea>
             </div>
             <div class="form-check mb-0">
                 <input class="form-check-input" type="checkbox" name="champs[${index}][requis]" value="1" id="requis_${index}">
@@ -125,6 +128,24 @@
         </div>`;
 
         container.insertAdjacentHTML('beforeend', html);
+
+        // Ajouter l'écouteur de changement sur le select du nouveau champ
+        const nouveauChamp = container.lastElementChild;
+        const selectType = nouveauChamp.querySelector('.type-select');
+        const optionsContainer = nouveauChamp.querySelector('.options-container');
+        const optionsTextarea = optionsContainer.querySelector('textarea');
+
+        selectType.addEventListener('change', function () {
+            if (this.value === 'select' || this.value === 'checkbox') {
+                optionsContainer.style.display = 'block';
+                optionsTextarea.setAttribute('required', 'required');
+            } else {
+                optionsContainer.style.display = 'none';
+                optionsTextarea.removeAttribute('required');
+                optionsTextarea.value = '';
+            }
+        });
+
         index++;
 
         if (typeof feather !== 'undefined') {

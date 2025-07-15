@@ -6,25 +6,29 @@ use App\Models\Stage;
 use App\Models\User;
 use App\Models\ReponseFormulaire;
 use App\Models\Candidature;
-use Illuminate\Http\Request;
-use App\Models\Departement;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Candidat;
-use Carbon\Carbon;
 use App\Models\CandidatureSpontanee;
-
-
+use App\Models\Departement;
+use App\Models\Candidat;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class StageController extends Controller
 {
     /**
      * Affiche la liste des stages.
      */
-       /** */ public function index()
-        {
-            $stages = Stage::with(['candidature.candidat', 'tuteur'])->latest()->get();
-            return view('admin.stages.index', compact('stages'));
-        }
+    public function index()
+    {
+        $stages = Stage::with([
+            'candidature.candidat',
+            'candidatureSpontanee.candidat',
+            'tuteur',
+            'departement'
+        ])->latest()->get();
+
+        return view('admin.stages.index', compact('stages'));
+    }
 
     /**
      * Formulaire de création d’un stage (RH).
@@ -32,14 +36,14 @@ class StageController extends Controller
     public function create(Request $request)
     {
         $departements = Departement::all();
-        // Vérifie si paramètre d'URL présent (GET)
+
         if ($request->filled('id_candidature')) {
             $candidature = Candidature::with('candidat', 'offre')->findOrFail($request->id_candidature);
             return view('admin.stages.create', [
                 'candidature' => $candidature,
                 'offre' => $candidature->offre,
                 'type' => 'classique',
-                'departements' => $departements
+                'departements' => $departements,
             ]);
         }
 
@@ -49,20 +53,18 @@ class StageController extends Controller
                 'candidature' => $candidature,
                 'offre' => null,
                 'type' => 'spontanee',
-                'departements' => $departements
+                'departements' => $departements,
             ]);
         }
 
         return redirect()->route('dashboard.RH')->with('error', 'Paramètres invalides pour la création du stage.');
     }
 
-
     /**
      * Enregistrement d’un nouveau stage.
      */
-   public function store(Request $request)
+    public function store(Request $request)
     {
-        // 1. Validation des données reçues
         $request->validate([
             'type' => 'required|in:classique,spontanee',
             'id_candidature' => 'required_if:type,classique|exists:candidatures,id',
@@ -74,8 +76,8 @@ class StageController extends Controller
                 'after_or_equal:date_debut',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->has('date_debut')) {
-                        $dateDebut = \Carbon\Carbon::parse($request->input('date_debut'));
-                        $dateFin = \Carbon\Carbon::parse($value);
+                        $dateDebut = Carbon::parse($request->input('date_debut'));
+                        $dateFin = Carbon::parse($value);
 
                         if ($dateFin->lt($dateDebut->copy()->addMonth())) {
                             $fail('La date de fin doit être au moins 1 mois après la date de début.');
@@ -90,7 +92,6 @@ class StageController extends Controller
             'remuneration' => 'nullable|numeric',
         ]);
 
-        // 2. Récupérer les données communes
         $data = $request->only([
             'date_debut',
             'date_fin',
@@ -101,176 +102,166 @@ class StageController extends Controller
             'remuneration',
         ]);
 
-        // 3. Statut par défaut si non fourni
+        // Statut par défaut
         $data['statut'] = $data['statut'] ?? Stage::STATUTS['EN_ATTENTE'];
 
-        // 4. Selon le type, récupérer la candidature liée et vérifier doublons
         if ($request->type === 'classique') {
             $candidature = Candidature::with(['candidat', 'offre'])->find($request->id_candidature);
-
             if (!$candidature) {
                 return back()->with('error', 'Candidature classique introuvable.');
             }
 
-            // Vérifier doublon : stage actif pour ce candidat et cette offre
+            // Vérifier doublon : stage actif (en_cours ou en_attente) pour ce candidat et cette offre
             $stageExistant = Stage::whereHas('candidature', function ($query) use ($candidature) {
                 $query->where('candidat_id', $candidature->candidat_id)
-                    ->where('offre_id', $candidature->offre_id);
-            })
-            ->whereIn('statut', ['en_cours', 'valide'])
-            ->exists();
+                      ->where('offre_id', $candidature->offre_id);
+            })->whereIn('statut', [
+                Stage::STATUTS['EN_COURS'],
+                Stage::STATUTS['EN_ATTENTE'],
+            ])->exists();
 
             if ($stageExistant) {
-                return back()->with('error', 'Ce candidat a déjà un stage actif pour cette offre.');
+                return back()->with('error', 'Ce candidat a déjà un stage actif ou en attente pour cette offre.');
             }
 
             $data['id_candidature'] = $candidature->id;
             $data['id_candidature_spontanee'] = null;
 
-        } else {
+        } else { // spontanee
             $candidatureSpontanee = CandidatureSpontanee::with('candidat')->find($request->id_candidature_spontanee);
-
             if (!$candidatureSpontanee) {
                 return back()->with('error', 'Candidature spontanée introuvable.');
             }
 
-            // Vérifier doublon : stage actif pour ce candidat et cette candidature spontanée
+            // Vérifier doublon : stage actif (en_cours ou en_attente) pour cette candidature spontanée
             $stageExistant = Stage::where('id_candidature_spontanee', $candidatureSpontanee->id)
-                ->whereIn('statut', ['en_cours', 'valide'])
+                ->whereIn('statut', [
+                    Stage::STATUTS['EN_COURS'],
+                    Stage::STATUTS['EN_ATTENTE'],
+                ])
                 ->exists();
 
             if ($stageExistant) {
-                return back()->with('error', 'Ce candidat a déjà un stage actif pour cette candidature spontanée.');
+                return back()->with('error', 'Ce candidat a déjà un stage actif ou en attente pour cette candidature spontanée.');
             }
 
             $data['id_candidature_spontanee'] = $candidatureSpontanee->id;
             $data['id_candidature'] = null;
         }
 
-        // 5. Création du stage
         Stage::create($data);
 
-        // 6. Redirection avec message succès
         return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès.');
     }
 
     /**
-     *Détail d’un stage.
+     * Détail d’un stage (pour RH).
      */
     public function show(Stage $stage)
     {
         $numero = Stage::where('id', '<=', $stage->id)->count();
 
         $stage->load([
-            'candidature' => function($query) {
-                $query->with(['candidat' => function($q) {
-                    // Solution alternative pour gérer les candidats supprimés
-                    if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
-                        $q->withTrashed();
-                    }
-                }]);
+            'candidature.candidat' => function ($query) {
+                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                    $query->withTrashed();
+                }
+            },
+            'candidatureSpontanee.candidat' => function ($query) {
+                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                    $query->withTrashed();
+                }
             },
             'tuteur',
-            'departement'
+            'departement',
         ]);
 
-        // Solution de repli si la candidature ou le candidat n'existe pas
-        $candidat = $stage->candidature->candidat ?? null;
+        // Récupération candidat avec fallback candidature classique ou spontanée
+        $candidat = $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat ?? null;
 
-        // Alternative plus explicite:
-        // $candidat = $stage->candidature ? ($stage->candidature->candidat ?? null) : null;
-
-        return view('admin.stages.rh.details', [
-            'stage' => $stage,
-            'numero' => $numero,
-            'candidat' => $candidat,
-            'departement' => $stage->departement
-        ]);
+        return view('admin.stages.rh.details', compact('stage', 'numero', 'candidat'));
     }
 
+    /**
+     * Détail d’un stage (directeur).
+     */
     public function detailstagedirecteur(Stage $stage)
     {
         $numero = Stage::where('id', '<=', $stage->id)->count();
 
         $stage->load([
-            'candidature' => function($query) {
-                $query->with(['candidat' => function($q) {
-                    if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
-                        $q->withTrashed();
-                    }
-                }]);
+            'candidature.candidat' => function ($query) {
+                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                    $query->withTrashed();
+                }
+            },
+            'candidatureSpontanee.candidat' => function ($query) {
+                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                    $query->withTrashed();
+                }
             },
             'tuteur',
-            'departement'
+            'departement',
         ]);
 
-        $candidat = $stage->candidature->candidat ?? null;
+        $candidat = $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat ?? null;
 
         $cvValide = null;
         if ($candidat) {
-            // Récupérer la candidature validée du candidat
             $candidatureValidee = $candidat->candidatures()->where('statut', 'valide')->first();
             if ($candidatureValidee) {
                 $cvValide = $candidatureValidee->cv_fichier;
             }
         }
 
-        return view('admin.stages.directeurs.detail_stage', [
-            'stage' => $stage,
-            'numero' => $numero,
-            'candidat' => $candidat,
-            'departement' => $stage->departement,
-            'cvValide' => $cvValide,
-        ]);
+        return view('admin.stages.directeurs.detail_stage', compact('stage', 'numero', 'candidat', 'cvValide'));
     }
 
+    /**
+     * Détail d’un stage (tuteur).
+     */
     public function detailstagetuteur(Stage $stage)
     {
         $numero = Stage::where('id', '<=', $stage->id)->count();
 
         $stage->load([
-            'candidature' => function($query) {
-                $query->with(['candidat' => function($q) {
-                    if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
-                        $q->withTrashed();
-                    }
-                }]);
+            'candidature.candidat' => function ($query) {
+                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                    $query->withTrashed();
+                }
+            },
+            'candidatureSpontanee.candidat' => function ($query) {
+                if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses(Candidat::class))) {
+                    $query->withTrashed();
+                }
             },
             'tuteur',
-            'departement'
+            'departement',
         ]);
 
-        $candidat = $stage->candidature->candidat ?? null;
+        $candidat = $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat ?? null;
 
         $cvValide = null;
         if ($candidat) {
-            // Récupérer la candidature validée du candidat
             $candidatureValidee = $candidat->candidatures()->where('statut', 'valide')->first();
             if ($candidatureValidee) {
                 $cvValide = $candidatureValidee->cv_fichier;
             }
         }
 
-        return view('admin.stages.tuteur.detail_stage_tuteur', [
-            'stage' => $stage,
-            'numero' => $numero,
-            'candidat' => $candidat,
-            'departement' => $stage->departement,
-            'cvValide' => $cvValide,
-        ]);
+        return view('admin.stages.tuteur.detail_stage_tuteur', compact('stage', 'numero', 'candidat', 'cvValide'));
     }
 
-
     /**
-     * Formulaire d’affectation de tuteur.
+     * Affecter un tuteur à un stage (directeur uniquement).
      */
-   public function affecterTuteur(Request $request, $id)
+    public function affecterTuteur(Request $request, $id)
     {
         $stage = Stage::findOrFail($id);
 
-        $directeur = Auth::user();
+        $user = Auth::user();
 
-        if (!$directeur->hasRole('DIRECTEUR')) {
+        if (!$user->hasRole('DIRECTEUR')) {
             abort(403);
         }
 
@@ -286,7 +277,7 @@ class StageController extends Controller
     }
 
     /**
-     * Édition d’un stage.
+     * Formulaire d’édition d’un stage.
      */
     public function edit($id)
     {
@@ -304,9 +295,9 @@ class StageController extends Controller
     }
 
     /**
-     * Mise à jour d’un stage.
+     * Mise à jour d’un stage (upload rapport, note finale, statut terminé).
      */
-   public function update(Request $request, Stage $stage)
+    public function update(Request $request, Stage $stage)
     {
         $request->validate([
             'rapport_stage_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
@@ -315,18 +306,15 @@ class StageController extends Controller
 
         $data = [];
 
-        // Upload du rapport
         if ($request->hasFile('rapport_stage_fichier')) {
             $path = $request->file('rapport_stage_fichier')->store('rapports', 'public');
             $data['rapport_stage_fichier'] = $path;
         }
 
-        // Note finale
         if ($request->filled('note_finale')) {
             $data['note_finale'] = $request->note_finale;
         }
 
-        // Statut = terminé
         $data['statut'] = Stage::STATUTS['TERMINE'];
 
         $stage->update($data);
@@ -345,42 +333,55 @@ class StageController extends Controller
 
         return redirect()->route('stages.index')->with('success', 'Stage supprimé.');
     }
+
+    /**
+     * Liste des stages académiques.
+     */
     public function stagesAcademiques()
-{
-    $stages = Stage::with(['candidature.candidat', 'tuteur'])
-        ->whereHas('candidature.candidat', function($q) {
-            $q->where('type_depot', 'stage académique');
-        })
-        ->latest()
-        ->get();
+    {
+        $stages = Stage::with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur', 'departement'])
+            ->whereHas('candidature.candidat', function ($q) {
+                $q->where('type_depot', 'stage académique');
+            })
+            ->latest()
+            ->get();
 
-    return view('admin.stages.academique', ['stages' => $stages, 'typeDepot' => 'stage académique']);
-}
+        return view('admin.stages.academique', ['stages' => $stages, 'typeDepot' => 'stage académique']);
+    }
 
-public function stagesProfessionnels()
-{
-    $stages = Stage::with(['candidature.candidat', 'tuteur'])
-        ->whereHas('candidature.candidat', function($q) {
-            $q->where('type_depot', 'stage professionnel');
-        })
-        ->latest()
-        ->get();
+    /**
+     * Liste des stages professionnels.
+     */
+    public function stagesProfessionnels()
+    {
+        $stages = Stage::with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur', 'departement'])
+            ->whereHas('candidature.candidat', function ($q) {
+                $q->where('type_depot', 'stage professionnel');
+            })
+            ->latest()
+            ->get();
 
-    return view('admin.stages.professionnel', ['stages' => $stages, 'typeDepot' => 'stage professionnel']);
-}
+        return view('admin.stages.professionnel', ['stages' => $stages, 'typeDepot' => 'stage professionnel']);
+    }
 
-public function stagesPreembauche()
-{
-    $stages = Stage::with(['candidature.candidat', 'tuteur'])
-        ->whereHas('candidature.candidat', function($q) {
-            $q->where('type_depot', 'stage de préembauche');
-        })
-        ->latest()
-        ->get();
+    /**
+     * Liste des stages de préembauche.
+     */
+    public function stagesPreembauche()
+    {
+        $stages = Stage::with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur', 'departement'])
+            ->whereHas('candidature.candidat', function ($q) {
+                $q->where('type_depot', 'stage de préembauche');
+            })
+            ->latest()
+            ->get();
 
-    return view('admin.stages.preambauche', ['stages' => $stages, 'typeDepot' => 'stage de préembauche']);
-}
-// Dans StageController.php
+        return view('admin.stages.preambauche', ['stages' => $stages, 'typeDepot' => 'stage de préembauche']);
+    }
+
+    /**
+     * Liste des stages en attente de tuteur pour le directeur du département.
+     */
     public function stagesParDepartement()
     {
         $directeur = Auth::user();
@@ -389,13 +390,13 @@ public function stagesPreembauche()
             abort(403);
         }
 
-        $stages = Stage::whereNull('id_tuteur') // pas encore de tuteur
+        $stages = Stage::whereNull('id_tuteur')
             ->where('id_departement', $directeur->id_departement)
-            ->with(['candidature.candidat'])
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
             ->latest()
             ->get();
 
-        // Récupérer les tuteurs du même département
+        // Tuteurs même département
         $tuteurs = User::whereHas('roles', function ($q) {
             $q->where('name', 'TUTEUR');
         })
@@ -405,6 +406,9 @@ public function stagesPreembauche()
         return view('admin.stages.directeurs.stages_attente_tuteur', compact('stages', 'tuteurs'));
     }
 
+    /**
+     * Liste des stages avec tuteur pour directeur.
+     */
     public function stagesAvecTuteur()
     {
         $directeur = Auth::user();
@@ -413,14 +417,18 @@ public function stagesPreembauche()
             abort(403);
         }
 
-        $stages = Stage::whereNotNull('id_tuteur') // tuteur affecté
+        $stages = Stage::whereNotNull('id_tuteur')
             ->where('id_departement', $directeur->id_departement)
-            ->with(['candidature.candidat', 'tuteur'])
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur'])
             ->latest()
             ->get();
 
         return view('admin.stages.directeurs.stages_avec_tuteur', compact('stages'));
     }
+
+    /**
+     * Liste candidats des stages en cours pour directeur.
+     */
     public function candidatsStagesEnCours()
     {
         $directeur = Auth::user();
@@ -429,19 +437,22 @@ public function stagesPreembauche()
             abort(403, 'Accès non autorisé');
         }
 
-        // Stages avec tuteur, du même département que le directeur
         $stages = Stage::whereNotNull('id_tuteur')
             ->where('id_departement', $directeur->id_departement)
-            ->with(['candidature.candidat']) // on récupère le candidat lié à chaque stage
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
             ->latest()
             ->get();
 
-        // Extraire uniquement les candidats à partir des stages
-        $candidats = $stages->pluck('candidature.candidat')->filter();
+        $candidats = $stages->map(function($stage) {
+            return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+        })->filter()->unique('id')->values();
 
         return view('admin.stages.directeurs.candidats_stages_en_cours', compact('candidats'));
     }
 
+    /**
+     * Liste tuteurs du département du directeur.
+     */
     public function listerTuteursDepartement()
     {
         $directeur = Auth::user();
@@ -451,58 +462,88 @@ public function stagesPreembauche()
         }
 
         $tuteurs = User::whereHas('roles', function ($q) {
-                $q->where('name', 'TUTEUR');
-            })
-            ->where('id_departement', $directeur->id_departement)
-            ->get();
+            $q->where('name', 'TUTEUR');
+        })
+        ->where('id_departement', $directeur->id_departement)
+        ->get();
 
         return view('admin.stages.directeurs.liste_tuteurs', compact('tuteurs'));
     }
-   public function stagesEnAttentePourRH()
-{
-    $rh = Auth::user();
 
-    if (!$rh->hasRole('RH')) {
-        abort(403, 'Accès non autorisé');
-    }
+    /**
+     * Liste des stages en attente (RH).
+     */
+    public function stagesEnAttentePourRH()
+    {
+        $rh = Auth::user();
 
-    $stages = Stage::with(['candidature.candidat', 'candidature.offre', 'departement'])
-        ->where('statut', Stage::STATUTS['EN_ATTENTE']) // ou 'en_attente'
-        ->whereNull('id_tuteur')
-        ->latest()
-        ->get();
+        if (!$rh->hasRole('RH')) {
+            abort(403, 'Accès non autorisé');
+        }
 
-    return view('admin.stages.rh.en_attente_tuteur', compact('stages'));
-}
-public function stagesEnCoursPourRH()
-{
-    $rh = Auth::user();
-
-    if (!$rh->hasRole('RH')) {
-        abort(403, 'Accès non autorisé');
-    }
-
-    // Récupérer les types de dépôt distincts parmi les candidats des stages en cours
-    $typesDepot = Candidat::whereHas('candidatures.stage', function($q) {
-        $q->where('statut', Stage::STATUTS['EN_COURS'])
-          ->whereNotNull('id_tuteur');
-    })->distinct()->pluck('type_depot')->filter();
-
-    $stagesParType = [];
-
-    foreach ($typesDepot as $typeDepot) {
-        $stagesParType[$typeDepot] = Stage::with(['candidature.candidat', 'candidature.offre', 'tuteur', 'departement'])
-            ->where('statut', Stage::STATUTS['EN_COURS'])
-            ->whereNotNull('id_tuteur')
-            ->whereHas('candidature.candidat', function($query) use ($typeDepot) {
-                $query->where('type_depot', $typeDepot);
-            })
+        $stages = Stage::with(['candidature.candidat', 'candidature.offre', 'departement'])
+            ->where('statut', Stage::STATUTS['EN_ATTENTE'])
+            ->whereNull('id_tuteur')
             ->latest()
             ->get();
+
+        return view('admin.stages.rh.en_attente_tuteur', compact('stages'));
     }
 
-    return view('admin.stages.rh.en_cours', compact('typesDepot', 'stagesParType'));
-}
+    /**
+     * Liste des stages en cours (RH) par type dépôt.
+     */
+    public function stagesEnCoursPourRH()
+    {
+        $rh = Auth::user();
+
+        if (!$rh->hasRole('RH')) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        // Récupérer les types_depot ayant au moins un stage en cours
+        $typesDepot = Candidat::where(function ($query) {
+            $query->whereHas('candidatures.stage', function ($q) {
+                $q->where('statut', Stage::STATUTS['EN_COURS'])
+                ->whereNotNull('id_tuteur');
+            })
+            ->orWhereHas('candidatureSpontanees.stage', function ($q) {
+                $q->where('statut', Stage::STATUTS['EN_COURS'])
+                ->whereNotNull('id_tuteur');
+            });
+        })->distinct()->pluck('type_depot')->filter();
+
+        // Groupement des stages par type_depot
+        $stagesParType = [];
+
+        foreach ($typesDepot as $typeDepot) {
+            $stagesParType[$typeDepot] = Stage::with([
+                    'tuteur',
+                    'departement',
+                    'candidature.candidat',
+                    'candidature.offre',
+                    'candidatureSpontanee.candidat'
+                ])
+                ->where('statut', Stage::STATUTS['EN_COURS'])
+                ->whereNotNull('id_tuteur')
+                ->where(function ($query) use ($typeDepot) {
+                    $query->whereHas('candidature.candidat', function ($q) use ($typeDepot) {
+                        $q->where('type_depot', $typeDepot);
+                    })->orWhereHas('candidatureSpontanee.candidat', function ($q) use ($typeDepot) {
+                        $q->where('type_depot', $typeDepot);
+                    });
+                })
+                ->latest()
+                ->get();
+        }
+
+        return view('admin.stages.rh.en_cours', compact('typesDepot', 'stagesParType'));
+    }
+
+
+    /**
+     * Liste des stages en cours (Tuteur).
+     */
     public function stagesEnCoursPourtuteur()
     {
         $tuteur = Auth::user();
@@ -511,15 +552,18 @@ public function stagesEnCoursPourRH()
             abort(403);
         }
 
-        $stages = Stage::whereNotNull('id_tuteur') // tuteur affecté
+        $stages = Stage::whereNotNull('id_tuteur')
             ->where('id_departement', $tuteur->id_departement)
-            ->with(['candidature.candidat', 'tuteur', 'formulaire']) // on ajoute la relation 'formulaire'
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur', 'formulaire'])
             ->latest()
             ->get();
 
         return view('admin.stages.tuteur.en_cours', compact('stages'));
     }
 
+    /**
+     * Liste candidats en stage (RH).
+     */
     public function candidatsEnStage()
     {
         $user = Auth::user();
@@ -527,89 +571,110 @@ public function stagesEnCoursPourRH()
             abort(403, 'Accès non autorisé');
         }
 
-        // On récupère les stages en cours avec leurs candidats
-        $stages = Stage::with(['candidature.candidat'])
+        $stages = Stage::with(['candidature.candidat', 'candidatureSpontanee.candidat'])
             ->where('statut', Stage::STATUTS['EN_COURS'])
             ->whereNotNull('id_tuteur')
             ->latest()
             ->get();
 
-        // Option 1: Passer la liste des stages et récupérer candidats en Blade
-        // Option 2: Extraire la liste unique des candidats ici
-        // Exemple extraction candidats uniques :
-        $candidats = $stages->pluck('candidature.candidat')->unique('id')->values();
+        $candidats = $stages->map(function ($stage) {
+            return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+        })->filter()->unique('id')->values();
 
         return view('admin.stages.rh.candidats_en_stage', compact('candidats'));
     }
 
+    /**
+     * Liste candidats (Tuteur).
+     */
     public function candidatsTuteur()
     {
-        $directeur = Auth::user();
+        $tuteur = Auth::user();
 
-        if (!$directeur->hasRole('TUTEUR')) {
+        if (!$tuteur->hasRole('TUTEUR')) {
             abort(403, 'Accès non autorisé');
         }
 
-        // Stages avec tuteur, du même département que le directeur
         $stages = Stage::whereNotNull('id_tuteur')
-            ->where('id_departement', $directeur->id_departement)
-            ->with(['candidature.candidat']) // on récupère le candidat lié à chaque stage
+            ->where('id_departement', $tuteur->id_departement)
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
             ->latest()
             ->get();
 
-        // Extraire uniquement les candidats à partir des stages
-        $candidats = $stages->pluck('candidature.candidat')->filter();
+        $candidats = $stages->map(function ($stage) {
+            return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+        })->filter()->unique('id')->values();
 
         return view('admin.stages.tuteur.liste_candidats', compact('candidats'));
     }
+
+    /**
+     * Détails candidat en stage pour tuteur.
+     */
+
     public function details_candidat_encours_tuteur($id)
     {
+        $candidat = Candidat::findOrFail($id);
 
-    $candidat = Candidat::findOrFail($id);
+        $stage = Stage::where(function($query) use ($id) {
+            $query->whereHas('candidature', function ($q) use ($id) {
+                $q->where('candidat_id', $id);
+            })
+            ->orWhereHas('candidatureSpontanee', function ($q) use ($id) {
+                $q->where('candidat_id', $id);
+            });
+        })
+        ->where('statut', Stage::STATUTS['EN_COURS'])
+        ->latest('date_debut')
+        ->first();
 
-    // On récupère le stage actif lié à ce candidat via les candidatures
-    $stage = Stage::whereHas('candidature', function ($query) use ($id) {
-        $query->where('candidat_id', $id);
-    })->where('statut', Stage::STATUTS['EN_COURS'])->latest('date_debut')->first();
+        $progression = null;
 
-    $progression = null;
+        if ($stage && $stage->date_debut && $stage->date_fin) {
+            $dateDebut = Carbon::parse($stage->date_debut);
+            $dateFin = Carbon::parse($stage->date_fin);
+            $aujourdHui = Carbon::today();
 
-    if ($stage && $stage->date_debut && $stage->date_fin) {
-        $total = $stage->date_debut->diffInDays($stage->date_fin);
-        $ecoules = $stage->date_debut->diffInDays(min(Carbon::today(), $stage->date_fin));
-        $progression = $total > 0 ? round(($ecoules / $total) * 100) : 0;
+            $total = $dateDebut->diffInDays($dateFin);
+            $ecoules = $dateDebut->diffInDays(min($aujourdHui, $dateFin));
+
+            $progression = $total > 0 ? round(($ecoules / $total) * 100) : 0;
+        }
+
+        return view('admin.stages.tuteur.details_candidat', compact('candidat', 'stage', 'progression'));
     }
 
-    return view('admin.stages.tuteur.details_candidat', compact('candidat', 'stage', 'progression'));
-    }
 
+    /**
+     * Détails candidat en stage pour directeur.
+     */
     public function details_candidat_encours_directeur($id)
     {
+        $candidat = Candidat::findOrFail($id);
 
-    $candidat = Candidat::findOrFail($id);
+        $stage = Stage::whereHas('candidature', function ($query) use ($id) {
+            $query->where('candidat_id', $id);
+        })->where('statut', Stage::STATUTS['EN_COURS'])->latest('date_debut')->first();
 
-    // On récupère le stage actif lié à ce candidat via les candidatures
-    $stage = Stage::whereHas('candidature', function ($query) use ($id) {
-        $query->where('candidat_id', $id);
-    })->where('statut', Stage::STATUTS['EN_COURS'])->latest('date_debut')->first();
+        $progression = null;
 
-    $progression = null;
+        if ($stage && $stage->date_debut && $stage->date_fin) {
+            $total = $stage->date_debut->diffInDays($stage->date_fin);
+            $ecoules = $stage->date_debut->diffInDays(min(Carbon::today(), $stage->date_fin));
+            $progression = $total > 0 ? round(($ecoules / $total) * 100) : 0;
+        }
 
-    if ($stage && $stage->date_debut && $stage->date_fin) {
-        $total = $stage->date_debut->diffInDays($stage->date_fin);
-        $ecoules = $stage->date_debut->diffInDays(min(Carbon::today(), $stage->date_fin));
-        $progression = $total > 0 ? round(($ecoules / $total) * 100) : 0;
+        return view('admin.stages.directeurs.details_candidat_directeur', compact('candidat', 'stage', 'progression'));
     }
 
-    return view('admin.stages.directeurs.details_candidat_directeur', compact('candidat', 'stage', 'progression'));
-    }
+    /**
+     * Validation par directeur.
+     */
     public function validerParDirecteur($reponseId)
     {
-
         $reponse = ReponseFormulaire::findOrFail($reponseId);
 
-        // Ici, récupérer le stage lié à la réponse
-        $stage = $reponse->stage ?? null; // à adapter selon relation
+        $stage = $reponse->stage ?? null;
 
         if (!$stage) {
             return response()->json(['success' => false, 'message' => 'Stage non trouvé'], 404);
@@ -625,10 +690,14 @@ public function stagesEnCoursPourRH()
 
         return response()->json(['success' => true]);
     }
+
+    /**
+     * Liste stages terminés (RH).
+     */
     public function stagesTerminesPourRH()
     {
         $stagesTermines = Stage::with(['candidature.candidat', 'candidature.offre', 'tuteur'])
-            ->where('statut', 'termine')
+            ->where('statut', Stage::STATUTS['TERMINE'])
             ->get()
             ->groupBy(function ($stage) {
                 return $stage->type_depot ?? 'inconnu';

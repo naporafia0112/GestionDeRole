@@ -15,9 +15,9 @@
     <!-- end page title -->
 
     <div class="row">
-        <!-- Card 1: Candidats en stage -->
+        <!-- Candidats en stage -->
         <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
+            <div class="card widget-rounded-circle">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
@@ -25,20 +25,20 @@
                                 <i class="fe-user-check font-22 avatar-title text-success"></i>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countCandidatsEnCours }}</span></h3>
-                                <p class="text-muted mb-1 ">Candidats en stage</p>
-                            </div>
+                        <div class="col-6 text-end">
+                            <h3 class="text-dark mt-1">
+                                <span data-plugin="counterup">{{ $countCandidatsEnCours }}</span>
+                            </h3>
+                            <p class="text-muted mb-1">Candidats en stage</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2: Candidats ayant terminé -->
+        <!-- Candidats terminés -->
         <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
+            <div class="card widget-rounded-circle">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
@@ -46,29 +46,29 @@
                                 <i class="fe-user-check font-22 avatar-title text-primary"></i>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countCandidatsTermines }}</span></h3>
-                                <p class="text-muted mb-1 ">Candidats terminés</p>
-                            </div>
+                        <div class="col-6 text-end">
+                            <h3 class="text-dark mt-1">
+                                <span data-plugin="counterup">{{ $countCandidatsTermines }}</span>
+                            </h3>
+                            <p class="text-muted mb-1">Candidats terminés</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Donut Chart -->
+        <!-- Graphique Donut -->
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
 
-                    <h4 class="header-title mb-3">Statut des stages suivis</h4>
+                    <h4 class="header-title mb-3">Répartition des stages</h4>
 
                     <div dir="ltr">
                         <div id="tuteur-status-chart" class="apex-charts" data-colors="#0acf97,#727cf5"></div>
                     </div>
 
-                    <div class="row text-center mt-2">
+                    <div class="row text-center mt-3">
                         <div class="col-6">
                             <p class="text-muted mb-1">En cours</p>
                             <h5 class="mt-0">{{ $countCandidatsEnCours }}</h5>
@@ -78,34 +78,31 @@
                             <h5 class="mt-0">{{ $countCandidatsTermines }}</h5>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
-
     </div>
-    <!-- end row -->
-
-</div> <!-- container -->
+</div> <!-- end container -->
 @endsection
 
 @section('scripts')
 <!-- Apex Charts -->
 <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Counter animation
         $('[data-plugin="counterup"]').counterUp({
             delay: 100,
             time: 1200
         });
 
-        // Tuteur Status Chart
+        // Donut Chart
         var options = {
             series: [{{ $countCandidatsEnCours }}, {{ $countCandidatsTermines }}],
             chart: {
                 type: 'donut',
-                height: 250,
+                height: 250
             },
             labels: ["En cours", "Terminés"],
             colors: ["#0acf97", "#727cf5"],
@@ -115,12 +112,8 @@
             responsive: [{
                 breakpoint: 480,
                 options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
+                    chart: { width: 200 },
+                    legend: { position: 'bottom' }
                 }
             }]
         };

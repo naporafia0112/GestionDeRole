@@ -13,6 +13,9 @@ use App\Models\Candidat;
 use App\Models\Entreprise;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\candidatureSpontanee;
+use Illuminate\Support\Collection;
+
 
 
 class DashboardController extends Controller
@@ -21,20 +24,24 @@ class DashboardController extends Controller
     {
         return view('dashboard');
     }
-   public function dashboardDirecteur(Request $request)
+    public function dashboardDirecteur(Request $request)
     {
+        // Récupération de l'utilisateur connecté
         $directeur = Auth::user();
 
+        // Sécurité : seuls les directeurs peuvent accéder
         if (!$directeur->hasRole('DIRECTEUR')) {
             abort(403, 'Accès non autorisé');
         }
 
+        // Département du directeur connecté (filtrage)
         $departementId = $directeur->id_departement;
 
-        // --- Récupère la valeur du filtre (7, 30 ou 90 jours) ---
-        $days = $request->input('days'); // ex: ?days=30
+        // Récupération de la période de filtrage (ex: ?days=30)
+        $days = $request->input('days');
 
-        // --- Comptages principaux ---
+        // --- 1. Compteurs globaux ---
+
         $countEnAttente = Stage::where('id_departement', $departementId)
             ->where('statut', Stage::STATUTS['EN_ATTENTE'])
             ->whereNull('id_tuteur')
@@ -49,20 +56,22 @@ class DashboardController extends Controller
             ->where('statut', Stage::STATUTS['TERMINE'])
             ->count();
 
-        $countCandidats = Candidat::whereHas('candidatures.stage', function ($query) use ($departementId) {
-            $query->whereNotNull('id_tuteur')
-                ->where('statut', Stage::STATUTS['EN_COURS'])
-                ->where('id_departement', $departementId);
-        })->distinct('id')->count('id');
-
         $countstagestotal = $countEnCours + $countEnAttente;
 
-        // --- Liste des stages en attente (avec filtre jours) ---
-        $stagesEnAttenteQuery = Stage::with('departement')
+        // --- 2. Nombre de candidats en stage en cours dans ce département ---
+        $countCandidats = Candidat::whereHas('candidatures.stage', function ($query) use ($departementId) {
+            $query->where('id_departement', $departementId)
+                ->where('statut', Stage::STATUTS['EN_COURS'])
+                ->whereNotNull('id_tuteur');
+        })->distinct('id')->count('id');
+
+        // --- 3. Récupération des stages en attente récents ---
+        $stagesEnAttenteQuery = Stage::with(['departement', 'candidature.candidat', 'candidatureSpontanee.candidat'])
             ->where('id_departement', $departementId)
             ->where('statut', Stage::STATUTS['EN_ATTENTE'])
             ->whereNull('id_tuteur');
 
+        // Si un filtre temporel est appliqué (ex: 7 ou 30 jours)
         if ($days) {
             $stagesEnAttenteQuery->where('date_debut', '>=', Carbon::now()->subDays($days));
         }
@@ -77,7 +86,7 @@ class DashboardController extends Controller
             'countstagestotal',
             'stagesEnAttente'
         ));
-    }
+}
 
     public function dashboardRH(Request $request)
     {
@@ -87,35 +96,44 @@ class DashboardController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
-        $departementId = $rh->id_departement;
+        $days = $request->input('days');
 
-        // --- Récupère la valeur du filtre (7, 30 ou 90 jours) ---
-        $days = $request->input('days'); // ex: ?days=30
+        // Récupérer les candidats avec leurs candidatures et candidatures spontanées (avec stages pour candidatures classiques)
+        $candidats = Candidat::with([
+            'candidatures' => function ($q) {
+                $q->select('id', 'candidat_id', 'created_at', 'statut', 'offre_id');
+                $q->with('stage'); // Charger le stage lié à chaque candidature classique
+            },
+            'candidatureSpontanees' => function ($q) {
+                $q->select('id', 'candidat_id', 'created_at', 'statut');
+                // Si tu veux charger aussi les stages liés aux candidatures spontanées,
+                // ajoute un with('stage') ici si tu as cette relation côté CandidatureSpontanee
+                // Par exemple :
+                // $q->with('stage');
+            }
+        ])->get();
 
-        // --- Comptages principaux ---
-        $countEnAttente = Stage::
-            where('statut', Stage::STATUTS['EN_ATTENTE'])
-            ->whereNull('id_tuteur')
-            ->count();
+        // Nombre de candidats avec au moins une candidature classique en stage en cours avec tuteur
+        $countCandidats = $candidats->filter(function ($candidat) {
+            return $candidat->candidatures->contains(function ($c) {
+                return $c->stage
+                    && $c->stage->statut === Stage::STATUTS['EN_COURS']
+                    && $c->stage->id_tuteur !== null;
+            });
+        })->count();
 
-        $countEnCours = Stage::where('statut', Stage::STATUTS['EN_COURS'])
-            ->whereNotNull('id_tuteur')
-            ->count();
+        // Comptages globaux
+        $countEnAttente = Stage::where('statut', Stage::STATUTS['EN_ATTENTE'])
+            ->whereNull('id_tuteur')->count();
 
-        $countTermines = Stage::where('id_departement', $departementId)
-            ->where('statut', Stage::STATUTS['TERMINE'])
-            ->count();
+        $countEnCours = Stage::where('statut', Stage::STATUTS['EN_COURS'])->count();
 
-        $countCandidats = Candidat::whereHas('candidatures.stage', function ($query) {
-            $query->whereNotNull('id_tuteur')
-                ->where('statut', Stage::STATUTS['EN_COURS']);
-        })->distinct('id')->count('id');
+        $countTermines = Stage::where('statut', Stage::STATUTS['TERMINE'])->count();
 
         $countstagestotal = $countEnCours + $countEnAttente;
 
-        // --- Liste des stages en attente (avec filtre jours) ---
+        // Liste des stages en attente (filtrage jours si présent)
         $stagesEnAttenteQuery = Stage::with('departement')
-            ->where('id_departement', $departementId)
             ->where('statut', Stage::STATUTS['EN_ATTENTE'])
             ->whereNull('id_tuteur');
 
@@ -125,16 +143,61 @@ class DashboardController extends Controller
 
         $stagesEnAttente = $stagesEnAttenteQuery->latest()->take(6)->get();
 
-        $candidaturesChart = Candidature::select(
-        DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois"),
-            DB::raw("COUNT(*) as total")
-        )
-        ->groupBy('mois')
-        ->orderBy('mois')
+        // Groupement par mois sur created_at pour les candidatures classiques
+        $candidaturesParMois = $candidats->flatMap->candidatures
+            ->groupBy(fn($c) => Carbon::parse($c->created_at)->month)
+            ->map->count();
+
+        // Groupement par mois sur created_at pour les candidatures spontanées
+        $spontaneesParMois = $candidats->flatMap->candidatureSpontanees
+            ->groupBy(fn($c) => Carbon::parse($c->created_at)->month)
+            ->map->count();
+
+        // Préparation des labels et données pour le graphique
+        $months = collect(range(1, 12))->mapWithKeys(fn ($m) => [$m => Carbon::create()->month($m)->format('F')]);
+        $chartLabels = $months->values();
+        $chartDataOffres = $months->keys()->map(fn ($m) => $candidaturesParMois[$m] ?? 0);
+        $chartDataSpontanees = $months->keys()->map(fn ($m) => $spontaneesParMois[$m] ?? 0);
+
+        // Totaux
+        $totalValideOffre = $candidats->flatMap->candidatures->count();
+        $totalValideSpontanee = $candidats->flatMap->candidatureSpontanees->count();
+
+        // Top départements (basé sur stages)
+        $topDepartements = Stage::select('id_departement', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('id_departement')
+            ->groupBy('id_departement')
+            ->orderByDesc('total')
+            ->with('departement')
+            ->take(5)
+            ->get();
+
+        // 5 derniers stages en cours avec relations correctes (attention au nom des relations)
+        $dernierStagesEnCours = Stage::with([
+            'candidature.candidat',        // relation candidature (classique) singular
+            'candidatureSpontanee.candidat', // relation candidatureSpontanee (singulier)
+            'tuteur'
+        ])->where('statut', Stage::STATUTS['EN_COURS'])
+        ->latest('date_debut')
+        ->take(5)
         ->get();
 
-        $chartLabels = $candidaturesChart->pluck('mois');
-        $chartData = $candidaturesChart->pluck('total');
+        // Stats de progression sur la dernière semaine et dernier mois
+        $now = Carbon::now();
+        $lastWeekTotal = $candidats->flatMap->candidatures
+            ->where('created_at', '>=', $now->copy()->subWeek())->count()
+            + $candidats->flatMap->candidatureSpontanees
+            ->where('created_at', '>=', $now->copy()->subWeek())->count();
+
+        $lastMonthTotal = $candidats->flatMap->candidatures
+            ->where('created_at', '>=', $now->copy()->subMonth())->count()
+            + $candidats->flatMap->candidatureSpontanees
+            ->where('created_at', '>=', $now->copy()->subMonth())->count();
+
+        $targetCandidatures = 500;
+        $totalStages = Stage::where('statut', '!=', Stage::STATUTS['ANNULE'])->count();
+        $totalTermines = Stage::where('statut', Stage::STATUTS['TERMINE'])->count();
+        $progressionPourcent = $totalStages > 0 ? round(($totalTermines / $totalStages) * 100, 1) : 0;
 
         return view('dashboard.dashboardrh', compact(
             'countEnAttente',
@@ -144,11 +207,20 @@ class DashboardController extends Controller
             'countstagestotal',
             'stagesEnAttente',
             'chartLabels',
-            'chartData'
+            'chartDataOffres',
+            'chartDataSpontanees',
+            'totalValideOffre',
+            'totalValideSpontanee',
+            'topDepartements',
+            'progressionPourcent',
+            'dernierStagesEnCours',
+            'targetCandidatures',
+            'lastWeekTotal',
+            'lastMonthTotal'
         ));
     }
 
-   public function dashboardTuteur()
+public function dashboardTuteur()
 {
     $tuteur = Auth::user();
 
@@ -156,19 +228,30 @@ class DashboardController extends Controller
         abort(403, 'Accès non autorisé');
     }
 
-    // Nombre de candidats actuellement en stage avec ce tuteur
-    $countCandidatsEnCours = Candidat::whereHas('candidatures.stage', function ($query) use ($tuteur) {
-        $query->where('id_tuteur', $tuteur->id)
-              ->where('statut', Stage::STATUTS['EN_COURS']);
-    })->distinct('id')->count('id');
+    // Nombre de candidats actuellement en stage (classique + spontané) avec ce tuteur
+    $stagesEnCours = Stage::where('id_tuteur', $tuteur->id)
+        ->where('statut', Stage::STATUTS['EN_COURS'])
+        ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
+        ->get();
 
-    // Nombre de candidats ayant terminé leur stage avec ce tuteur
-    $countCandidatsTermines = Candidat::whereHas('candidatures.stage', function ($query) use ($tuteur) {
-        $query->where('id_tuteur', $tuteur->id)
-              ->where('statut', Stage::STATUTS['TERMINE']);
-    })->distinct('id')->count('id');
+    $stagesTermines = Stage::where('id_tuteur', $tuteur->id)
+        ->where('statut', Stage::STATUTS['TERMINE'])
+        ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
+        ->get();
 
-    return view('dashboard.dashboardtuteur', compact('countCandidatsEnCours', 'countCandidatsTermines'));
+    $countCandidatsEnCours = $stagesEnCours->map(function ($stage) {
+        return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+    })->filter()->unique('id')->count();
+
+    $countCandidatsTermines = $stagesTermines->map(function ($stage) {
+        return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+    })->filter()->unique('id')->count();
+
+    return view('dashboard.dashboardtuteur', compact(
+        'countCandidatsEnCours',
+        'countCandidatsTermines'
+    ));
 }
+
 
 }

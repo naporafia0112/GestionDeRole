@@ -36,7 +36,7 @@
                         <tbody>
                             @foreach($stages as $stage)
                                 <tr>
-                                    <td>{{ $stage->candidature->candidat->nom ?? '--' }} {{ $stage->candidature->candidat->prenoms ?? '' }}</td>
+                                    <td>{{ $stage->candidat->nom ?? '' }} {{ $stage->candidat->prenoms ?? '' }}</td>
                                     <td>{{ $stage->tuteur->name ?? '--' }}</td>
                                     <td>{{ $stage->sujet }}</td>
                                     <td>{{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</td>

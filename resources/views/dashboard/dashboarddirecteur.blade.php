@@ -1,184 +1,182 @@
 @extends('layouts.home')
 
 @section('content')
-<!-- Start Content-->
 <div class="container-fluid">
 
-    <!-- start page title -->
+    <!-- Titre + filtre date -->
     <div class="row">
         <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <form class="d-flex align-items-center mb-3">
-                        <div class="input-group input-group-sm">
-                            <input type="text" class="form-control border" id="dash-daterange">
-                            <span class="input-group-text bg-blue border-blue text-white">
-                                <i class="mdi mdi-calendar-range"></i>
-                            </span>
-                        </div>
-                        <a href="javascript: void(0);" class="btn btn-blue btn-sm ms-2">
-                            <i class="mdi mdi-autorenew"></i>
-                        </a>
-                    </form>
-                </div>
+            <div class="page-title-box d-flex justify-content-between align-items-center">
                 <h4 class="page-title">Dashboard Directeur</h4>
+                <form method="GET" class="d-flex align-items-center">
+                    <div class="input-group input-group-sm">
+                        <select class="form-select" name="days" onchange="this.form.submit()">
+                            <option value="">Toutes les dates</option>
+                            <option value="7" {{ request('days') == 7 ? 'selected' : '' }}>7 derniers jours</option>
+                            <option value="30" {{ request('days') == 30 ? 'selected' : '' }}>30 derniers jours</option>
+                            <option value="90" {{ request('days') == 90 ? 'selected' : '' }}>90 derniers jours</option>
+                        </select>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!-- end page title -->
 
-    <div class="row">
-        <!-- Card 1: Stages en attente -->
+    <!-- Statistiques principales -->
+    <div class="row mt-2">
+        <!-- Stages en attente -->
         <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="avatar-lg rounded-circle bg-soft-warning border-warning border">
-                                <i class="fe-clock font-22 avatar-title text-warning"></i>
-                            </div>
+            <div class="widget-rounded-circle card shadow">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-lg rounded-circle bg-soft-warning border-warning border">
+                            <i class="fe-clock font-22 avatar-title text-warning"></i>
                         </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countEnAttente }}</span></h3>
-                                <p class="text-muted mb-1 ">Stages en attente</p>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3 text-end">
+                        <h3 class="text-dark"><span data-plugin="counterup">{{ $countEnAttente }}</span></h3>
+                        <p class="text-muted mb-0">Stages en attente</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2: Stages en cours -->
+        <!-- Stages en cours -->
         <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="avatar-lg rounded-circle bg-soft-success border-success border">
-                                <i class="fe-check-circle font-22 avatar-title text-success"></i>
-                            </div>
+            <div class="widget-rounded-circle card shadow">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-lg rounded-circle bg-soft-success border-success border">
+                            <i class="fe-check-circle font-22 avatar-title text-success"></i>
                         </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countEnCours }}</span></h3>
-                                <p class="text-muted mb-1 ">Stages en cours</p>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3 text-end">
+                        <h3 class="text-dark"><span data-plugin="counterup">{{ $countEnCours }}</span></h3>
+                        <p class="text-muted mb-0">Stages en cours</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 3: Candidats -->
+        <!-- Candidats -->
         <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="avatar-lg rounded-circle bg-soft-info border-info border">
-                                <i class="fe-users font-22 avatar-title text-info"></i>
-                            </div>
+            <div class="widget-rounded-circle card shadow">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-lg rounded-circle bg-soft-info border-info border">
+                            <i class="fe-users font-22 avatar-title text-info"></i>
                         </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countCandidats }}</span></h3>
-                                <p class="text-muted mb-1 ">Candidats</p>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3 text-end">
+                        <h3 class="text-dark"><span data-plugin="counterup">{{ $countCandidats }}</span></h3>
+                        <p class="text-muted mb-0">Candidats en stage</p>
                     </div>
                 </div>
             </div>
         </div>
 
-    <!-- end row -->
-        <div class="col-lg-4">
-            <div class="card">
+        <!-- Total stages -->
+        <div class="col-md-6 col-xl-3">
+            <div class="widget-rounded-circle card shadow">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-lg rounded-circle bg-soft-primary border-primary border">
+                            <i class="fe-briefcase font-22 avatar-title text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3 text-end">
+                        <h3 class="text-dark"><span data-plugin="counterup">{{ $countstagestotal }}</span></h3>
+                        <p class="text-muted mb-0">Stages actifs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique donut -->
+    <div class="row mt-3">
+        <div class="col-lg-6">
+            <div class="card shadow">
                 <div class="card-body">
-
-                    <h4 class="header-title mb-3">Statut des stages</h4>
-
+                    <h4 class="header-title mb-3">Répartition des stages</h4>
                     <div dir="ltr">
                         <div id="stages-status-chart" class="apex-charts" data-colors="#f7b84b,#0acf97,#727cf5"></div>
                     </div>
-
-                    <div class="row text-center mt-2">
+                    <div class="row text-center mt-3">
                         <div class="col-4">
                             <p class="text-muted mb-1">En attente</p>
-                            <h5 class="mt-0">{{ $countEnAttente }}</h5>
+                            <h5 class="mb-0">{{ $countEnAttente }}</h5>
                         </div>
                         <div class="col-4">
                             <p class="text-muted mb-1">En cours</p>
-                            <h5 class="mt-0">{{ $countEnCours }}</h5>
+                            <h5 class="mb-0">{{ $countEnCours }}</h5>
                         </div>
                         <div class="col-4">
                             <p class="text-muted mb-1">Terminés</p>
-                            <h5 class="mt-0">{{ $countTermines }}</h5>
+                            <h5 class="mb-0">{{ $countTermines }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- end row -->
 
-</div> <!-- container -->
+        <!-- Derniers stages en attente -->
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="header-title mb-3">Derniers stages en attente</h4>
+                    @forelse ($stagesEnAttente as $stage)
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="mt-0 mb-1">
+                                    {{ $stage->sujet }} — 
+                                    <span class="text-muted small">{{ optional($stage->candidat ?? $stage->candidatureSpontanees->candidat)->nom ?? 'Candidat inconnu' }}</span>
+                                </h5>
+                                <p class="text-muted mb-0"><i class="fe-calendar me-1"></i> Début prévu : {{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</p>
+                            </div>
+                            <div class="ms-3">
+                                <span class="badge bg-warning text-dark">En attente</span>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted">Aucun stage en attente récemment.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 @endsection
 
 @section('scripts')
-<!-- Apex Charts -->
+<!-- ApexCharts -->
 <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
-
+<script src="{{ asset('assets/libs/jquery.counterup/jquery.counterup.min.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Counter animation
+        // Counter
         $('[data-plugin="counterup"]').counterUp({
-            delay: 100,
-            time: 1200
+            delay: 10,
+            time: 1000
         });
 
-        // Stages Status Chart
+        // Donut chart
         var options = {
             series: [{{ $countEnAttente }}, {{ $countEnCours }}, {{ $countTermines }}],
             chart: {
                 type: 'donut',
-                height: 250,
+                height: 250
             },
-            labels: ["En attente", "En cours", "Terminés"],
-            colors: ["#f7b84b", "#0acf97", "#727cf5"],
+            labels: ['En attente', 'En cours', 'Terminés'],
+            colors: ['#f7b84b', '#0acf97', '#727cf5'],
             legend: {
-                show: false
-            },
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }]
+                position: 'bottom'
+            }
         };
 
         var chart = new ApexCharts(document.querySelector("#stages-status-chart"), options);
         chart.render();
-
-        // Date range picker
-        $('#dash-daterange').daterangepicker({
-            opens: 'left',
-            locale: {
-                format: 'DD/MM/YYYY',
-                applyLabel: "Appliquer",
-                cancelLabel: "Annuler",
-                fromLabel: "De",
-                toLabel: "À",
-                daysOfWeek: ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"],
-                monthNames: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
-                firstDay: 1
-            }
-        });
     });
 </script>
 @endsection

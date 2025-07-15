@@ -40,5 +40,11 @@ class CandidatureSpontanee extends Model
     {
         return $this->entretiens->contains('statut', 'effectuee');
     }
+    // App\Models\CandidatureSpontanee.php
+
+    public function stage()
+    {
+        return $this->hasOne(Stage::class, 'id_candidature_spontanee');
+    }
 
 }

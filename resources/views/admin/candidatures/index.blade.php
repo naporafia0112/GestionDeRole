@@ -22,15 +22,9 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
-            <!-- En-tête amélioré avec plus d'espace -->
-            <div class="page-header mb-4">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h2 class="page-title mb-0" style='font-size: 20px;'>
-                           {{ $offre->titre }}
-                        </h2>
-                    </div>
-                    <div class="col-md-6">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="page-title-box">
                         <div class="page-title-right">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb m-0">
@@ -39,6 +33,11 @@
                                     <li class="breadcrumb-item active">Liste des candidatures</li>
                                 </ol>
                             </nav>
+                        </div>
+                        <div class="col-md-6">
+                            <h1 class="page-title mb-0" style='font-size: 40px;'>
+                                {{ $offre->titre }}
+                            </h1>
                         </div>
                     </div>
                 </div>

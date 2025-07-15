@@ -3,83 +3,60 @@
 @section('content')
 <div class="container-fluid">
 
-    <!-- Titre de la page -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-flex justify-content-between align-items-center">
-                <h4 class="page-title">Dashboard RH</h4>
-                <form class="d-flex align-items-center mb-3">
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control border" id="dash-daterange">
-                        <span class="input-group-text bg-blue border-blue text-white">
-                            <i class="mdi mdi-calendar-range"></i>
-                        </span>
-                    </div>
-                    <a href="javascript: void(0);" class="btn btn-blue btn-sm ms-2">
-                        <i class="mdi mdi-autorenew"></i>
-                    </a>
-                </form>
-            </div>
+    <!-- Titre et filtre date -->
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="page-title">Dashboard RH</h4>
+            <form class="d-flex align-items-center">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control border" id="dash-daterange" placeholder="Sélectionnez une période">
+                    <span class="input-group-text bg-primary border-primary text-white">
+                        <i class="mdi mdi-calendar-range"></i>
+                    </span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm ms-2" title="Filtrer">
+                    <i class="mdi mdi-filter"></i> Appliquer
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Cartes -->
+    <!-- Cartes statistiques principales -->
     <div class="row">
-        <!-- En attente -->
-        <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
-                <div class="card-body d-flex align-items-center">
-                    <div class="avatar-lg rounded-circle bg-soft-warning border-warning border me-3">
-                        <i class="fe-clock font-22 avatar-title text-warning"></i>
-                    </div>
-                    <div class="flex-grow-1 text-end">
-                        <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countEnAttente }}</span></h3>
-                        <p class="text-muted mb-1">Stages en attente</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- En cours -->
-        <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
-                <div class="card-body d-flex align-items-center">
-                    <div class="avatar-lg rounded-circle bg-soft-success border-success border me-3">
-                        <i class="fe-check-circle font-22 avatar-title text-success"></i>
-                    </div>
-                    <div class="flex-grow-1 text-end">
-                        <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countEnCours }}</span></h3>
-                        <p class="text-muted mb-1">Stages en cours</p>
+        @php
+            $stats = [
+                ['label' => 'Stages en attente', 'count' => $countEnAttente, 'icon' => 'fe-clock', 'color' => 'warning', 'description' => '(Stages sans tuteur assigné, en attente de traitement.)'],
+                ['label' => 'Stages en cours', 'count' => $countEnCours, 'icon' => 'fe-check-circle', 'color' => 'success', 'description' => '(Stages actifs avec un tuteur désigné.)'],
+                ['label' => 'Candidats en stage', 'count' => $countCandidats, 'icon' => 'fe-users', 'color' => 'info', 'description' => '(Nombre de candidats actuellement en stage avec un tuteur.)'],
+            ];
+        @endphp
+        @foreach ($stats as $stat)
+            <div class="col-md-6 col-xl-4 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="avatar-lg rounded-circle bg-soft-{{ $stat['color'] }} border-{{ $stat['color'] }} border me-3">
+                            <i class="{{ $stat['icon'] }} font-22 avatar-title text-{{ $stat['color'] }}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="text-dark mb-1"><span data-plugin="counterup">{{ $stat['count'] }}</span></h3>
+                            <p class="text-muted mb-0">{{ $stat['label'] }}</p>
+                            <small class="text-muted">{{ $stat['description'] }}</small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Candidats -->
-        <div class="col-md-6 col-xl-3">
-            <div class="widget-rounded-circle card">
-                <div class="card-body d-flex align-items-center">
-                    <div class="avatar-lg rounded-circle bg-soft-info border-info border me-3">
-                        <i class="fe-users font-22 avatar-title text-info"></i>
-                    </div>
-                    <div class="flex-grow-1 text-end">
-                        <h3 class="text-dark mt-1"><span data-plugin="counterup">{{ $countCandidats }}</span></h3>
-                        <p class="text-muted mb-1">Candidats</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
 
-    <!-- Graphique donut -->
-    <div class="row mt-3">
-        <div class="col-lg-4">
-            <div class="card">
+    <!-- Graphiques résumé -->
+    <div class="row">
+        <!-- Donut: Statut des stages -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h4 class="header-title mb-3">Statut des stages</h4>
-                    <div id="stages-status-chart" class="apex-charts" data-colors="#f7b84b,#0acf97,#727cf5"></div>
-
-                    <div class="row text-center mt-3">
+                    <h5 class="card-title">Répartition des stages par statut</h5>
+                    <div id="stages-status-chart" class="apex-charts mb-3" data-colors="#f7b84b,#0acf97,#727cf5"></div>
+                    <div class="row text-center">
                         <div class="col-4">
                             <p class="text-muted mb-1">En attente</p>
                             <h5>{{ $countEnAttente }}</h5>
@@ -93,16 +70,132 @@
                             <h5>{{ $countTermines }}</h5>
                         </div>
                     </div>
+                    <small class="text-muted d-block mt-2">Visualisation des stages selon leur statut actuel</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 départements -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Top 5 départements par nombre de stagiaires</h5>
+                    <canvas id="departementsChart" height="230"></canvas>
+                    <small class="text-muted d-block mt-2">Les départements les plus actifs en termes de stages</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progression globale -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="card-title mb-4">Progression des stages terminés</h5>
+                    <div class="progress w-100" style="height: 30px;">
+                        <div class="progress-bar progress-bar-striped bg-success" role="progressbar"
+                            style="width: {{ $progressionPourcent }}%;" aria-valuenow="{{ $progressionPourcent }}"
+                            aria-valuemin="0" aria-valuemax="100">
+                            {{ $progressionPourcent }}%
+                        </div>
+                    </div>
+                    <small class="text-muted mt-3 text-center">
+                        Pourcentage des stages terminés par rapport aux stages totaux (hors annulés).
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Graphique Line Chart -->
-    <div class="card mt-4">
+    <!-- Graphiques des candidatures -->
+    <div class="row">
+        <!-- Barres par mois -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Candidatures valides reçues par mois</h5>
+                    <canvas id="barChartCandidatures" height="120"></canvas>
+                    <small class="text-muted d-block mt-2">
+                        Répartition mensuelle des candidatures valides pour les offres classiques (en bleu) et les candidatures spontanées (en vert).
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Camembert répartition types -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Répartition globale des candidatures valides</h5>
+                    <canvas id="pieChartTypes" height="120"></canvas>
+                    <small class="text-muted d-block mt-2">
+                        Part relative entre candidatures sur offres et candidatures spontanées.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidatures reçues sur la durée (courbe) -->
+    <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-3">Évolution des candidatures</h5>
-            <canvas id="candidaturesChart" height="100"></canvas>
+            <h5 class="card-title">Évolution des candidatures reçues sur l'année</h5>
+
+            <canvas id="candidaturesLifetimeChart" style="max-height: 250px;"></canvas>
+            <div class="row mt-4 text-center">
+                <div class="col-4">
+                    <p class="text-muted mb-1">Objectif mensuel de candidatures</p>
+                    <h4><i class="fe-target text-primary me-1"></i>{{ $targetCandidatures }}</h4>
+                </div>
+                <div class="col-4">
+                    <p class="text-muted mb-1">Candidatures validées la dernière semaine</p>
+                    <h4><i class="fe-arrow-up text-success me-1"></i>{{ $lastWeekTotal }}</h4>
+                </div>
+                <div class="col-4">
+                    <p class="text-muted mb-1">Candidatures validées le dernier mois</p>
+                    <h4><i class="fe-arrow-up text-success me-1"></i>{{ $lastMonthTotal }}</h4>
+                </div>
+            </div>
+            <small class="text-muted d-block mt-2">
+                Suivi régulier des candidatures pour mesurer les tendances et atteindre les objectifs.
+            </small>
+        </div>
+    </div>
+
+    <!-- Liste des derniers stages en cours -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title mb-3">5 derniers stages en cours dans votre département</h5>
+            @if($dernierStagesEnCours->isEmpty())
+                <p class="text-muted">Aucun stage en cours pour le moment.</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Tuteur</th>
+                                <th>Date de début</th>
+                                <th>Sujet du stage</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($dernierStagesEnCours as $stage)
+                                <tr>
+                                    <td>{{ $stage->candidat?->nom  ?? 'N/A' }} {{ $stage->candidat?->prenoms  ?? 'N/A' }}</td>
+                                    <td>{{ $stage->tuteur?->name ?? 'Non attribué' }}</td>
+                                    <td>{{ $stage->date_debut?->format('d/m/Y') ?? 'N/A' }}</td>
+                                    <td>{{ \Illuminate\Support\Str::limit($stage->sujet, 50) }}</td>
+                                    <td>
+                                        <span class="badge bg-success text-white">{{ ucfirst(str_replace('_', ' ', $stage->statut)) }}</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+            <small class="text-muted d-block mt-3">Suivi des stages actifs avec leur tuteur assigné.</small>
         </div>
     </div>
 
@@ -112,27 +205,21 @@
 @push('scripts')
 <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.counterup/2.1.0/jquery.counterup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Animation des compteurs
-    $('[data-plugin="counterup"]').counterUp({
-        delay: 100,
-        time: 1200
-    });
+    // Animation compteur
+    $('[data-plugin="counterup"]').counterUp({ delay: 100, time: 1200 });
 
-    // Donut Chart
-    const donutOptions = {
+    // Donut : Statut stages
+    new ApexCharts(document.querySelector("#stages-status-chart"), {
         series: [{{ $countEnAttente }}, {{ $countEnCours }}, {{ $countTermines }}],
-        chart: {
-            type: 'donut',
-            height: 250,
-        },
+        chart: { type: 'donut', height: 250 },
         labels: ["En attente", "En cours", "Terminés"],
         colors: ["#f7b84b", "#0acf97", "#727cf5"],
-        legend: {
-            show: false
-        },
+        legend: { show: false },
         responsive: [{
             breakpoint: 480,
             options: {
@@ -140,42 +227,73 @@ document.addEventListener('DOMContentLoaded', function () {
                 legend: { position: 'bottom' }
             }
         }]
-    };
-    new ApexCharts(document.querySelector("#stages-status-chart"), donutOptions).render();
+    }).render();
 
-    // Line Chart des candidatures
-    const ctx = document.getElementById('candidaturesChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
+    // Barres mensuelles candidatures valides
+    new Chart(document.getElementById('barChartCandidatures'), {
+        type: 'bar',
         data: {
-            labels: @json($chartLabels),
-            datasets: [{
-                label: 'Candidatures par mois',
-                data: @json($chartData),
-                fill: false,
-                borderColor: '#4e73df',
-                backgroundColor: '#4e73df',
-                tension: 0.4,
-                pointRadius: 4,
-                pointBackgroundColor: '#4e73df',
-                pointBorderColor: '#fff',
-            }]
+            labels: {!! json_encode($chartLabels) !!},
+            datasets: [
+                {
+                    label: 'Candidatures Offres',
+                    data: {!! json_encode($chartDataOffres) !!},
+                    backgroundColor: '#4e73df'
+                },
+                {
+                    label: 'Candidatures Spontanées',
+                    data: {!! json_encode($chartDataSpontanees) !!},
+                    backgroundColor: '#1cc88a'
+                }
+            ]
         },
         options: {
             responsive: true,
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Nombre' }
-                },
-                x: {
-                    title: { display: true, text: 'Mois' }
-                }
+                y: { beginAtZero: true, title: { display: true, text: 'Nombre' } },
+                x: { title: { display: true, text: 'Mois' } }
             }
         }
     });
 
-    // Date range picker
+    // Camembert répartition candidatures
+    new Chart(document.getElementById('pieChartTypes'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Offres', 'Spontanées'],
+            datasets: [{
+                data: [{{ $totalValideOffre }}, {{ $totalValideSpontanee }}],
+                backgroundColor: ['#4e73df', '#1cc88a']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Barres horizontales : Top départements
+    new Chart(document.getElementById('departementsChart'), {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($topDepartements->pluck('departement.nom')) !!},
+            datasets: [{
+                label: 'Nombre de stagiaires',
+                data: {!! json_encode($topDepartements->pluck('total')) !!},
+                backgroundColor: '#39afd1'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Datepicker pour filtre (dépend de daterangepicker si intégré)
     $('#dash-daterange').daterangepicker({
         opens: 'left',
         locale: {
@@ -189,6 +307,47 @@ document.addEventListener('DOMContentLoaded', function () {
             firstDay: 1
         }
     });
+
+    // Courbe évolution candidatures reçues
+    const ctx = document.getElementById('candidaturesLifetimeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {!! json_encode($chartLabels) !!},
+            datasets: [
+                {
+                    label: 'Candidatures Offres',
+                    data: {!! json_encode($chartDataOffres) !!},
+                    borderColor: '#00acc1',
+                    backgroundColor: 'rgba(0, 172, 193, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                },
+                {
+                    label: 'Candidatures Spontanées',
+                    data: {!! json_encode($chartDataSpontanees) !!},
+                    borderColor: '#f1556c',
+                    backgroundColor: 'rgba(241, 85, 108, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            stacked: false,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Nombre de candidatures' } },
+                x: { title: { display: true, text: 'Mois' } }
+            }
+        }
+    });
+
 });
 </script>
 @endpush

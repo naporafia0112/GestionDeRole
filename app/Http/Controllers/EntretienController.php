@@ -207,7 +207,7 @@ class EntretienController extends Controller
         // On exclut le statut 'prevu' de la liste des statuts modifiables
         $statutsFiltres = collect(Entretien::STATUTS)
             ->reject(function ($label, $value) {
-                return $value === 'prevu';
+                return $value === 'effectuee' || $value === 'annule';
             });
 
         return view('admin.entretiens.edit', compact(
@@ -238,7 +238,7 @@ class EntretienController extends Controller
         $validator = Validator::make($request->all(), [
             'date'   => ['required', 'date'],
             'heure'  => ['required'],
-            'statut' => ['required', 'in:prevu,en_cours,effectuee,termine,annule'],
+            'statut' => ['required', 'in:effectuee,termine,annule'],
             'lieu'   => ['required_if:type,présentiel', 'string'], // Validation pour le lieu
         ]);
 

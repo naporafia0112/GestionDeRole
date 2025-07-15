@@ -61,15 +61,7 @@
                                 </p>
                             </div>
 
-                           <div class="mb-3">
-                                <label class="mb-1"><strong>Département :</strong></label>
-                                @if($departement)
-                                    <p class="p-2 bg-light rounded">{{ $departement->nom }}</p>
-                                @else
-                                    <p class="text-muted">Département non spécifié</p>
-                                @endif
-                            </div>
-                                                    </div>
+                        </div>
 
                             <!-- Colonne droite - Candidat et Tuteur -->
                             <div class="col-md-6">

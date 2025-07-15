@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Stage;
 use App\Models\ReponseFormulaire;
 use App\Models\ReponseChamp;
+use Illuminate\Validation\Rule; // tout en haut du fichier
 
 class FormulaireController extends Controller
 {
@@ -20,12 +21,14 @@ class FormulaireController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'titre' => 'required|string|max:255',
-            'champs' => 'required|array|min:1',
-            'champs.*.label' => 'required|string',
-            'champs.*.type' => 'required|string|in:text,textarea,number,date,select,checkbox',
-            'champs.*.requis' => 'boolean',
+            'titre' => ['required', 'string', 'max:255'],
+            'champs' => ['required', 'array'],
+            'champs.*.label' => ['required', 'string', 'max:255'],
+            'champs.*.type' => ['required', Rule::in(['text', 'textarea', 'number', 'date', 'checkbox', 'select', 'file'])],
+            'champs.*.requis' => ['nullable', 'boolean'],
+            'champs.*.options' => ['nullable', 'string'], // Pour checkbox ou select uniquement
         ]);
+
 
         $user = Auth::user();
 
@@ -41,8 +44,7 @@ class FormulaireController extends Controller
                 'label' => $champ['label'],
                 'type' => $champ['type'],
                 'requis' => isset($champ['requis']),
-                'options' => null,
-            ]);
+                'options' => in_array($champ['type'], ['select', 'checkbox']) ? $champ['options'] ?? null : null,            ]);
         }
 
         return redirect()->route('directeur.formulaires.liste')->with('success', 'Formulaire créé avec succès.');
@@ -66,7 +68,11 @@ class FormulaireController extends Controller
     {
         $formulaire->load('champs');
 
-        return view('admin.rapports.tuteur.details', compact('formulaire'));
+        // Récupérer les stages liés au tuteur connecté (à adapter selon ton modèle)
+        $user = Auth::user();
+        $stages = Stage::where('id_tuteur', $user->id)->get();
+
+        return view('admin.rapports.tuteur.details', compact('formulaire', 'stages'));
     }
 
     // Enregistrer la réponse du tuteur
@@ -92,11 +98,25 @@ class FormulaireController extends Controller
         ]);
 
         foreach ($formulaire->champs as $champ) {
+            $valeur = null;
+
+            if ($champ->type === 'file' && $request->hasFile("champs.{$champ->id}")) {
+                $fichier = $request->file("champs.{$champ->id}");
+                $valeur = $fichier->store('formulaires_fichiers', 'public');
+            } elseif ($champ->type === 'checkbox') {
+                $valeur = is_array($request->input("champs.{$champ->id}"))
+                    ? implode(', ', $request->input("champs.{$champ->id}"))
+                    : null;
+            } else {
+                $valeur = $request->input("champs.{$champ->id}");
+            }
+
             ReponseChamp::create([
                 'reponse_formulaire_id' => $reponse->id,
                 'champ_formulaire_id' => $champ->id,
-                'valeur' => $request->input("champs.{$champ->id}"),
+                'valeur' => $valeur,
             ]);
+
         }
 
         return redirect()->route('tuteur.formulaires.affichage')->with('success', 'Formulaire rempli avec succès.');

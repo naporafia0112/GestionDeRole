@@ -33,7 +33,7 @@
                         <tbody>
                             @forelse($stages as $stage)
                                 <tr>
-                                    <td>{{ $stage->candidature->candidat->nom ?? '' }} {{ $stage->candidature->candidat->prenoms ?? '' }}</td>
+                                    <td>{{ $stage->candidat->nom ?? '' }} {{ $stage->candidat->prenoms ?? '' }}</td>
                                     <td>{{ $stage->tuteur->name ?? '----------' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($stage->date_fin)->format('d/m/Y') }}</td>
@@ -41,7 +41,7 @@
                                     <td>{{ ucfirst(str_replace('_', ' ', $stage->statut)) }}</td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            <a href="{{ route('stages.show', $stage->id) }}" class="btn btn-sm btn-info" title="Détails">
+                                            <a href="{{ route('directeur.stages.details', $stage->id) }}" class="btn btn-sm btn-info" title="Détails">
                                                 <i class="fe-eye"></i>
                                             </a>
                                             <!-- Bouton pour ouvrir modal affectation tuteur -->
@@ -52,7 +52,7 @@
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#affecterTuteurModal"
                                                 data-stage-id="{{ $stage->id }}"
-                                                data-candidat-nom="{{  $stage->candidature->candidat->nom }}"
+                                                data-candidat-nom="{{  $stage->candidat->nom }}"
                                             >
                                                 <i class="fe-plus-circle"></i>
                                             </button>
@@ -166,7 +166,7 @@ $(document).ready(function () {
         const stageId = $(button).data('stage-id');
         const nom = $(button).data('candidat-nom');
 
-        $('#affectationForm')[0].reset();  
+        $('#affectationForm')[0].reset();
         $('#candidatNom').val(nom);
         $('#affectationForm').removeClass('was-validated');
         $('#affectationForm').attr('action', '/stages/' + stageId + '/affecter-tuteur');

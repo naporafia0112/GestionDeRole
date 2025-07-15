@@ -2,16 +2,11 @@
 
 @section('content')
 <div class="container mt-4">
-    <div class="card shadow-sm">
+     <div class="card shadow-sm">
         <div class="card-body">
-            <div class="page-header mb-4">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h2 class="page-title mb-0" style="font-size: 20px;">
-                            Candidatures Spontanées
-                        </h2>
-                    </div>
-                    <div class="col-md-6">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="page-title-box">
                         <div class="page-title-right">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb m-0">
@@ -20,6 +15,7 @@
                                 </ol>
                             </nav>
                         </div>
+                        <h4 class="page-title"><strong>Listes des candidatures Spontanées</strong></h4>
                     </div>
                 </div>
             </div>
@@ -87,7 +83,7 @@
                                         @if($c->statut === 'reçue')
                                             <form action="{{ route('candidatures.spontanees.retenir', $c->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer la retenue ?">
                                                 @csrf @method('PATCH')
-                                                <button class="btn btn-sm btn-outline-success" title="Retenir"><i class="mdi mdi-check-circle-outline"></i></button>
+                                                <button class="btn btn-sm btn-outline-success ms-1" title="Retenir"><i class="mdi mdi-check-circle-outline"></i></button>
                                             </form>
                                             <form action="{{ route('candidatures.spontanees.rejeter', $c->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer le rejet ?">
                                                 @csrf @method('PATCH')
