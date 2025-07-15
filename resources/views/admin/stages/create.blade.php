@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-4">
-    <div classrow>
+    <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
@@ -11,34 +11,48 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="page-title-box d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h4 class="page-title">Créer un Stage</h4>
+                                <div class="page-title-left">
                                     <ol class="breadcrumb m-0">
                                         <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                         <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
-                                        <li class="breadcrumb-item"><a href="{{ route('offres.candidatures', $candidature->offre->id) }}">Liste des candidatures</a></li>
+                                        @if ($type === 'classique')
+                                            <li class="breadcrumb-item"><a href="{{ route('offres.candidatures', $candidature->offre->id) }}">Liste des candidatures</a></li>
+                                        @elseif ($type === 'spontanee')
+                                            <li class="breadcrumb-item">Candidature spontanée</li> {{-- ou autre lien adapté --}}
+                                        @endif
                                         <li class="breadcrumb-item active">Créer un Stage</li>
                                     </ol>
                                 </div>
+                                <h4 class="page-title">Créer un Stage</h4>
                             </div>
                         </div>
                     </div>
-
+                    @if($type === 'classique' && $candidature->offre)
+                        <span class="text-success"><p>Offre : {{ $candidature->offre->titre }}</p></span>
+                    @elseif($type === 'spontanee')
+                       <span class="text-success"> <p>Candidature spontanée</p></span>
+                    @endif
                     <!-- Formulaire -->
                     <form id="stageForm" action="{{ route('stages.store') }}" method="POST" novalidate>
                         @csrf
+                        <input type="hidden" name="type" value="{{ $type }}">
+                        @if($type === 'classique')
+                            <input type="hidden" name="id_candidature" value="{{ $candidature->id }}">
+                        @else
+                            <input type="hidden" name="id_candidature_spontanee" value="{{ $candidature->id }}">
+                        @endif
                         <div class="row g-3">
 
                             <!-- Candidat -->
                             <div class="col-lg-6">
                                 <label class="form-label">Candidat</label>
-                                @if(isset($candidature) && $candidature)
-                                    <input type="hidden" name="id_candidature" value="{{ $candidature->id }}">
+                                    @if($type === 'classique')
+                                        <input type="hidden" name="id_candidature" value="{{ $candidature->id }}">
+                                    @elseif($type === 'spontanee')
+                                        <input type="hidden" name="id_candidature_spontanee" value="{{ $candidature->id }}">
+                                    @endif
                                     <input type="text" class="form-control" disabled
                                         value="{{ $candidature->candidat->nom }} {{ $candidature->candidat->prenoms }}">
-                                @else
-                                    <p class="text-danger">Aucune candidature valide reçue.</p>
-                                @endif
                             </div>
 
                             <!-- Sujet (modifiable) -->

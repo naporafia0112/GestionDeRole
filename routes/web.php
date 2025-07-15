@@ -73,10 +73,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/offres/{offre}/preselectionner', [CandidatureController::class, 'preselectionner'])->name('candidatures.preselectionner');
 
     //CANDIDATURES SPONTANNÉES
+
     Route::get('/admin/candidatures-spontanees', [CandidatureSpontaneeController::class, 'index'])
         ->name('admin.candidatures.spontanees.index');
     Route::get('/candidatures/spontanees/{id}', [CandidatureSpontaneeController::class, 'show'])
         ->name('candidatures.spontanees.show')->whereNumber('id');
+    Route::patch('candidatures-spontanees/{id}/valider', [CandidatureSpontaneeController::class, 'valider'])->name('candidatures.spontanees.valider');
+    Route::patch('/candidatures-spontanees/{id}/retenir', [CandidatureSpontaneeController::class, 'retenir'])
+        ->name('candidatures.spontanees.retenir');
+    Route::patch('candidatures-spontanees/{id}/rejeter', [CandidatureSpontaneeController::class, 'rejeter'])->name('candidatures.spontanees.rejeter');
+    Route::post('candidatures-spontanees/{id}/analyze', [CandidatureSpontaneeController::class, 'analyze'])->name('candidatures.spontanees.analyze');
+    // Aperçu PDF dans navigateur
+    Route::get('/candidatures/{id}/preview/{field}', [CandidatureSpontaneeController::class, 'preview'])->name('candidatures.preview');
+
+    // Téléchargement du fichier
+    Route::get('/candidatures/{id}/download/{field}', [CandidatureSpontaneeController::class, 'download'])->name('candidatures.download');
+
     // Routes personnalisées pour les types de stages
 
     Route::get('stages/academiques', [StageController::class, 'stagesAcademiques'])->name('stages.academiques');

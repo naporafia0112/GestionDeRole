@@ -14,17 +14,13 @@ class FormulaireController extends Controller
 {
     public function create()
     {
-        // Récupérer les stages (optionnel: filtrer selon besoin)
-        $stages = Stage::all();
-
-        return view('admin.rapports.directeur.formulairedynamique', compact('stages'));
+        return view('admin.rapports.directeur.formulairedynamique');
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'titre' => 'required|string|max:255',
-            'stage_id' => 'required|exists:stages,id', // validation du stage
             'champs' => 'required|array|min:1',
             'champs.*.label' => 'required|string',
             'champs.*.type' => 'required|string|in:text,textarea,number,date,select,checkbox',
@@ -37,7 +33,6 @@ class FormulaireController extends Controller
             'titre' => $request->titre,
             'id_departement' => $user->id_departement,
             'cree_par' => $user->id,
-            'stage_id' => $request->stage_id,  // <-- association au stage
         ]);
 
         foreach ($request->champs as $champ) {
@@ -50,18 +45,20 @@ class FormulaireController extends Controller
             ]);
         }
 
-        return redirect()->route('formulairedynamique.creation')->with('success', 'Formulaire créé avec succès.');
+        return redirect()->route('directeur.formulaires.liste')->with('success', 'Formulaire créé avec succès.');
     }
+
     //PAGES TUTEURS
-   public function affichageformulaire()
+    public function affichageformulaire()
     {
         $user = Auth::user();
 
-        // Récupère les stages supervisés par ce tuteur
-        $stages = $user->stages()->with('formulaire')->get();
+        // Récupérer tous les formulaires créés pour le département du tuteur
+        $formulaires = Formulaire::where('id_departement', $user->id_departement)->get();
 
-        return view('admin.rapports.tuteur.affichageformulaire', compact('stages'));
+        return view('admin.rapports.tuteur.affichageformulaire', compact('formulaires'));
     }
+
 
 
     // Afficher le formulaire à remplir
@@ -77,27 +74,23 @@ class FormulaireController extends Controller
     {
         $user = Auth::user();
 
-        // Validation des champs dynamiques
-        $rules = [];
+        $rules = [
+            'stage_id' => 'required|exists:stages,id',
+        ];
+
         foreach ($formulaire->champs as $champ) {
-            $rule = [];
-            if ($champ->requis) {
-                $rule[] = 'required';
-            } else {
-                $rule[] = 'nullable';
-            }
-            // Tu peux étendre selon le type, ex: 'date', 'numeric', etc.
+            $rule = $champ->requis ? ['required'] : ['nullable'];
             $rules["champs.{$champ->id}"] = $rule;
         }
+
         $request->validate($rules);
 
-        // Création de la réponse globale
         $reponse = ReponseFormulaire::create([
             'formulaire_id' => $formulaire->id,
             'user_id' => $user->id,
+            'stage_id' => $request->stage_id,
         ]);
 
-        // Enregistrement des réponses par champ
         foreach ($formulaire->champs as $champ) {
             ReponseChamp::create([
                 'reponse_formulaire_id' => $reponse->id,
@@ -108,6 +101,7 @@ class FormulaireController extends Controller
 
         return redirect()->route('tuteur.formulaires.affichage')->with('success', 'Formulaire rempli avec succès.');
     }
+
     //PAGE DIRECTEUR
     //FORMULAIRES CRÉE PAR LE DIRECTEUR
     public function listeformulairesdirecteur()

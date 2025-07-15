@@ -4,6 +4,8 @@
 <div class="container mt-4">
     <div class="content">
         <div class="container-fluid">
+            <div class="card shadow-sm">
+                <div class="card-body">
             <!-- start page title -->
             <div class="row">
                 <div class="col-12">
@@ -12,38 +14,26 @@
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item"><a href="{{ route('dashboard.tuteur') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item active">
-                                    <a href="{{ route('directeur.formulaires.liste') }}">Listes des formulaires crées</a>
+                                    <a href="{{ route('directeur.formulaires.liste') }}">Listes des formulaires</a>
                                 </li>
                                 <li class="breadcrumb-item active">Formulaire de création</li>
                             </ol>
                         </div>
                         <h4 class="page-title">Créer un nouveau formulaire</h4>
-                        <p class="sub-header">Définissez les champs et les détails de votre formulaire</p>
+                        <p class="sub-header">Définissez les champs de votre formulaire destinés à tous les tuteurs</p>
                     </div>
                 </div>
             </div>
 
+            <!-- formulaire -->
             <div class="row">
                 <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            @if(session('success'))
-                                <div class="alert alert-success">{{ session('success') }}</div>
-                            @endif
-                            @if ($errors->any())
-                                <div class="alert alert-danger">
-                                    <strong>Veuillez corriger les erreurs ci-dessous :</strong>
-                                    <ul class="mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
 
-                            <form action="{{ route('formulaires.store') }}" method="POST">
+
+                            <form id="formulaire-creation" action="{{ route('formulaires.store') }}" method="POST">
                                 @csrf
 
+                                <!-- titre -->
                                 <div class="mb-3">
                                     <label for="titre" class="form-label">Titre du formulaire <span class="text-danger">*</span></label>
                                     <input type="text" name="titre" id="titre" class="form-control @error('titre') is-invalid @enderror" value="{{ old('titre') }}" required>
@@ -52,23 +42,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="stage_id" class="form-label">Associer à un stage  <span class="text-danger">*</span></label>
-                                    <select name="stage_id" id="stage_id" class="form-select @error('stage_id') is-invalid @enderror">
-                                        <option value="">-- Aucun --</option>
-                                        @foreach ($stages as $stage)
-                                            <option value="{{ $stage->id }}" {{ old('stage_id') == $stage->id ? 'selected' : '' }}>
-                                                {{ $stage->candidature->candidat->nom ?? 'Nom inconnu' }} {{ $stage->candidature->candidat->prenoms ?? '' }} - {{ $stage->candidature->offre->titre ?? 'Offre inconnue' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('stage_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
                                 <hr>
-
                                 <h5>Champs du formulaire <span class="text-danger">*</span></h5>
                                 <div id="champs-container"></div>
 
@@ -77,10 +51,10 @@
                                 </button>
 
                                 <div class="text-end">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="button" id="confirm-submit" class="btn btn-primary">
                                         Créer le formulaire
                                     </button>
-                                    <a href="{{ url()->previous() }}" class="btn btn-light ms-2">Annuler</a>
+                                    <a href="{{ route('directeur.formulaires.liste') }}" class="btn btn-light ms-2">Annuler</a>
                                 </div>
                             </form>
                         </div> <!-- end card-body -->
@@ -90,13 +64,41 @@
         </div> <!-- end container-fluid -->
     </div> <!-- end content -->
 </div> <!-- end container -->
+@endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     let index = 0;
 
     function ajouterChamp() {
         const container = document.getElementById('champs-container');
+
+        const dernierChamp = container.lastElementChild;
+        if (dernierChamp) {
+            const labelInput = dernierChamp.querySelector('input[name^="champs"][name$="[label]"]');
+            const typeSelect = dernierChamp.querySelector('select[name^="champs"][name$="[type]"]');
+
+            if (!labelInput.value.trim()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Champ manquant',
+                    text: "Veuillez remplir le Label du dernier champ avant d'en ajouter un nouveau.",
+                    confirmButtonText: 'OK'
+                }).then(() => labelInput.focus());
+                return;
+            }
+
+            if (!typeSelect.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Champ manquant',
+                    text: "Veuillez sélectionner le Type du dernier champ avant d'en ajouter un nouveau.",
+                    confirmButtonText: 'OK'
+                }).then(() => typeSelect.focus());
+                return;
+            }
+        }
 
         const html = `
         <div class="border rounded p-3 mb-3">
@@ -107,6 +109,7 @@
             <div class="mb-3">
                 <label class="form-label">Type <span class="text-danger">*</span></label>
                 <select name="champs[${index}][type]" class="form-select" required>
+                    <option value="">-- Sélectionner un type --</option>
                     <option value="text">Texte</option>
                     <option value="textarea">Zone de texte</option>
                     <option value="number">Nombre</option>
@@ -128,7 +131,42 @@
             feather.replace();
         }
     }
+
+    // Confirmation de soumission
+    document.getElementById('confirm-submit').addEventListener('click', function () {
+        Swal.fire({
+            title: 'Confirmer la création',
+            text: 'Souhaitez-vous vraiment créer ce formulaire ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Oui, créer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('formulaire-creation').submit();
+            }
+        });
+    });
+
+    // Affichage des alertes post redirection
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: "{{ session('success') }}",
+            confirmButtonColor: '#198754'
+        });
+    @endif
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Veuillez corriger les erreurs dans le formulaire.',
+            confirmButtonColor: '#dc3545'
+        });
+    @endif
 </script>
 @endpush
-
-@endsection

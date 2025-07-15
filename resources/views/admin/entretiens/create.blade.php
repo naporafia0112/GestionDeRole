@@ -72,13 +72,8 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="id_candidat" class="form-label">Candidat</label>
-                                    <select name="id_candidat_display" class="form-control" disabled>
-                                        @foreach($candidats as $candidat)
-                                            @if(isset($id_candidat) && $id_candidat == $candidat->id)
-                                                <option selected>{{ $candidat->nom }} {{ $candidat->prenoms }}</option>
-                                            @endif
-                                        @endforeach
-                                    </select>
+                                    <input type="text" class="form-control" disabled value="{{ $candidat->nom }} {{ $candidat->prenoms }}">
+                                    <input type="hidden" name="id_candidat" value="{{ $candidat->id }}">
                                     <input type="hidden" name="id_candidat" value="{{ $id_candidat }}">
                                 </div>
                             </div>
@@ -86,16 +81,23 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="id_offre" class="form-label">Offre</label>
-                                    <select name="id_offre_display" class="form-control" disabled>
-                                        @foreach($offres as $offre)
-                                            @if(isset($id_offre) && $id_offre == $offre->id)
-                                                <option selected>{{ $offre->titre }}</option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                    <input type="hidden" name="id_offre" value="{{ $id_offre }}">
+
+                                    @if(isset($id_offre) && $id_offre)
+                                        <select name="id_offre_display" class="form-control" disabled>
+                                            @foreach($offres as $offre)
+                                                @if($id_offre == $offre->id)
+                                                    <option selected>{{ $offre->titre }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                        <input type="hidden" name="id_offre" value="{{ $id_offre }}">
+                                    @else
+                                        <input type="text" class="form-control" disabled value="Candidature spontanée - pas d'offre associée">
+                                        <input type="hidden" name="id_offre" value="">
+                                    @endif
                                 </div>
                             </div>
+
                         </div>
 
                         {{-- Champ commentaire pleine largeur en bas --}}
@@ -110,7 +112,7 @@
 
                         <div class="text-end">
                             <button type="submit" class="btn btn-success">Créer l'entretien</button>
-                            <a href="{{ route('offres.candidatures',$offre->id) }}" class="btn btn-light">Annuler</a>
+                            <a href="{{ isset($offre) ? route('offres.candidatures', $offre->id) : route('admin.candidatures.spontanees.index') }}" class="btn btn-light">Annuler</a>
                         </div>
                     </form>
                 </div> <!-- end card-body -->

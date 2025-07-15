@@ -11,6 +11,8 @@ use App\Models\Departement;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Candidat;
 use Carbon\Carbon;
+use App\Models\CandidatureSpontanee;
+
 
 
 class StageController extends Controller
@@ -29,30 +31,42 @@ class StageController extends Controller
      */
     public function create(Request $request)
     {
-        $id_candidature = $request->get('id_candidature');
-
-        if (!$id_candidature) {
-            return redirect()->route('candidatures.index')->with('error', 'Candidature manquante.');
-        }
-
-        $candidature = Candidature::with(['candidat', 'offre'])->find($id_candidature);
-
-        if (!$candidature) {
-            return redirect()->route('candidatures.index')->with('error', 'Candidature introuvable.');
-        }
-
         $departements = Departement::all();
+        // Vérifie si paramètre d'URL présent (GET)
+        if ($request->filled('id_candidature')) {
+            $candidature = Candidature::with('candidat', 'offre')->findOrFail($request->id_candidature);
+            return view('admin.stages.create', [
+                'candidature' => $candidature,
+                'offre' => $candidature->offre,
+                'type' => 'classique',
+                'departements' => $departements
+            ]);
+        }
 
-        return view('admin.stages.create', compact('candidature', 'departements'));
+        if ($request->filled('candidature_spontanee_id')) {
+            $candidature = CandidatureSpontanee::with('candidat')->findOrFail($request->candidature_spontanee_id);
+            return view('admin.stages.create', [
+                'candidature' => $candidature,
+                'offre' => null,
+                'type' => 'spontanee',
+                'departements' => $departements
+            ]);
+        }
+
+        return redirect()->route('dashboard.RH')->with('error', 'Paramètres invalides pour la création du stage.');
     }
+
 
     /**
      * Enregistrement d’un nouveau stage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
+        // 1. Validation des données reçues
         $request->validate([
-            'id_candidature' => 'required|exists:candidatures,id',
+            'type' => 'required|in:classique,spontanee',
+            'id_candidature' => 'required_if:type,classique|exists:candidatures,id',
+            'id_candidature_spontanee' => 'required_if:type,spontanee|exists:candidatures_spontanees,id',
             'date_debut' => 'required|date',
             'date_fin' => [
                 'required',
@@ -60,8 +74,8 @@ class StageController extends Controller
                 'after_or_equal:date_debut',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->has('date_debut')) {
-                        $dateDebut =Carbon::parse($request->input('date_debut'));
-                        $dateFin =Carbon::parse($value);
+                        $dateDebut = \Carbon\Carbon::parse($request->input('date_debut'));
+                        $dateFin = \Carbon\Carbon::parse($value);
 
                         if ($dateFin->lt($dateDebut->copy()->addMonth())) {
                             $fail('La date de fin doit être au moins 1 mois après la date de début.');
@@ -76,8 +90,8 @@ class StageController extends Controller
             'remuneration' => 'nullable|numeric',
         ]);
 
+        // 2. Récupérer les données communes
         $data = $request->only([
-            'id_candidature',
             'date_debut',
             'date_fin',
             'sujet',
@@ -87,28 +101,58 @@ class StageController extends Controller
             'remuneration',
         ]);
 
+        // 3. Statut par défaut si non fourni
         $data['statut'] = $data['statut'] ?? Stage::STATUTS['EN_ATTENTE'];
 
-        // Vérification : éviter doublon de stage pour même candidat/offre
-        $candidature = Candidature::with(['candidat', 'offre'])->find($data['id_candidature']);
+        // 4. Selon le type, récupérer la candidature liée et vérifier doublons
+        if ($request->type === 'classique') {
+            $candidature = Candidature::with(['candidat', 'offre'])->find($request->id_candidature);
 
-        $stageExistant = Stage::whereHas('candidature', function ($query) use ($candidature) {
-            $query->where('candidat_id', $candidature->candidat_id)
-                ->where('offre_id', $candidature->offre_id);
-        })
-        ->whereIn('statut', ['en_cours', 'valide']) // selon ta logique métier
-        ->exists();
+            if (!$candidature) {
+                return back()->with('error', 'Candidature classique introuvable.');
+            }
 
-        if ($stageExistant) {
-            return back()->with('error', 'Ce candidat a déjà un stage actif pour cette offre.');
+            // Vérifier doublon : stage actif pour ce candidat et cette offre
+            $stageExistant = Stage::whereHas('candidature', function ($query) use ($candidature) {
+                $query->where('candidat_id', $candidature->candidat_id)
+                    ->where('offre_id', $candidature->offre_id);
+            })
+            ->whereIn('statut', ['en_cours', 'valide'])
+            ->exists();
+
+            if ($stageExistant) {
+                return back()->with('error', 'Ce candidat a déjà un stage actif pour cette offre.');
+            }
+
+            $data['id_candidature'] = $candidature->id;
+            $data['id_candidature_spontanee'] = null;
+
+        } else {
+            $candidatureSpontanee = CandidatureSpontanee::with('candidat')->find($request->id_candidature_spontanee);
+
+            if (!$candidatureSpontanee) {
+                return back()->with('error', 'Candidature spontanée introuvable.');
+            }
+
+            // Vérifier doublon : stage actif pour ce candidat et cette candidature spontanée
+            $stageExistant = Stage::where('id_candidature_spontanee', $candidatureSpontanee->id)
+                ->whereIn('statut', ['en_cours', 'valide'])
+                ->exists();
+
+            if ($stageExistant) {
+                return back()->with('error', 'Ce candidat a déjà un stage actif pour cette candidature spontanée.');
+            }
+
+            $data['id_candidature_spontanee'] = $candidatureSpontanee->id;
+            $data['id_candidature'] = null;
         }
 
+        // 5. Création du stage
         Stage::create($data);
 
-        return redirect()->route('stages.academiques')->with('success', 'Stage créé avec succès.');
+        // 6. Redirection avec message succès
+        return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès.');
     }
-
-
 
     /**
      *Détail d’un stage.
@@ -221,25 +265,25 @@ class StageController extends Controller
      * Formulaire d’affectation de tuteur.
      */
    public function affecterTuteur(Request $request, $id)
-{
-    $stage = Stage::findOrFail($id);
+    {
+        $stage = Stage::findOrFail($id);
 
-    $directeur = Auth::user();
+        $directeur = Auth::user();
 
-    if (!$directeur->hasRole('DIRECTEUR')) {
-        abort(403);
+        if (!$directeur->hasRole('DIRECTEUR')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'id_tuteur' => 'required|exists:users,id',
+        ]);
+
+        $stage->id_tuteur = $request->id_tuteur;
+        $stage->statut = Stage::STATUTS['EN_COURS'];
+        $stage->save();
+
+        return redirect()->route('stages.en_cours')->with('success', 'Tuteur affecté avec succès.');
     }
-
-    $request->validate([
-        'id_tuteur' => 'required|exists:users,id',
-    ]);
-
-    $stage->id_tuteur = $request->id_tuteur;
-    $stage->statut = Stage::STATUTS['EN_COURS'];
-    $stage->save();
-
-    return redirect()->route('directeur.stages')->with('success', 'Tuteur affecté avec succès.');
-}
 
     /**
      * Édition d’un stage.

@@ -214,11 +214,17 @@ $(document).ready(function () {
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Oui',
-            cancelButtonText: 'Annuler'
+            cancelButtonText: 'Annuler',
+            customClass: {
+                confirmButton: 'btn btn-success me-2',
+                cancelButton: 'btn btn-outline-secondary'
+            },
+            buttonsStyling: false
         }).then((result) => {
             if (result.isConfirmed) form.submit();
         });
     });
+
 
     $('.analyze-btn').on('click', function () {
         const btn = $(this);

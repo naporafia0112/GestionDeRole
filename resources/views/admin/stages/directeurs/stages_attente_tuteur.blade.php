@@ -166,11 +166,12 @@ $(document).ready(function () {
         const stageId = $(button).data('stage-id');
         const nom = $(button).data('candidat-nom');
 
+        $('#affectationForm')[0].reset();  
         $('#candidatNom').val(nom);
-        $('#affectationForm').attr('action', '/stages/' + stageId + '/affecter-tuteur');
-        $('#affectationForm')[0].reset();
         $('#affectationForm').removeClass('was-validated');
+        $('#affectationForm').attr('action', '/stages/' + stageId + '/affecter-tuteur');
     });
+
 
     $('#affectationForm').on('submit', function (e) {
         e.preventDefault();

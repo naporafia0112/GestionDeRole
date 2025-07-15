@@ -3,35 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\CandidatureSpontanee;
 use App\Models\Candidat;
-use Illuminate\Support\Facades\Storage;
 
 class CandidatureSpontaneeController extends Controller
 {
     public function index()
     {
-        $candidatures = CandidatureSpontanee::with('candidat')->latest()->paginate(10);
+        $candidatures = CandidatureSpontanee::with(['candidat', 'entretiens'])->latest()->paginate(10);
         return view('admin.candidatures.spontanee.candidatures-spontanees', compact('candidatures'));
     }
+
     public function create()
     {
         return view('vitrine.candidature-spontanee');
     }
-
-     public function show($id)
-    {
-        $candidature = CandidatureSpontanee::with('candidat')->findOrFail($id);
-
-        // Numéro d'ordre dans la liste
-        $toutesCandidatures = CandidatureSpontanee::orderBy('id')->pluck('id')->toArray();
-        $numero = array_search($candidature->id, $toutesCandidatures) + 1;
-
-        $statut = $candidature->statut;
-
-        return view('admin.candidatures.spontanee.show', compact('candidature', 'numero', 'statut'));
-    }
-
 
     public function store(Request $request)
     {
@@ -49,7 +36,6 @@ class CandidatureSpontaneeController extends Controller
             'message' => 'nullable|string',
         ]);
 
-        // Enregistre ou récupère le candidat
         $candidat = Candidat::firstOrCreate(
             ['email' => $validated['email']],
             [
@@ -62,7 +48,6 @@ class CandidatureSpontaneeController extends Controller
             ]
         );
 
-        // Upload fichiers
         $cv = $request->file('cv_fichier')?->store('cvs', 'public');
         $lm = $request->file('lm_fichier')?->store('lms', 'public');
         $lr = $request->file('lr_fichier')?->store('lrs', 'public');
@@ -73,8 +58,88 @@ class CandidatureSpontaneeController extends Controller
             'lm_fichier' => $lm,
             'lr_fichier' => $lr,
             'message' => $validated['message'],
+            'statut' => 'reçue',
         ]);
 
-        return redirect()->back()->with('success', 'Candidature envoyée avec succès.');
+        return redirect()->route('vitrine.index')->with('success', 'Candidature envoyée avec succès.');
     }
+
+    public function show($id)
+    {
+        $candidature = CandidatureSpontanee::with('candidat')->findOrFail($id);
+
+        $toutesCandidatures = CandidatureSpontanee::orderBy('id')->pluck('id')->toArray();
+        $numero = array_search($candidature->id, $toutesCandidatures) + 1;
+
+        $statut = $candidature->statut;
+
+        return view('admin.candidatures.spontanee.show', compact('candidature', 'numero', 'statut'));
+    }
+
+    public function preview($id, $field)
+    {
+        $candidature = CandidatureSpontanee::findOrFail($id);
+
+        $allowedFields = ['cv_fichier', 'lm_fichier', 'lr_fichier'];
+
+        if (!in_array($field, $allowedFields) || !$candidature->$field) {
+            abort(404, 'Fichier non disponible');
+        }
+
+        $path = $candidature->$field;
+
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404, 'Fichier introuvable');
+        }
+
+        return response()->file(storage_path('app/public/' . $path));
+    }
+
+    public function download($id, $field)
+    {
+        $candidature = CandidatureSpontanee::findOrFail($id);
+
+        $allowedFields = ['cv_fichier', 'lm_fichier', 'lr_fichier'];
+
+        if (!in_array($field, $allowedFields) || !$candidature->$field) {
+            abort(404, 'Fichier non disponible');
+        }
+
+        $path = $candidature->$field;
+
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404, 'Fichier introuvable');
+        }
+
+        return Storage::disk('public')->download($path);
+    }
+
+    // Méthodes de traitement
+
+    public function retenir($id)
+    {
+        $candidature = CandidatureSpontanee::findOrFail($id);
+        $candidature->update(['statut' => 'retenu']);
+
+        return back()->with('success', 'Candidature retenue avec succès.');
+    }
+
+    public function rejeter($id)
+    {
+        $candidature = CandidatureSpontanee::findOrFail($id);
+        $candidature->update(['statut' => 'rejete']);
+
+        return back()->with('success', 'Candidature rejetée.');
+    }
+
+    public function valider($id)
+    {
+        $candidature = CandidatureSpontanee::findOrFail($id);
+        $candidature->update(['statut' => 'valide']);
+
+        return redirect()->route('stages.create', [
+            'candidature_spontanee_id' => $candidature->id
+        ])->with('success', 'Candidature validée. Vous pouvez maintenant créer un stage.');
+    }
+
 }

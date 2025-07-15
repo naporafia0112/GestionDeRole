@@ -22,14 +22,9 @@
         <div class="col-12">
             <div class="card d-block">
                 <div class="card-body">
-                    <div class="float-sm-end mb-2 mb-sm-0">
-                        <div class="row g-2">
-                            <div class="col-auto">
-                            </div>
-
+                        <div class="col-auto">
+                            <a href="{{ route('tuteur.stages.en_cours') }}" class="btn btn-sm btn-link"><i class="mdi mdi-keyboard-backspace"></i>Retour</a>
                         </div>
-                    </div>
-
                     <div class="row mt-3">
                         <!-- Colonne gauche - Informations principales -->
                         <div class="col-md-6">

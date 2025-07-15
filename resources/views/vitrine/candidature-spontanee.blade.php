@@ -111,3 +111,26 @@
     </div>
 </div>
 @endsection
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès',
+                text: "{{ session('success') }}",
+                confirmButtonText: 'OK'
+            });
+        @elseif($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                html: `<ul style="text-align:left;">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>`,
+                confirmButtonText: 'OK'
+            });
+        @endif
+    });
+</script>
+@endpush

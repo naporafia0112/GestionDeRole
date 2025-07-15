@@ -62,7 +62,7 @@
                                     </a>
                                 @endif--}}
 
-                                @if($statut === 'retenu')
+                                @if($statut === 'retenu' && !$candidature->entretien)
                                     {{--<form action="{{ route('candidatures.reject', $candidature->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer le rejet de cette candidature ?">
                                         @csrf
                                         @method('PATCH')
@@ -70,20 +70,22 @@
                                             <i class="mdi mdi-close-circle-outline"></i>
                                         </button>
                                     </form>--}}
-                                    <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}" class="d-inline">
-                                        @csrf
-                                        <button class="btn btn-sm btn-success confirm-validate" type="submit" title="Valider">
-                                            <i class="mdi mdi-check"></i>
-                                        </button>
                                     </form>
-                                    <a href="{{ route('entretiens.create', ['id_candidat' => $candidature->candidat->id, 'offre_id' => $candidature->offre->id]) }}"
-                                        class="btn btn-sm btn-outline-info"
-                                        title="Planifier entretien">
+                                    <a href="{{ route('entretiens.slots.page', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}" class="btn btn-sm btn-outline-info ms-1" title="Choisir un créneau">
                                         <i class="mdi mdi-calendar-check-outline"></i>
+                                    </a>
                                     </a>
                                     <button class="btn btn-sm btn-outline-primary analyze-btn" data-id="{{ $candidature->id }}" title="Analyser">
                                         <i class="mdi mdi-robot"></i>
                                     </button>
+                                @endif
+                                @if($statut==='retenu' && $candidature->entretien)
+                                   <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}" class="d-inline">
+                                        @csrf
+                                        <button class="btn btn-sm btn-success confirm-validate" title="Valider">
+                                            <i class="mdi mdi-check"></i>
+                                        </button>
+                                    </form>
                                 @endif
                             </div>
                         </div>

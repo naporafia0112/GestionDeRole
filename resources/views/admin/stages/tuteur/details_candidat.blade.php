@@ -28,8 +28,8 @@
         <!-- Colonne Informations personnelles -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="card-title mb-0 fw-bold">Informations personnelles</h5>
+               <div class="col-auto">
+                    <a href="{{ route('stages.candidats_tuteurs') }}" class="btn btn-sm btn-link"><i class="mdi mdi-keyboard-backspace"></i>Retour</a>
                 </div>
                 <div class="card-body">
                     <div class="row">

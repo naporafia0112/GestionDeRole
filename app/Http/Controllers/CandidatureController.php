@@ -277,10 +277,10 @@ EOT;
         $candidature->save();
 
         return redirect()->route('stages.create', [
-            'id_candidature' => $candidature->id,
-            'id_offre' => $candidature->offre_id,
+            'id_candidature' => $candidature->id
         ])->with('success', 'Candidature validée. Vous pouvez maintenant créer un stage.');
     }
+
 
 
     public function effectuee($id)

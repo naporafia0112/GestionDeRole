@@ -72,20 +72,24 @@ class EntretienController extends Controller
     // Formulaire de création d’un entretien
     public function create(Request $request)
     {
-        $candidats = Candidat::whereHas('candidatures', function ($query) {
-            $query->where('statut', 'retenu');
-        })->get();
+        $id_candidat = $request->get('id_candidat');
+        $id_offre = $request->get('id_offre');
 
-        // Récupérer les ids passés en GET pour pré-remplissage
-        $id_candidat = $request->query('id_candidat');
-        $id_offre = $request->query('id_offre');
-        $date = $request->query('date');
-        $heure = $request->query('heure');
+        $candidat = \App\Models\Candidat::findOrFail($id_candidat);
+        $offres = \App\Models\Offre::all();
 
-        $offres = $id_offre ? Offre::where('id', $id_offre)->get() : Offre::all();
+        // Si la date et l'heure sont fournies depuis les créneaux
+        $date = $request->get('date');
+        $heure = $request->get('heure');
 
-
-        return view('admin.entretiens.create', compact('candidats', 'offres', 'id_candidat', 'id_offre','date','heure'));
+        return view('admin.entretiens.create', compact(
+            'candidat',
+            'id_candidat',
+            'id_offre',
+            'offres',
+            'date',
+            'heure'
+        ));
     }
 
 
@@ -103,7 +107,9 @@ class EntretienController extends Controller
             'statut' => 'nullable|string|in:prevu,en_cours,effectuee,termine,annule',
             'commentaire' => 'nullable|string',
             'id_candidat' => 'required|exists:candidats,id',
-            'id_offre' => 'required|exists:offres,id',
+            'id_offre' => 'nullable|exists:offres,id',
+            'candidature_spontanee_id' => 'nullable|exists:candidatures_spontanees,id',
+
         ]);
 
         $validator->after(function ($validator) use ($entretienDateTime, $now) {
@@ -127,10 +133,12 @@ class EntretienController extends Controller
                 'heure' => $request->heure,
                 'lieu' => $request->lieu,
                 'type' => $request->type,
-                'statut' =>'prévu',
+                'statut' =>'prevu',
                 'commentaire' => $request->commentaire,
                 'id_candidat' => $request->id_candidat,
-                'id_offre' => $request->id_offre,
+                'id_offre' => $request->id_offre ?? null,
+                'candidature_spontanee_id' => $request->candidature_spontanee_id ?? null,
+                // Ajout des dates de début et de fin
                 'date_debut' => $debut,
                 'date_fin' => $fin,
             ]);
@@ -196,12 +204,18 @@ class EntretienController extends Controller
         $candidats = Candidat::all();
         $offres = Offre::all();
 
+        // On exclut le statut 'prevu' de la liste des statuts modifiables
         $statutsFiltres = collect(Entretien::STATUTS)
-        ->reject(function ($label, $value) {
-            return in_array($value, ['prevu']);
-        });
+            ->reject(function ($label, $value) {
+                return $value === 'prevu';
+            });
 
-        return view('admin.entretiens.edit', compact('entretien', 'candidats', 'offres', 'statutsFiltres'));
+        return view('admin.entretiens.edit', compact(
+            'entretien',
+            'candidats',
+            'offres',
+            'statutsFiltres'
+        ));
     }
 
 
@@ -263,7 +277,7 @@ class EntretienController extends Controller
         $entretien->update($updateData);
 
         // 6. Redirection
-        return redirect()->route('entretiens.index')
+        return redirect()->route('entretiens.calendrier')
                         ->with('success', 'Entretien mis à jour avec succès.');
     }
     // Annulation avec alertes
@@ -283,6 +297,7 @@ class EntretienController extends Controller
     // Retour JSON pour affichage modal / ajax (si besoin)
    public function showJson($id)
     {
+
         $entretien = Entretien::with(['candidat', 'offre'])->findOrFail($id);
         return response()->json([
             'title' => $entretien->type,
@@ -294,7 +309,8 @@ class EntretienController extends Controller
             'commentaire' => $entretien->commentaire,
             'candidat' => $entretien->candidat ? $entretien->candidat->nom . ' ' . $entretien->candidat->prenoms : '',
             'offre' => $entretien->offre ? $entretien->offre->titre : '',
-            'offre_id' => $entretien->offre ? $entretien->offre->id : null, // <-- ajouté ici
+            'offre_id' => $entretien->offre ? $entretien->offre->id : null,
+            'candidature_spontanee_id' => $entretien->candidature_spontanee_id,
         ]);
     }
 

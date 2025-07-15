@@ -12,6 +12,7 @@ class Stage extends Model
     protected $fillable = [
         'id_tuteur',
         'id_candidature',
+        'id_candidature_spontanee',
         'date_debut',
         'date_fin',
         'remuneration',
@@ -80,6 +81,23 @@ class Stage extends Model
     public function formulaire()
     {
         return $this->hasOne(Formulaire::class);
+    }
+
+    public function candidatureSpontanee()
+    {
+        return $this->belongsTo(CandidatureSpontanee::class, 'id_candidature_spontanee');
+    }
+    public function getCandidatAttribute()
+    {
+        if ($this->candidature) {
+            return $this->candidature->candidat;
+        }
+
+        if ($this->candidatureSpontanee) {
+            return $this->candidatureSpontanee->candidat;
+        }
+
+        return null;
     }
 
 }

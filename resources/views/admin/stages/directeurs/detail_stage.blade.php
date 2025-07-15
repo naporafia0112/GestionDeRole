@@ -1,27 +1,30 @@
 @extends('layouts.home')
 @section('content')
 <div class="container mt-4">
+     <div class="card d-block">
+        <div class="card-body">
     <!-- start page title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="">DIPRH</a></li>
-                        <li class="breadcrumb-item"><a href="{{route('stages.en_cours')}}">Stages en cours</a></li>
-                        <li class="breadcrumb-item active"><strong>Détails du stage</strong></li>
-                    </ol>
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{route('stages.en_cours')}}">Stages en cours</a></li>
+                                <li class="breadcrumb-item active"><strong>Détails du stage</strong></li>
+                            </ol>
+                        </div>
+                        <h4 class="page-title"><strong>Détails du stage N°{{ $numero }}</strong></h4>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ route('stages.en_cours') }}" class="btn btn-sm btn-link"><i class="mdi mdi-keyboard-backspace"></i>Retour</a>
+                    </div>
                 </div>
-                <h4 class="page-title"><strong>Détails du stage N°{{ $numero }}</strong></h4>
             </div>
-        </div>
-    </div>
     <!-- end page title -->
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card d-block">
-                <div class="card-body">
+            <div class="row">
+                <div class="col-12">
                     <div class="float-sm-end mb-2 mb-sm-0">
                         <div class="row g-2">
                             <div class="col-auto">

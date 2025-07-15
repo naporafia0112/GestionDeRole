@@ -8,7 +8,7 @@ class ReponseFormulaire extends Model
 {
         protected $table = 'reponses_formulaires';
 
-    protected $fillable = ['formulaire_id', 'user_id'];
+    protected $fillable = ['formulaire_id', 'user_id', 'stage_id'];
 
     public function formulaire()
     {
@@ -33,10 +33,8 @@ class ReponseFormulaire extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
     public function stage()
     {
-        return $this->hasOne(Stage::class, 'id_tuteur', 'user_id');
+        return $this->belongsTo(Stage::class);
     }
-
 }

@@ -34,9 +34,9 @@
                             <tr data-statut="{{ strtolower($entretien->statut) }}">
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $entretien->candidat->nom ?? '-' }} {{ $entretien->candidat->prenoms ?? '' }}</td>
-                                <td>{{ $entretien->offre->titre ?? '-' }}</td>
+                                <td>{{ $entretien->offre->titre ?? 'Entretien spontané' }}</td>
                                 <td>{{ \Carbon\Carbon::parse($entretien->date)->format('d/m/Y') }}</td>
-                                <td>{{ $entretien->heure ?? '--' }}</td>
+                                <td>{{ $entretien->heure ? \Carbon\Carbon::parse($entretien->heure)->format('H:i') : '--' }}</td>
                                 <td>
                                     <span class="badge bg-{{ $entretien->statut === 'annule' ? 'danger' : ($entretien->statut === 'effectuee' ? 'success' : 'warning') }}">
                                         {{ ucfirst($entretien->statut) }}

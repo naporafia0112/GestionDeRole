@@ -30,7 +30,6 @@
 </div>
 
 <!-- Modal Détails Entretien -->
-<!-- Modal Détails Entretien Modernisé -->
 <div class="modal fade" id="entretienDetailModal" tabindex="-1" aria-labelledby="entretienDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-lg border-0">
@@ -41,7 +40,6 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body px-4 py-4">
                 <!-- En-tête résumé -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -95,7 +93,7 @@
                         </div>
                     </div>
 
-                    <!-- Commentaire à côté -->
+                    <!-- Commentaire -->
                     <div class="col-md-6">
                         <div class="border rounded bg-light-subtle p-3 d-flex align-items-start h-100">
                             <div class="me-3 text-primary">
@@ -109,17 +107,18 @@
                     </div>
                 </div>
 
-            <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
-                <div class="d-flex gap-2">
-                    <a id="btn-candidatures-entretien" href="#" class="btn btn-outline-secondary">
-                        <i class="mdi mdi-account-multiple-outline me-1"></i> Voir candidatures
-                    </a>
-                    <button id="btn-cancel-entretien" class="btn btn-outline-danger">
-                        <i class="mdi mdi-cancel me-1"></i> Annuler
-                    </button>
-                    <a id="btn-edit-entretien" href="#" class="btn btn-primary">
-                        <i class="mdi mdi-pencil-outline me-1"></i> Modifier
-                    </a>
+                <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
+                    <div class="d-flex gap-2">
+                        <a id="btn-candidatures-entretien" href="#" class="btn btn-outline-secondary">
+                            <i class="mdi mdi-account-multiple-outline me-1"></i> Voir candidatures
+                        </a>
+                        <button id="btn-cancel-entretien" class="btn btn-outline-danger">
+                            <i class="mdi mdi-cancel me-1"></i> Annuler
+                        </button>
+                        <a id="btn-edit-entretien" href="#" class="btn btn-primary">
+                            <i class="mdi mdi-pencil-outline me-1"></i> Modifier
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,7 +164,9 @@
                             <label>Statut</label>
                             <select class="form-control" name="statut" id="edit-statut">
                                 @foreach($statutsFiltres as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
+                                    @if(!in_array($value, ['prevu','en_cours']))
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -230,6 +231,19 @@ $(document).ready(function () {
                     $('#modal-lieu').text(data.lieu || 'Non défini');
                     $('#modal-type').text(data.type || 'Non défini');
                     $('#modal-statut').text(data.statut || 'Non défini');
+                    let couleurBadge = {
+                        'Prévu': 'bg-primary',
+                        'En cours': 'bg-warning text-dark',
+                        'Effectué': 'bg-success text-white',
+                        'Terminé': 'bg-teal text-white',
+                        'Annulé': 'bg-danger text-white'
+                    }[data.statut] || 'bg-secondary';
+
+                    $('#modal-statut-badge')
+                        .removeClass()
+                        .addClass('badge rounded-pill border ' + couleurBadge)
+                        .html('<i class="mdi mdi-circle-medium me-1"></i>' + data.statut);
+
                     $('#modal-commentaire').text(data.commentaire || 'Aucun commentaire');
 
                     const dateToSet = data.date || new Date().toISOString().split('T')[0];
@@ -239,7 +253,7 @@ $(document).ready(function () {
                         $('#edit-heure').val(data.heure);
                         $('#edit-lieu').val(data.lieu);
                         $('#edit-type').val(data.type);
-                        $('#edit-statut').val(data.statut);
+                        $('#edit-statut').val(data.statut.toLowerCase() === ['prévu', 'en_cours'] ? 'en_cours' : data.statut);
                         $('#edit-commentaire').val(data.commentaire);
                         $('#edit-id_offre').val(data.id_offre);
                         $('#edit-id_candidat').val(data.id_candidat);
@@ -247,7 +261,13 @@ $(document).ready(function () {
                         $('#modalEditEntretien').modal('show');
                     });
 
-                    $('#btn-candidatures-entretien').attr('href', '/offres/' + data.offre_id + '/candidatures');
+                    let lienCandidature = '#';
+                    if (data.offre_id) {
+                        lienCandidature = '/offres/' + data.offre_id + '/candidatures';
+                    } else if (data.candidature_spontanee_id) {
+                        lienCandidature = '/candidatures/spontanees/' + data.candidature_spontanee_id;
+                    }
+                    $('#btn-candidatures-entretien').attr('href', lienCandidature);
 
                     $('#btn-cancel-entretien').off('click').on('click', function () {
                         Swal.fire({
@@ -260,10 +280,13 @@ $(document).ready(function () {
                             cancelButtonColor: '#3085d6',
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                $.ajax({
+                               $.ajax({
                                     url: '/entretiens/' + event.id + '/annuler',
-                                    method: 'PATCH',
-                                    data: { _token: $('meta[name="csrf-token"]').attr('content') },
+                                    type: 'POST',
+                                    data: {
+                                        _token: $('meta[name="csrf-token"]').attr('content'),
+                                        _method: 'PATCH'
+                                    },
                                     success: function () {
                                         $('#entretienDetailModal').modal('hide');
                                         $('#calendar').fullCalendar('refetchEvents');
@@ -296,7 +319,23 @@ $(document).ready(function () {
             cancelButtonText: 'Annuler'
         }).then((result) => {
             if (result.isConfirmed) {
-                this.submit();
+                let form = $(this);
+                let url = form.attr('action');
+                let data = form.serialize();
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    success: function(response) {
+                        $('#modalEditEntretien').modal('hide');
+                        $('#calendar').fullCalendar('refetchEvents');
+                        Swal.fire('Succès', 'Entretien modifié avec succès', 'success');
+                    },
+                    error: function() {
+                        Swal.fire('Erreur', 'Une erreur est survenue lors de la modification.', 'error');
+                    }
+                });
             }
         });
     });
