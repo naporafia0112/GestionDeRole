@@ -73,7 +73,7 @@
                     </div>
 
                     <!-- Boutons -->
-                    <div class="text-center mt-4">
+                    <div class="text-end">
                         <button type="submit" class="btn btn-success">Enregistrer</button>
                         <a href="{{ route('user.index') }}" class="btn btn-secondary">Annuler</a>
                     </div>

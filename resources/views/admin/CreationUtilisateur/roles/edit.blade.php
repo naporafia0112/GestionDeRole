@@ -9,23 +9,21 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="#">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{route('dashboard')}}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Liste des rôles</a></li>
                                 <li class="breadcrumb-item active">Modifier le rôle</li>
                             </ol>
                         </div>
-                        <h4 class="page-title">Modification d’un rôle</h4>
+                        <h4 class="page-title">Modification du role "{{$role->name}}"</h4>
                     </div>
                 </div>
             </div>
 
-            <x-alert-success />
 
             <div class="row">
                 <div class="col-12">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <h4 class="header-title">Éditer le rôle</h4>
 
                             <form action="{{ route('roles.update', $role->id) }}" method="POST">
                                 @csrf
@@ -62,7 +60,7 @@
                                     @error('permissions') <div class="text-danger">{{ $message }}</div> @enderror
                                 </div>
 
-                                <div class="text-center mt-3">
+                                <div class="text-end">
                                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
                                     <a href="{{ route('roles.index') }}" class="btn btn-secondary">Annuler</a>
                                 </div>

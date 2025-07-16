@@ -7,28 +7,29 @@
             <div class="card">
                 <div class="card-body">
 
+                    <!-- Breadcrumb + Titre -->
                     <div class="row mb-2">
-                    <div class="col-12">
-                        <div class="page-title-box">
-                            <div class="page-title-right">
-                                <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
-                                    <li class="breadcrumb-item"><a href="{{ route('rh.stages.en_cours') }}">Liste des stages en cours</a></li>
-                                    <li class="breadcrumb-item"><a href="">Modifier stage</a></li>
-                                </ol>
+                        <div class="col-12">
+                            <div class="page-title-box">
+                                <div class="page-title-right">
+                                    <ol class="breadcrumb m-0">
+                                        <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('rh.stages.en_cours') }}">Liste des stages en cours</a></li>
+                                        <li class="breadcrumb-item active">Modifier stage</li>
+                                    </ol>
+                                </div>
+                                <h4 class="page-title"><strong>Modifier stage</strong></h4>
                             </div>
-                            <h4 class="page-title">
-                                <strong>Modifier stage</strong>
-                            </h4>
                         </div>
                     </div>
-                    <!-- Formulaire de modification -->
-                    <form action="{{ route('stages.update', $stage->id) }}" method="POST" enctype="multipart/form-data">
+
+                    <!-- Formulaire -->
+                    <form id="stageForm" action="{{ route('stages.update', $stage->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
                         <div class="mb-3">
-                            <label for="rapport_stage_fichier" class="form-label">Rapport de stage (PDF ou Word)</label>
+                            <label for="rapport_stage_fichier" class="form-label">Rapport de stage (PDF)</label>
                             <input type="file" name="rapport_stage_fichier" class="form-control">
                             @if($stage->rapport_stage_fichier)
                                 <p class="mt-2">
@@ -56,34 +57,46 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(document).ready(function () {
-    @if ($errors->any())
-        let errorMessages = `{!! implode('<br>', $errors->all()) !!}`;
-        Swal.fire({
-            title: 'Erreurs de validation',
-            html: errorMessages,
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    @endif
+    $(document).ready(function () {
 
-    $('#stageForm').on('submit', function (e) {
-        e.preventDefault();
-        Swal.fire({
-            title: 'Confirmation',
-            text: "Souhaitez-vous enregistrer les modifications du stage ?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#198754',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Oui, enregistrer',
-            cancelButtonText: 'Annuler'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.submit();
-            }
+        // Si erreurs de validation côté serveur
+        @if ($errors->any())
+            Swal.fire({
+                title: 'Erreurs de validation',
+                html: `{!! implode('<br>', $errors->all()) !!}`,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        @endif
+
+        // Si succès envoyé via session (depuis le contrôleur)
+        @if (session('success'))
+            Swal.fire({
+                title: 'Succès',
+                text: "{{ session('success') }}",
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        @endif
+
+        // Confirmation avant soumission
+        $('#stageForm').on('submit', function (e) {
+            e.preventDefault(); // Empêche soumission directe
+            Swal.fire({
+                title: 'Confirmer la modification',
+                text: "Souhaitez-vous enregistrer les modifications du stage ?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, enregistrer',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit(); // Soumission réelle
+                }
+            });
         });
     });
-});
 </script>
 @endpush

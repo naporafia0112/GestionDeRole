@@ -23,30 +23,93 @@
 
     <!-- Cartes statistiques principales -->
     <div class="row">
-        @php
-            $stats = [
-                ['label' => 'Stages en attente', 'count' => $countEnAttente, 'icon' => 'fe-clock', 'color' => 'warning', 'description' => '(Stages sans tuteur assigné, en attente de traitement.)'],
-                ['label' => 'Stages en cours', 'count' => $countEnCours, 'icon' => 'fe-check-circle', 'color' => 'success', 'description' => '(Stages actifs avec un tuteur désigné.)'],
-                ['label' => 'Candidats en stage', 'count' => $countCandidats, 'icon' => 'fe-users', 'color' => 'info', 'description' => '(Nombre de candidats actuellement en stage avec un tuteur.)'],
-            ];
-        @endphp
-        @foreach ($stats as $stat)
-            <div class="col-md-6 col-xl-4 mb-3">
-                <div class="card shadow-sm">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="avatar-lg rounded-circle bg-soft-{{ $stat['color'] }} border-{{ $stat['color'] }} border me-3">
-                            <i class="{{ $stat['icon'] }} font-22 avatar-title text-{{ $stat['color'] }}"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h3 class="text-dark mb-1"><span data-plugin="counterup">{{ $stat['count'] }}</span></h3>
-                            <p class="text-muted mb-0">{{ $stat['label'] }}</p>
-                            <small class="text-muted">{{ $stat['description'] }}</small>
-                        </div>
+        <div class="col-md-6 col-xl-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar-lg rounded-circle bg-soft-warning border-warning border me-3">
+                        <i class="fe-clock font-22 avatar-title text-warning"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="text-dark mb-1">{{ $countEnAttente }}</h3>
+                        <p class="text-muted mb-0">Stages en attente</p>
+                        <small class="text-muted">(Stages actuellement en attente d'un tuteur)</small>
                     </div>
                 </div>
             </div>
-        @endforeach
+        </div>
+
+        <div class="col-md-6 col-xl-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar-lg rounded-circle bg-soft-success border-success border me-3">
+                        <i class="fe-more-horizontal font-22 avatar-title text-success"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="text-dark mb-1">{{ $countEnCours }}</h3>
+                        <p class="text-muted mb-0">Stages en cours</p>
+                         <small class="text-muted">(Stages en cours d'éxécution )</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar-lg rounded-circle bg-soft-success border-success border me-3">
+                        <i class="fe-check-circle font-22 avatar-title text-danger"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="text-dark mb-1">{{ $countTermines }}</h3>
+                        <p class="text-muted mb-0">Stages Terminés</p>
+                         <small class="text-muted">(Stages terminés par le Responsable RH)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar-lg rounded-circle bg-soft-info border-info border me-3">
+                        <i class="fe-users font-22 avatar-title text-info"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="text-dark mb-1">{{ $countCandidats }}</h3>
+                        <p class="text-muted mb-0">Candidats Actuel</p>
+                        <small class="text-muted">(Distincts candidats ayant fait un depôt de candidatures)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar-lg rounded-circle bg-soft-info border-info border me-3">
+                        <i class="fe-users font-22 avatar-title text-info"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="text-dark mb-1">{{ $totalValideOffre }}</h3>
+                        <p class="text-muted mb-0">Candidatures á offres</p>
+                         <small class="text-muted">(Candidures liés á des offres)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="avatar-lg rounded-circle bg-soft-info border-info border me-3">
+                        <i class="fe-users font-22 avatar-title text-info"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="text-dark mb-1">{{ $totalValideSpontanee }}</h3>
+                        <p class="text-muted mb-0">Candidatures spontanées</p>
+                         <small class="text-muted">(Candidatures libres, qui ne sont pas associées a une offre)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 
     <!-- Graphiques résumé -->
     <div class="row">
@@ -135,38 +198,12 @@
         </div>
     </div>
 
-    <!-- Candidatures reçues sur la durée (courbe) -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Évolution des candidatures reçues sur l'année</h5>
-
-            <canvas id="candidaturesLifetimeChart" style="max-height: 250px;"></canvas>
-            <div class="row mt-4 text-center">
-                <div class="col-4">
-                    <p class="text-muted mb-1">Objectif mensuel de candidatures</p>
-                    <h4><i class="fe-target text-primary me-1"></i>{{ $targetCandidatures }}</h4>
-                </div>
-                <div class="col-4">
-                    <p class="text-muted mb-1">Candidatures validées la dernière semaine</p>
-                    <h4><i class="fe-arrow-up text-success me-1"></i>{{ $lastWeekTotal }}</h4>
-                </div>
-                <div class="col-4">
-                    <p class="text-muted mb-1">Candidatures validées le dernier mois</p>
-                    <h4><i class="fe-arrow-up text-success me-1"></i>{{ $lastMonthTotal }}</h4>
-                </div>
-            </div>
-            <small class="text-muted d-block mt-2">
-                Suivi régulier des candidatures pour mesurer les tendances et atteindre les objectifs.
-            </small>
-        </div>
-    </div>
-
     <!-- Liste des derniers stages en cours -->
     <div class="card">
         <div class="card-body">
             <h5 class="card-title mb-3">5 derniers stages en cours dans votre département</h5>
             @if($dernierStagesEnCours->isEmpty())
-                <p class="text-muted">Aucun stage en cours pour le moment.</p>
+                <p class="text-danger">Aucun stage en cours pour le moment.</p>
             @else
                 <div class="table-responsive">
                     <table class="table table-striped table-hover align-middle mb-0">
@@ -180,17 +217,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($dernierStagesEnCours as $stage)
-                                <tr>
-                                    <td>{{ $stage->candidat?->nom  ?? 'N/A' }} {{ $stage->candidat?->prenoms  ?? 'N/A' }}</td>
-                                    <td>{{ $stage->tuteur?->name ?? 'Non attribué' }}</td>
-                                    <td>{{ $stage->date_debut?->format('d/m/Y') ?? 'N/A' }}</td>
-                                    <td>{{ \Illuminate\Support\Str::limit($stage->sujet, 50) }}</td>
-                                    <td>
-                                        <span class="badge bg-success text-white">{{ ucfirst(str_replace('_', ' ', $stage->statut)) }}</span>
-                                    </td>
-                                </tr>
-                            @endforeach
+                        @foreach ($dernierStagesEnCours as $stage)
+                            <tr>
+                                <td>{{ $stage->candidat?->nom  ?? 'N/A' }} {{ $stage->candidat?->prenoms  ?? 'N/A' }}</td>
+                                <td>{{ $stage->tuteur?->name ?? 'Non attribué' }}</td>
+                                <td>{{ $stage->date_debut?->format('d/m/Y') ?? 'N/A' }}</td>
+                                <td>{{ \Illuminate\Support\Str::limit($stage->sujet, 50) }}</td>
+                                <td>
+                                <span class="badge bg-success text-white">{{ ucfirst(str_replace('_', ' ', $stage->statut)) }}</span>
+                                </td>
+                            </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -305,46 +342,6 @@ document.addEventListener('DOMContentLoaded', function () {
             daysOfWeek: ["Di", "Lu", "Ma", "Me", "Je", "Ve", "Sa"],
             monthNames: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
             firstDay: 1
-        }
-    });
-
-    // Courbe évolution candidatures reçues
-    const ctx = document.getElementById('candidaturesLifetimeChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {!! json_encode($chartLabels) !!},
-            datasets: [
-                {
-                    label: 'Candidatures Offres',
-                    data: {!! json_encode($chartDataOffres) !!},
-                    borderColor: '#00acc1',
-                    backgroundColor: 'rgba(0, 172, 193, 0.2)',
-                    fill: true,
-                    tension: 0.3,
-                },
-                {
-                    label: 'Candidatures Spontanées',
-                    data: {!! json_encode($chartDataSpontanees) !!},
-                    borderColor: '#f1556c',
-                    backgroundColor: 'rgba(241, 85, 108, 0.2)',
-                    fill: true,
-                    tension: 0.3,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            stacked: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: false }
-            },
-            scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Nombre de candidatures' } },
-                x: { title: { display: true, text: 'Mois' } }
-            }
         }
     });
 

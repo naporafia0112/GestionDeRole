@@ -1,6 +1,23 @@
 @extends('layouts.home')
 
 @section('content')
+@php
+    $labels = [
+        'reçue' => 'warning',
+        'retenu' => 'success',
+        'valide' => 'primary',
+        'rejete' => 'danger',
+        'effectuee' => 'info',
+    ];
+
+    $noms = [
+        '' => 'Tous',
+        'reçue' => 'Non traité',
+        'retenu' => 'Retenu',
+        'valide' => 'Validé',
+        'rejete' => 'Rejeté'
+    ];
+@endphp
 <div class="container mt-4">
      <div class="card shadow-sm">
         <div class="card-body">
@@ -44,7 +61,7 @@
                                 </td>
                                 <td>{{ $c->candidat->ville }} / {{ $c->candidat->quartier }}</td>
                                <td>
-                                    <span class="badge bg-primary">
+                                     <span class="badge bg-{{ $labels[$c->statut] ?? 'secondary' }} rounded-pill">
                                         {{ \App\Models\CandidatureSpontanee::STATUTS[$c->statut] ?? ucfirst($c->statut) }}
                                     </span>
                                 </td>

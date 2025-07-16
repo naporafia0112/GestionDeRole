@@ -37,33 +37,15 @@
             </li>
 
             {{-- Utilisateur connecté (menu déroulant) --}}
-            <li class="dropdown topbar-dropdown">
-                <a class="nav-link dropdown-toggle nav-user me-0 waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button">
-                    <img src="https://i.pinimg.com/736x/15/02/d0/1502d08ab9ee14a185e3ee5c26c621e9.jpg" alt="user-image" class="rounded-circle" height="32">
+            <li class="">
+                <a class="nav-link nav-user me-0 waves-effect waves-light" href="{{ route('profil.show') }}" role="button">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=100&background=4e54c8&color=fff" class="rounded-circle" alt="Avatar">
                     <span class="pro-user-name ms-1">
-                        {{ Auth::user()->name }} <i class="mdi mdi-chevron-down"></i>
+                        {{ Auth::user()->name }}
                     </span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-end profile-dropdown">
-
-                    <!-- Mon Profil -->
-                    <a href="{{ route('profile.edit') }}" class="dropdown-item notify-item">
-                        <i class="fe-user me-1"></i>
-                        <span>Mon profil</span>
-                    </a>
-
-                    <div class="dropdown-divider"></div>
-
-                    <!-- Déconnexion -->
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="dropdown-item notify-item">
-                            <i class="fe-log-out me-1"></i>
-                            <span>Déconnexion</span>
-                        </button>
-                    </form>
-                </div>
             </li>
+
 
             {{-- Bouton paramètres (facultatif) --}}
             <li class="notification-list ms-2">

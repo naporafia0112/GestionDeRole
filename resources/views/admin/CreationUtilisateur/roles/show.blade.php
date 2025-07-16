@@ -2,49 +2,43 @@
 
 @section('content')
 <div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box">
-                                    <div class="page-title-right">
-                                        <ol class="breadcrumb m-0">
-                                            <li class="breadcrumb-item"><a href="">DIPRH</a></li>
-                                            <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Liste des rôle</a></li>
-                                            <li class="breadcrumb-item active"><strong>Détails rôles</strong></li>
-                                        </ol>
-                                    </div>
-                                    <h4 class="page-title"><strong>Détails de {{$role->name}}</strong></h4>
-                                    <h4>Permissions héritées :</h4>
-                                        <ul>
-                                            @foreach($permissions as $perm)
-                                                <li>{{ $perm }}</li>
-                                            @endforeach
-                                        </ul>
-                                </div>
-                            </div>
-                        </div>
-
-
+    <!-- Carte principale -->
+    <div class="card shadow-sm border-0 rounded-3">
         <div class="card-body">
-
-            <div class="table-responsive">
-                <ul>
-                        @forelse ($permissions as $permission)
-                            <li>{{ $permission->name }}</li>
-                        @empty
-                            <li>Aucune permission attribuée</li>
-                        @endforelse
-                    </ul>
-                </li>
-            </ul>
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="{{route('dashboard')}}">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Liste des rôles</a></li>
+                                <li class="breadcrumb-item active">Details rôle</li>
+                            </ol>
+                        </div>
+                        <h3 class="mb-4">
+                            <strong>Détails du rôle :</strong> {{ $role->name }}
+                        </h3>
+                    </div>
+                </div>
             </div>
-            <a href="{{ route('roles.index') }}" class="btn btn-secondary">Retour</a>
+            
+            <!-- Permissions -->
+            <div class="mb-4">
+                <h5 class="text-primary mb-3">Permissions héritées :</h5>
+                @forelse($permissions as $perm)
+                    <span class="badge bg-info text-dark me-2 mb-2">
+                        <i class="fas fa-key me-1"></i> {{ $perm->name }}
+                    </span>
+                @empty
+                    <p class="text-muted">Ce rôle n’a actuellement aucune permission attribuée.</p>
+                @endforelse
+            </div>
         </div>
     </div>
 </div>
 @endsection
 
 @push('styles')
-{{-- Pour que les icônes fonctionnent, assurez-vous d'inclure Font Awesome dans votre layout principal (layouts/app.blade.php) --}}
-{{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> --}}
+{{-- Font Awesome (icônes) --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 @endpush

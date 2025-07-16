@@ -300,8 +300,8 @@ class StageController extends Controller
     public function update(Request $request, Stage $stage)
     {
         $request->validate([
-            'rapport_stage_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'note_finale' => 'nullable|numeric|min:0|max:20',
+            'rapport_stage_fichier' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'note_finale' => 'required|numeric|min:0|max:20',
         ]);
 
         $data = [];

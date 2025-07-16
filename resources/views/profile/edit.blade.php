@@ -1,35 +1,37 @@
-@extends('layouts.app')
+@extends('layouts.home')
 
 @section('content')
-<div class="container mt-4">
-    {{-- Utilisation d'une "Card" Bootstrap pour un meilleur encadrement du contenu --}}
-    <div class="card shadow-sm">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            {{-- Le titre de la page --}}
-            <h1 class="h4 mb-0 text-primary fw-bold">
-                <i class="fas fa-user me-2"></i>Mon profil
-
-            </h1>
-            {{-- Le bouton pour ajouter un utilisateur, aligné à droite --}}
-
-        </div>
-
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
         <div class="card-body">
-
-            {{-- Le div "table-responsive" assure que le tableau ne casse pas le design sur mobile --}}
-            <div class="table-responsive">
-                <ul>
-                    <li>Nom: {{$user->name}}</li>
-                    <li>Email: {{$user->email}}</li>
-                </ul>
+            <a href="{{ route('dashboard') }}" class="btn btn-light"><i class="mdi mdi-keyboard-backspace"></i> </a>
+            <div class="d-flex align-items-center mb-4">
+                <div class="me-4">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=100&background=4e54c8&color=fff" class="rounded-circle" alt="Avatar">
+                </div>
+                <div>
+                    <h4 class="mb-1">{{ $user->name }}</h4>
+                    <p class="text-muted mb-0">{{ $user->email }}</p>
+                    <small>Membre depuis le {{ $user->created_at->format('d/m/Y') }}</small>
+                </div>
             </div>
-            <a href="{{ route('user.index') }}" class="btn btn-secondary"><i class="fe-arrow-left"></i></a>
+
+            <hr>
+
+            <h5 class="mt-4">Rôles :</h5>
+            <ul class="list-group mb-3">
+                @forelse($user->roles as $role)
+                    <li class="list-group-item">{{ $role->name }}</li>
+                @empty
+                    <li class="list-group-item text-muted">Aucun rôle attribué</li>
+                @endforelse
+            </ul>
         </div>
     </div>
 </div>
 @endsection
 
 @push('styles')
-{{-- Pour que les icônes fonctionnent, assurez-vous d'inclure Font Awesome dans votre layout principal (layouts/app.blade.php) --}}
-{{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> --}}
+<!-- Font Awesome pour les icônes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 @endpush

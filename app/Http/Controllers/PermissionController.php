@@ -3,62 +3,53 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Permission;
 
 class PermissionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $permissions = Permission::orderBy('name')->get();
+        return view('admin.CreationUtilisateur.roles.index', compact('permissions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('admin.CreationUtilisateur.permissions.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|unique:permissions,name',
+        ]);
+
+        Permission::create(['name' => $request->name]);
+
+        return redirect()->route('roles.index')->with('success', 'Permission créée avec succès');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Permission $permission)
     {
-        //
+        return view('admin.CreationUtilisateur.permissions.edit', compact('permission'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Permission $permission)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|unique:permissions,name,' . $permission->id,
+        ]);
+
+        $permission->update(['name' => $request->name]);
+
+        return redirect()->route('roles.index')->with('success', 'Permission mise à jour avec succès');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Permission $permission)
     {
-        //
-    }
+        $permission->roles()->detach(); // détacher les relations
+        $permission->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('roles.index')->with('success', 'Permission supprimée');
     }
 }

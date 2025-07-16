@@ -31,11 +31,13 @@ class User extends Authenticatable
 
     // Toujours charger les rôles avec l'utilisateur
     protected $with = ['roles'];
+// app/Models/User.php
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class, 'role_user');
     }
+
 
     /**
      * Vérifie si l'utilisateur a un ou plusieurs rôles.

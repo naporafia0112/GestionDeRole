@@ -40,7 +40,7 @@
                 @if (Auth::user()->hasRole('ADMIN'))
                     <li class="menu-title">ADMIN</li>
                     <li>
-                        <a href=""><i data-feather="airplay"></i><span> Tableau de bord </span></a>
+                        <a href="{{route('dashboard')}}"><i data-feather="airplay"></i><span> Tableau de bord </span></a>
                     </li>
                     <li class="menu-title mt-2">Administration</li>
                     <li>
@@ -53,7 +53,7 @@
                                 <li><a href="{{ route('user.index') }}">Utilisateurs</a></li>
                             </ul>
                         </div>
-                        <li><a href="{{ route('departements.index') }}"><i data-feather="grid"></i> <span>Les départements </span></a></li>
+                        <li><a href="{{ route('departements.index') }}"><i data-feather="grid"></i> <span>Départements </span></a></li>
                     </li>
 
                 @elseif (Auth::user()->hasRole('RH'))

@@ -84,7 +84,7 @@
                                     </select>
                                 </div>
 
-                                <div class="text-center mt-4">
+                                <div class="text-end">
                                     <button type="submit" class="btn btn-primary">Créer</button>
                                     <a href="{{ route('user.index') }}" class="btn btn-light">Annuler</a>
                                 </div>

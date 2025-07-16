@@ -16,7 +16,8 @@ use App\Http\Controllers\{
     DepartementController,
     RapportController,
     FormulaireController,
-    CandidatureSpontaneeController
+    CandidatureSpontaneeController,
+    PermissionController
 };
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjetCreateMail;
@@ -47,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profil', [ProfileController::class, 'show'])->name('profil.show');
+
 
     // Candidatures générales
     Route::get('/candidatures', [CandidatureController::class, 'all'])->name('candidatures.index');
@@ -171,6 +174,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes réservées aux ADMIN uniquement (gestion utilisateurs et rôles)
     Route::middleware(['role:ADMIN'])->group(function () {
         Route::resource('roles', RoleController::class);
+        Route::resource('permissions', PermissionController::class);
         Route::resource('user', UserController::class);
         Route::resource('departements', DepartementController::class)->except(['show', 'edit', 'create']);
     });

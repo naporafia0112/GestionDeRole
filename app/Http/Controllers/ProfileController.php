@@ -60,4 +60,11 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+
+    public function show()
+    {
+        $user = Auth::user(); 
+        return view('profile.edit', compact('user'));
+    }
 }

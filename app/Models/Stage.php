@@ -44,10 +44,10 @@ class Stage extends Model
     {
         return $this->belongsTo(Candidature::class, 'id_candidature');
     }
-/**public function departement()
-{
-    return $this->belongsTo(Departement::class, 'id_departement');
-}+**/
+    /**public function departement()
+    {
+        return $this->belongsTo(Departement::class, 'id_departement');
+    }+**/
 
     /**
      * Offre liée au stage via la candidature

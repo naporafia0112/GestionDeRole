@@ -9,7 +9,7 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="#">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{route('dashboard')}}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Liste des rôles</a></li>
                                 <li class="breadcrumb-item active">Créer un rôle</li>
                             </ol>
@@ -31,8 +31,6 @@
                 <div class="col-12">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <h4 class="header-title">Nouveau rôle</h4>
-
                             <form action="{{ route('roles.store') }}" method="POST">
                                 @csrf
 
@@ -65,7 +63,7 @@
                                     @error('permissions') <div class="text-danger">{{ $message }}</div> @enderror
                                 </div>
 
-                                <div class="text-center mt-3">
+                                <div class="text-end">
                                     <button type="submit" class="btn btn-primary">Créer</button>
                                     <a href="{{ route('roles.index') }}" class="btn btn-secondary">Annuler</a>
                                 </div>

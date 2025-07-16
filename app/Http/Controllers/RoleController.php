@@ -14,7 +14,8 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->get(); // Précharge les permissions
-        return view('admin.CreationUtilisateur.roles.index', compact('roles'));
+        $permissions = Permission::orderBy('name')->get();
+        return view('admin.CreationUtilisateur.roles.index', compact('roles', 'permissions'));
     }
 
     /**
@@ -51,7 +52,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        $permissions = $role->permissions()->pluck('name');
+        $permissions = $role->permissions()->get();
         return view('admin.CreationUtilisateur.roles.show', compact('role', 'permissions'));
     }
 
@@ -61,7 +62,7 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         $permissions = Permission::orderBy('name')->get();
-        $rolePermissions = $role->permissions()->pluck('id')->toArray();
+        $rolePermissions = $role->permissions()->pluck('permissions.id')->toArray();
 
         return view('admin.CreationUtilisateur.roles.edit', compact('role', 'permissions', 'rolePermissions'));
     }

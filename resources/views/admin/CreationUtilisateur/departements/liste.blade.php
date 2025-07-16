@@ -49,9 +49,9 @@
                                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editDepartementModal{{ $d->id }}">
                                             <i class="mdi mdi-square-edit-outline"></i>
                                         </button>
-                                        <form method="POST" action="{{ route('departements.destroy', $d) }}" class="d-inline">
+                                        <form method="POST" action="{{ route('departements.destroy', $d) }}" class="d-inline form-delete" data-name="{{ $d->nom }}">
                                             @csrf @method('DELETE')
-                                            <button onclick="return confirm('Supprimer ce département ?')" class="btn btn-sm btn-danger">
+                                            <button class="btn btn-sm btn-danger">
                                                 <i class="mdi mdi-delete"></i>
                                             </button>
                                         </form>
@@ -137,11 +137,36 @@
 <script src="{{ asset('assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js') }}"></script>
 <script>
     $(document).ready(function () {
+        // Initialisation de DataTables
         $('#departementsTable').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
             },
             responsive: true
+        });
+
+        // Confirmation avant suppression
+        document.querySelectorAll('.form-delete').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // Empêche l'envoi immédiat
+
+                const itemName = this.dataset.name ?? 'cet élément';
+
+                Swal.fire({
+                    title: 'Êtes-vous sûr ?',
+                    text: `La suppression de "${itemName}" est irréversible.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Oui, supprimer',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
+                    }
+                });
+            });
         });
     });
 </script>

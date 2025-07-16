@@ -109,7 +109,7 @@
                     </div>
                 </div>
 
-            <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
+            <div class="modal-footer">
                 <div class="d-flex gap-2">
                     <a id="btn-candidatures-entretien" href="#" class="btn btn-outline-secondary">
                         <i class="mdi mdi-account-multiple-outline me-1"></i> Voir candidatures
