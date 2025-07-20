@@ -1,97 +1,75 @@
 @extends('layouts.vitrine.vitrine')
+
 @php
     use Illuminate\Support\Facades\Storage;
     $hasFile = $offre->fichier && Storage::disk('public')->exists($offre->fichier);
 @endphp
 
 @section('content')
-<div class="container mt-4">
-    <!-- start page title -->
-    <!-- end page title -->
-
-    <div class="row">
-        <!-- Colonne gauche - Carte Principale -->
+<div class="container mt-5">
+    <div class="row g-4">
+        <!-- Partie principale -->
         <div class="{{ $hasFile ? 'col-lg-8' : 'col-12' }}">
-            <div class="card d-block h-100">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="float-sm-end mb-2 mb-sm-0">
-                       <div class="row g-2 align-items-center">
-                            <div class="col-auto">
-                                <a href="{{ route('vitrine.index') }}" class="btn btn-outline-primary rounded-pill px-4">
-                                    <i class="bi bi-arrow-left me-2"></i> Retour
-                                </a>
-                            </div>
-                            <div class="col-auto">
-                                <a href="{{ route('candidature.create', $offre->id) }}" class="btn btn-primary rounded-pill px-4">
-                                    <i class="mdi mdi-pencil"></i> Postuler à l'offre
-                                </a>
-                            </div>
-                        </div>
-
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <a href="{{ route('vitrine.index') }}" class="btn btn-outline-secondary rounded-pill">
+                            <i class="bi bi-arrow-left me-2"></i> Retour aux offres
+                        </a>
+                        <a href="{{ route('candidature.create', $offre->id) }}" class="btn btn-primary rounded-pill">
+                            <i class="bi bi-send-check me-2"></i> Postuler à cette offre
+                        </a>
                     </div>
 
-                    <h4 class="mb-3 mt-0 font-18"><strong>{{ $offre->titre }}</strong></h4>
+                    <h2 class="fw-bold text-primary">{{ $offre->titre }}</h2>
+                    <hr>
 
-                    <div class="row">
+                    <div class="row mb-4">
                         <div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Localisation :</strong></label>
-                            <p>
-                                <i class="mdi mdi-map-marker text-danger me-1"></i>
-                                <strong>{{ $offre->localisation->pays }}</strong>
-                            </p>
-                        </div>
-                        <!--div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Département :</strong></label>
-                            <p><strong>{{--  --}}</strong></p>
-                        </!--div-->
-                        <!--div class="col-md-6">
-                            <label class="mt-2 mb-1"><strong>Statut :</strong></label>
-                                @if($offre->est_publie)
-                                <span class="badge bg-success">Publié</span>
-                                @else
-                                <span class="badge bg-secondary">Brouillon</span>
-                                @endif
-                            </span>
-                        </div-->
-                        <div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Date de publication :</strong></label>
-                            <p><strong>{{ $offre->date_publication->format('d/m/Y') }}</strong></p>
+                            <p class="mb-1 text-muted">Localisation</p>
+                            <p><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $offre->localisation->pays }}</p>
                         </div>
                         <div class="col-md-4">
-                            <label class="mt-2 mb-1"><strong>Date limite :</strong></label>
-                            <p><strong>{{ $offre->date_limite->format('d/m/Y') }}</strong></p>
+                            <p class="mb-1 text-muted">Date de publication</p>
+                            <p><i class="bi bi-calendar-event me-1"></i>{{ $offre->date_publication->format('d/m/Y') }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1 text-muted">Date limite</p>
+                            <p><i class="bi bi-clock-history me-1"></i>{{ $offre->date_limite->format('d/m/Y') }}</p>
                         </div>
                     </div>
 
-                    <label class="mt-3 mb-1"><strong>Description :</strong></label>
-                    <div class=" p-2 rounded mb-3">
-                        {!! nl2br(e($offre->description)) !!}
+                    <div class="mb-4">
+                        <h5 class="text-secondary">Description du poste</h5>
+                        <div class="bg-light p-3 rounded">
+                            {!! nl2br(e($offre->description)) !!}
+                        </div>
                     </div>
 
-                    <label class="mt-3 mb-1"><strong>Exigences :</strong></label>
-                    <div class=" p-3 rounded">
-                        {!! nl2br(e($offre->exigences)) !!}
+                    <div>
+                        <h5 class="text-secondary">Exigences du poste</h5>
+                        <div class="bg-light p-3 rounded">
+                            {!! nl2br(e($offre->exigences)) !!}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         @if($hasFile)
-        <!-- Colonne droite - PDF -->
+        <!-- Colonne PDF -->
         <div class="col-lg-4">
-            <div class="card h-100">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <h5 class="card-title"><strong>Fiche de poste</strong></h5>
-                    <div class="text-center mb-3">
-                        <embed src="{{ asset('storage/'.$offre->fichier) }}"
-                               type="application/pdf"
-                               width="100%" height="300px">
+                    <h5 class="fw-bold text-center mb-3">Fiche de poste (PDF)</h5>
+
+                    <div class="mb-3 text-center">
+                        <embed src="{{ asset('storage/'.$offre->fichier) }}" type="application/pdf" width="100%" height="320px" class="rounded shadow-sm">
                     </div>
-                    <div class="d-grid gap-2">
-                        <a href="{{ asset('storage/'.$offre->fichier) }}"
-                           class="btn btn-primary" download>
-                            <i class="dripicons-download me-1"></i>
-                            <strong>Télécharger le PDF</strong>
+
+                    <div class="d-grid">
+                        <a href="{{ asset('storage/'.$offre->fichier) }}" class="btn btn-outline-primary rounded-pill" download>
+                            <i class="bi bi-download me-2"></i>Télécharger le PDF
                             ({{ round(Storage::disk('public')->size($offre->fichier) / 1024) }} KB)
                         </a>
                     </div>

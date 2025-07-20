@@ -42,7 +42,7 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $d->nom }}</td>
-                                <td>{{ $d->description }}</td>
+                                <td>{{ $d->description ?? 'Aucune description pour ce departement'}}</td>
                                 <td>{{ $d->directeur?->name ?? 'Non défini' }}</td>
                                 <td>
                                     <div class="d-flex gap-1">

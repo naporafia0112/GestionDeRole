@@ -13,7 +13,7 @@
     <div class="p-4 rounded-4 shadow-sm" style="background-color: #f8fafc; border: 1px solid rgba(0,0,0,0.05);">
         <!-- Bouton retour stylisé -->
         <div class="mb-4">
-            <a href="{{ route('vitrine.index') }}" class="btn btn-outline-primary rounded-pill px-4">
+            <a href="{{ route('vitrine.index') }}" class="btn btn-outline-secondary rounded-pill">
                 <i class="bi bi-arrow-left me-2"></i> Retour à l'accueil
             </a>
         </div>

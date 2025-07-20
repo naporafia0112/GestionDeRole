@@ -108,6 +108,7 @@ class EntretienController extends Controller
             'commentaire' => 'nullable|string',
             'id_candidat' => 'required|exists:candidats,id',
             'id_offre' => 'nullable|exists:offres,id',
+            'type' => 'required|string|in:présentiel,En ligne',
             'candidature_spontanee_id' => 'nullable|exists:candidatures_spontanees,id',
 
         ]);

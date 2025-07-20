@@ -35,7 +35,7 @@
                             </nav>
                         </div>
                         <div class="col-md-6">
-                            <h1 class="page-title mb-0" style='font-size: 40px;'>
+                            <h1 class="page-title mb-0" style='font-size: 25px;'>
                                 {{ $offre->titre }}
                             </h1>
                         </div>
@@ -102,6 +102,9 @@
                                 </td>
                                 <td class="text-center action-buttons">
                                     <div class="d-flex justify-content-center">
+                                        <a href="{{ route('candidatures.show', $candidature->id) }}" class="btn btn-sm btn-info ms-1" title="Voir">
+                                            <i class="fe-eye"></i>
+                                        </a>
                                         @if($candidature->statut === 'en_cours')
                                             <form action="{{ route('candidatures.retenir', $candidature->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer la retenue ?">
                                                 @csrf @method('PATCH')
@@ -117,9 +120,6 @@
                                             <button class="btn btn-sm btn-outline-primary ms-1 analyze-btn" data-id="{{ $candidature->id }}" title="Analyser">
                                                 <i class="mdi mdi-robot"></i>
                                             </button>
-                                            <a href="{{ route('candidatures.show', $candidature->id) }}" class="btn btn-sm btn-info ms-1" title="Voir">
-                                                <i class="fe-eye"></i>
-                                            </a>
                                         @endif
 
                                         @if($candidature->statut === 'retenu' && !$candidature->entretien)
@@ -149,7 +149,6 @@
     </div>
 </div>
 @endsection
-
 @push('scripts')
 <script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
@@ -166,30 +165,25 @@ $(document).ready(function () {
         columnDefs: [{ orderable: false, targets: [6] }]
     });
 
-    // Tabs Bootstrap : filtrage dynamique
+    // Filtrage par onglets
     $('.nav-link[data-status]').on('click', function () {
         const selected = $(this).data('status');
-        table.column(2).search(''); // Clear previous search
-        if (selected) {
-            table.rows().every(function () {
-                const rowStatut = $(this.node()).attr('data-statut');
-                $(this.node()).toggle(rowStatut === selected);
-            });
-        } else {
-            table.rows().every(function () {
-                $(this.node()).show();
-            });
-        }
+        table.column(2).search('');
+        table.rows().every(function () {
+            const rowStatut = $(this.node()).attr('data-statut');
+            $(this.node()).toggle(!selected || rowStatut === selected);
+        });
         table.draw(false);
     });
 
-    // SweetAlert confirmations
-    $('.confirm-action').on('submit', function (e) {
+    //SweetAlert pour toutes les confirmations d'action
+    $(document).on('submit', '.confirm-action', function (e) {
         e.preventDefault();
         const form = this;
+        const message = $(form).data('message') || "Êtes-vous sûr de vouloir effectuer cette action ?";
         Swal.fire({
             title: 'Confirmation',
-            text: $(form).data('message') || "Confirmer ?",
+            text: message,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Oui',
@@ -204,7 +198,7 @@ $(document).ready(function () {
         });
     });
 
-    $('.confirm-validate').on('click', function (e) {
+    $(document).on('click', '.confirm-validate', function (e) {
         e.preventDefault();
         const form = $(this).closest('form')[0];
         Swal.fire({
@@ -212,7 +206,7 @@ $(document).ready(function () {
             text: "Cette action est irréversible.",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Oui',
+            confirmButtonText: 'Valider',
             cancelButtonText: 'Annuler',
             customClass: {
                 confirmButton: 'btn btn-success me-2',
@@ -224,7 +218,7 @@ $(document).ready(function () {
         });
     });
 
-
+    // Bouton d'analyse
     $('.analyze-btn').on('click', function () {
         const btn = $(this);
         const id = btn.data('id');

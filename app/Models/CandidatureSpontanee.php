@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class CandidatureSpontanee extends Model
 {
     protected $table = 'candidatures_spontanees';
@@ -18,6 +18,7 @@ class CandidatureSpontanee extends Model
         'lm_fichier',
         'lr_fichier',
         'message',
+        'uuid',
     ];
     public const STATUTS = [
         'reçue'   => 'Reçue',
@@ -28,6 +29,20 @@ class CandidatureSpontanee extends Model
     protected $casts = [
         'date_soumission' => 'datetime',
     ];
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
     public function candidat()
     {
         return $this->belongsTo(Candidat::class);

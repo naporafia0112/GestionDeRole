@@ -53,6 +53,22 @@
                                         </div>
                                     </div>
                                 </div>
+                                @php
+    $status = strtolower($candidat->statut_stage);
+    $statusClasses = match($status) {
+        'en cours' => 'bg-warning text-dark',
+        'terminé' => 'bg-success',
+        'interrompu' => 'bg-danger',
+        default => 'bg-secondary'
+    };
+@endphp
+
+<div class="mt-2">
+    <span class="badge {{ $statusClasses }} status-badge">
+        {{ ucfirst($status) }}
+    </span>
+</div>
+
                                 <div class="card-status">
                                     <a href="{{ route('candidats.details.directeur', $candidat->id) }}" class="btn btn-primary rounded-pill px-4">
                                             <i class="fe-eye"></i>

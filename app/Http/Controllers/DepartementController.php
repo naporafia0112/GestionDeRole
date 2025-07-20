@@ -32,7 +32,7 @@ class DepartementController extends Controller
             'description'=> 'nullable|string|max:255',
         ]);
 
-        Departement::create($request->only('nom', 'id_directeur'));
+        Departement::create($request->only('nom', 'id_directeur', 'description'));
 
         return redirect()->route('departements.index')->with('success', 'Département ajouté avec succès.');
     }
@@ -47,9 +47,9 @@ class DepartementController extends Controller
             'description'=> 'nullable|string|max:255',
         ]);
 
-        $departement->update($request->only('nom', 'id_directeur'));
+        $departement->update($request->only('nom', 'id_directeur', 'description'));
 
-        return response()->json(['message' => 'Département mis à jour avec succès.']);
+        return back()->with('success', 'Département mis à jour avec succès.');
     }
 
     /**

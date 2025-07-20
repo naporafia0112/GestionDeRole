@@ -29,7 +29,7 @@
                         @method('PUT')
 
                         <div class="mb-3">
-                            <label for="rapport_stage_fichier" class="form-label">Rapport de stage (PDF)</label>
+                            <label for="rapport_stage_fichier" class="form-label">Rapport de stage (PDF)<span class="text-danger">*</span></label>
                             <input type="file" name="rapport_stage_fichier" class="form-control">
                             @if($stage->rapport_stage_fichier)
                                 <p class="mt-2">
@@ -39,12 +39,13 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="note_finale" class="form-label">Note finale (sur 20)</label>
+                            <label for="note_finale" class="form-label">Note finale (sur 20)<span class="text-danger">*</span></label>
                             <input type="number" name="note_finale" class="form-control" min="0" max="20" step="0.1" value="{{ old('note_finale', $stage->note_finale) }}">
                         </div>
-
+                         <div class="text-end">
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
                         <a href="{{ route('rh.stages.termines') }}" class="btn btn-light">Annuler</a>
+                        </div>
                     </form>
 
                 </div>

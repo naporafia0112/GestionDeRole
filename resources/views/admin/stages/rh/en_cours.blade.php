@@ -79,11 +79,12 @@
                                                     <a href="{{ route('stages.show', $stage->id) }}" class="btn btn-sm btn-info" title="Voir">
                                                         <i class="fe-eye"></i>
                                                     </a>
+                                                    @if($stage->validation_directeur)
 
                                                         <a href="{{ route('stages.edit', $stage->id) }}" class="btn btn-success btn-sm">
                                                             <i class="mdi mdi-check-circle-outline"></i> Terminer stage
                                                         </a>
-
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -414,16 +414,35 @@ class StageController extends Controller
         $directeur = Auth::user();
 
         if (!$directeur->hasRole('DIRECTEUR')) {
-            abort(403);
+            abort(403, 'Accès non autorisé');
         }
 
         $stages = Stage::whereNotNull('id_tuteur')
             ->where('id_departement', $directeur->id_departement)
+            ->where('statut', 'en_cours') // <- Statut "en cours"
             ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur'])
             ->latest()
             ->get();
 
         return view('admin.stages.directeurs.stages_avec_tuteur', compact('stages'));
+    }
+
+    public function stagesTermines()
+    {
+        $directeur = Auth::user();
+
+        if (!$directeur->hasRole('DIRECTEUR')) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        $stages = Stage::whereNotNull('id_tuteur')
+            ->where('id_departement', $directeur->id_departement)
+            ->where('statut', 'termine') // <- Statut "terminé"
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur'])
+            ->latest()
+            ->get();
+
+        return view('admin.stages.directeurs.stages_termines', compact('stages'));
     }
 
     /**
@@ -437,18 +456,25 @@ class StageController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
-        $stages = Stage::whereNotNull('id_tuteur')
+        // On récupère les stages validés dans le département du directeur
+        $stages = Stage::with(['candidature.candidat', 'candidatureSpontanee.candidat'])
+            ->whereNotNull('id_tuteur')
             ->where('id_departement', $directeur->id_departement)
-            ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
-            ->latest()
             ->get();
 
-        $candidats = $stages->map(function($stage) {
-            return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+        // On extrait les candidats uniques à partir des stages
+        $candidats = $stages->map(function ($stage) {
+            $candidat = $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
+            if ($candidat) {
+                // Injecter le statut de stage dans le candidat (utile pour l'affichage)
+                $candidat->statut_stage = $stage->statut ?? 'En cours';
+            }
+            return $candidat;
         })->filter()->unique('id')->values();
 
         return view('admin.stages.directeurs.candidats_stages_en_cours', compact('candidats'));
     }
+
 
     /**
      * Liste tuteurs du département du directeur.
@@ -544,22 +570,40 @@ class StageController extends Controller
     /**
      * Liste des stages en cours (Tuteur).
      */
-    public function stagesEnCoursPourtuteur()
+    public function stagesEnCoursPourTuteur()
     {
         $tuteur = Auth::user();
 
         if (!$tuteur->hasRole('TUTEUR')) {
-            abort(403);
+            abort(403, 'Accès refusé');
         }
 
-        $stages = Stage::whereNotNull('id_tuteur')
-            ->where('id_departement', $tuteur->id_departement)
-            ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'tuteur', 'formulaire'])
+        $stages = Stage::where('id_tuteur', $tuteur->id)
+            ->where('statut', 'en_cours')
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'formulaire'])
             ->latest()
             ->get();
 
         return view('admin.stages.tuteur.en_cours', compact('stages'));
     }
+
+    public function stagesTerminesPourTuteur()
+    {
+        $tuteur = Auth::user();
+
+        if (!$tuteur->hasRole('TUTEUR')) {
+            abort(403, 'Accès refusé');
+        }
+
+        $stages = Stage::where('id_tuteur', $tuteur->id)
+            ->where('statut', 'termine')
+            ->with(['candidature.candidat', 'candidatureSpontanee.candidat', 'formulaire'])
+            ->latest()
+            ->get();
+
+        return view('admin.stages.tuteur.termines', compact('stages'));
+    }
+
 
     /**
      * Liste candidats en stage (RH).
@@ -595,12 +639,13 @@ class StageController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
-        $stages = Stage::whereNotNull('id_tuteur')
-            ->where('id_departement', $tuteur->id_departement)
+        // Récupère tous les stages encadrés par ce tuteur
+        $stages = Stage::where('id_tuteur', $tuteur->id)
             ->with(['candidature.candidat', 'candidatureSpontanee.candidat'])
             ->latest()
             ->get();
 
+        // Récupère les candidats associés à ces stages
         $candidats = $stages->map(function ($stage) {
             return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
         })->filter()->unique('id')->values();

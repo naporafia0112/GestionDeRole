@@ -2,35 +2,32 @@
 
 @section('content')
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="header-section mb-5 w-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1 fw-bold">Formulaires d'évaluation</h2>
-                    <p class="text-muted mb-0">Gérez vos formulaires d'évaluation</p>
-                </div>
-                <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success btn-sm">
-                    <i data-feather="plus" class="me-1"></i> Créer un formulaire
-                </a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <div>
+            <h2 class="mb-1 fw-bold">Formulaires d'évaluation</h2>
+            <p class="text-muted mb-0">Gérez vos formulaires d'évaluation</p>
         </div>
+        <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success btn-sm mt-2 mt-md-0">
+            <i data-feather="plus" class="me-1"></i> Créer un formulaire
+        </a>
     </div>
-    
+
     @if($formulaires->isEmpty())
         <div class="alert alert-info text-center">
             Aucun formulaire créé pour le moment.
         </div>
     @else
-        <div class="timeline">
+        <div class="timeline" id="timeline">
             @foreach($formulaires as $index => $formulaire)
-                <div class="timeline-item {{ $index % 2 === 0 ? 'left' : 'right' }}">
+                <div class="timeline-item {{ $index % 2 === 0 ? 'left' : 'right' }}" data-index="{{ $index }}">
+                    <div class="timeline-marker"></div>
                     <div class="timeline-content card shadow-sm">
                         <div class="card-body">
                             <div class="timeline-date text-muted">
                                 {{ $formulaire->created_at->format('d/m/Y à H\hi') }}
                             </div>
                             <h5 class="card-title mb-2">{{ $formulaire->titre }}</h5>
-                            <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-secondary btn-sm">
+                             <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-secondary btn-sm">
                                 <i data-feather="file-text" class="me-1"></i> Voir réponses
                             </a>
                         </div>
@@ -44,6 +41,206 @@
 
 @push('styles')
 <style>
+/* Container */
+.timeline {
+    position: relative;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Ligne centrale verticale */
+.timeline::before {
+    content: '';
+    position: absolute;
+    width: 4px;
+    background: linear-gradient(180deg, #6c6e71 0%, #6c6e71 100%);
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(30, 144, 255, 0.3);
+}
+
+/* Timeline Item commun */
+.timeline-item {
+    position: relative;
+    width: 35%; /* largeur réduite */
+    margin-bottom: 2rem; /* marge verticale réduite */
+    opacity: 0;
+    transition: all 0.5s ease, opacity 0.5s ease;
+    cursor: default;
+}
+
+/* Apparition avec translation latérale */
+.timeline-item.show.left {
+    opacity: 1;
+    transform: translateX(0);
+    box-shadow: 0 10px 25px rgba(104, 104, 105, 0.15);
+}
+.timeline-item.show.right {
+    opacity: 1;
+    transform: translateX(0);
+    box-shadow: 0 10px 25px rgba(94, 94, 94, 0.15);
+}
+
+/* Position à gauche */
+.timeline-item.left {
+    left: 0;
+    transform: translateX(-80px);
+    text-align: right;
+}
+
+/* Position à droite */
+.timeline-item.right {
+    left: 55%;
+    transform: translateX(80px);
+    text-align: left;
+}
+
+/* Marker - Cercle avec ombre */
+.timeline-marker {
+    position: absolute;
+    top: 1.5rem;
+    width: 14px; /* plus petit */
+    height: 14px;
+    background: #fff;
+    border: 3px solid #6c6e71; /* bord plus fin */
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(91, 91, 92, 0.4);
+    z-index: 10;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Marker à droite pour items gauche, à gauche pour items droite */
+.timeline-item.left .timeline-marker {
+    right: -30px;
+}
+.timeline-item.right .timeline-marker {
+    left: -30px;
+}
+
+/* Flèche "pointe" sur la carte */
+.timeline-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.75rem 1rem; /* padding réduit */
+    position: relative;
+    border-left: 6px solid #6c6e71; /* plus fin */
+    transition: box-shadow 0.3s ease, border-left-color 0.3s ease;
+}
+
+/* Flèche CSS */
+.timeline-item.left .timeline-content::after,
+.timeline-item.right .timeline-content::after {
+    content: "";
+    position: absolute;
+    top: 1.5rem;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+/* Flèche pointant vers droite */
+.timeline-item.left .timeline-content::after {
+    right: -24px;
+    border-width: 12px 0 12px 16px;
+    border-color: transparent transparent transparent #6c6e71;
+}
+
+/* Flèche pointant vers gauche */
+.timeline-item.right .timeline-content::after {
+    left: -24px;
+    border-width: 12px 16px 12px 0;
+    border-color: transparent #6c6e71 transparent transparent;
+}
+
+/* Hover & focus state */
+.timeline-content:hover, .timeline-content:focus-within {
+    box-shadow: 0 15px 30px rgba(95, 96, 96, 0.25);
+    border-left-color: #6c6e71;
+    outline: none;
+}
+
+/* Title */
+.card-title {
+    font-weight: 700;
+    font-size: 1.1rem; /* plus petit */
+    color: #212529;
+}
+
+/* Date */
+.timeline-date {
+    font-size: 0.75rem; /* plus petit */
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Bouton Toggle */
+.btn-toggle {
+    margin-top: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #6c6e71;
+    border: none;
+    border-radius: 6px;
+    padding: 0.3rem 0.8rem; /* padding réduit */
+    color: white;
+    box-shadow: 0 3px 10px rgba(63, 63, 63, 0.5);
+    user-select: none;
+}
+.btn-toggle:hover, .btn-toggle:focus {
+    background-color: #6c6e71;
+    box-shadow: 0 6px 16px rgba(63, 63, 63, 0.5);
+    outline: none;
+}
+
+/* Réponses */
+.responses {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.35s ease, max-height 0.35s ease;
+    color: #495057;
+    font-size: 0.95rem;
+    padding-left: 0.75rem;
+}
+.responses.show {
+    opacity: 1;
+    max-height: 600px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .timeline-item {
+        width: 90% !important;
+        left: 5% !important;
+        transform: translateX(0) !important;
+        text-align: left !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .timeline-item.left .timeline-marker,
+    .timeline-item.right .timeline-marker {
+        left: -30px !important;
+        right: auto !important;
+    }
+    .timeline-content::after {
+        display: none;
+    }
+}
+
+/* Header & Button */
 .header-section {
     background: linear-gradient(135deg, #f8f9fa 0%, #d3d5d5 100%);
     padding: 1.5rem;
@@ -53,212 +250,67 @@
 
 .btn-create {
     padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-.btn-create:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.12);
-}
-
-.empty-state {
-    text-align: center;
-    padding: 2rem;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 2px dashed #e9ecef;
-}
-
-.empty-icon {
-    margin-bottom: 1rem;
-}
-
-.icon-lg {
-    width: 48px;
-    height: 48px;
-    color: #6c757d;
-}
-
-.icon-sm {
-    width: 14px;
-    height: 14px;
-}
-
-.timeline {
-    position: relative;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 1rem 0;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    width: 3px;
-    background: linear-gradient(to bottom, #e9ecef, #dee2e6);
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    margin-left: -1.5px;
-    border-radius: 2px;
-}
-
-.timeline-item {
-    padding: 0.5rem 1rem;
-    position: relative;
-    width: 50%;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.timeline-item:hover {
-    transform: translateY(-6px);
-    z-index: 2;
-}
-
-.timeline-item.left {
-    left: 0;
-    text-align: right;
-}
-
-.timeline-item.right {
-    left: 50%;
-    text-align: left;
-}
-
-.timeline-marker {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: #fff;
-    border: 2px solid rgb(177, 231, 238);
-    border-radius: 50%;
-    top: 1.5rem;
-    z-index: 2;
-    box-shadow: 0 0 0 3px rgba(177, 231, 238, 0.2);
-}
-
-.timeline-item.left .timeline-marker {
-    right: -6px;
-}
-
-.timeline-item.right .timeline-marker {
-    left: -6px;
-}
-
-.timeline-content {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-.timeline-content:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
-}
-
-.timeline-content .card-body {
-    padding: 1rem;
-}
-
-.timeline-date {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-}
-
-.card-title {
-    font-size: 1rem;
+    border-radius: 8px;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #343a40;
-}
-
-.creator-info {
-    display: flex;
-    align-items: center;
-    color: #6c757d;
-    font-size: 0.8rem;
-    margin-bottom: 0.75rem;
-}
-
-.action-section {
-    display: flex;
-}
-
-.btn-action {
-    padding: 0.4rem 0.9rem;
-    font-size: 0.85rem;
-    border-radius: 6px;
-    font-weight: 500;
     transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(40,167,69,0.35);
+    background: linear-gradient(45deg, #28a745, #218838);
+    border: none;
+    color: white;
     display: flex;
     align-items: center;
+    gap: 0.4rem;
 }
-
-.btn-action:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-}
-
-/* Responsive */
-@media screen and (max-width: 768px) {
-    .header-section {
-        padding: 1rem;
-    }
-
-    .header-section .d-flex {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .timeline::before {
-        left: 31px;
-    }
-
-    .timeline-item {
-        width: 100%;
-        padding-left: 60px;
-        padding-right: 20px;
-        text-align: left !important;
-    }
-
-    .timeline-item.left .timeline-marker,
-    .timeline-item.right .timeline-marker {
-        left: 20px;
-    }
-
-    .timeline-item.right {
-        left: 0;
-    }
-}
-
-@media screen and (max-width: 576px) {
-    .btn-create span,
-    .btn-action span {
-        display: none;
-    }
-
-    .timeline-content .card-body {
-        padding: 0.75rem;
-    }
+.btn-create:hover, .btn-create:focus {
+    background: linear-gradient(45deg, #218838, #1e7e34);
+    box-shadow: 0 8px 20px rgba(33,136,56,0.5);
+    transform: translateY(-2px);
+    outline: none;
 }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        if (typeof feather !== 'undefined') {
-            feather.replace();
-        }
+document.addEventListener("DOMContentLoaded", () => {
+    // Feather icons
+    if(typeof feather !== 'undefined'){
+        feather.replace();
+    }
+
+    // Animation zigzag apparition progressive
+    const items = document.querySelectorAll('.timeline-item');
+    items.forEach((item, idx) => {
+        setTimeout(() => {
+            item.classList.add('show');
+            if(item.classList.contains('left')){
+                item.style.transform = 'translateX(0)';
+            } else {
+                item.style.transform = 'translateX(0)';
+            }
+        }, idx * 250);
     });
+
+    // Toggle réponses
+    const toggles = document.querySelectorAll('.btn-toggle');
+    toggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('aria-controls');
+            const content = document.getElementById(targetId);
+            if(!content) return;
+
+            const shown = content.classList.toggle('show');
+            btn.setAttribute('aria-expanded', shown);
+            btn.innerHTML = shown
+                ? '<i data-feather="chevron-up" class="me-1"></i> Masquer réponses'
+                : '<i data-feather="file-text" class="me-1"></i> Voir réponses';
+
+            if(typeof feather !== 'undefined'){
+                feather.replace();
+            }
+        });
+    });
+});
 </script>
 @endpush
+

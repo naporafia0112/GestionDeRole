@@ -161,11 +161,11 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-6 mb-3">
+                        <div class="col-lg-12 mb-3">
                             <label>Statut</label>
                            <select class="form-control" name="statut" id="edit-statut">
                                 @foreach($statutsFiltres as $value => $label)
-                                    @if(!in_array($value, ['prevu','en_cours']))
+                                    @if(!in_array($value, ['en_cours', 'annule', 'termine']))
                                         <option value="{{ $value }}">{{ $label }}</option>
                                     @endif
                                 @endforeach
@@ -228,7 +228,7 @@ $(document).ready(function () {
                 method: 'GET',
                 success: function(data) {
                     $('#modal-candidat-nom').text(data.candidat || 'Inconnu');
-                    $('#modal-offre-titre').text(data.offre || 'Non précisé');
+                    $('#modal-offre-titre').text(data.offre || 'Candidature Spontanée');
                     $('#modal-date-heure').text(data.date + ' à ' + data.heure);
                     $('#modal-lieu').text(data.lieu || 'Non défini');
                     $('#modal-type').text(data.type || 'Non défini');
@@ -251,11 +251,15 @@ $(document).ready(function () {
                     const dateToSet = data.date || new Date().toISOString().split('T')[0];
 
                     $('#btn-edit-entretien').off('click').on('click', function () {
+                        if (['Effectué', 'Annulé'].includes(data.statut)) {
+                            Swal.fire('Action non autorisée', 'Seuls les entretiens effectués ou annulés peuvent être modifiés.', 'warning');
+                            return;
+                        }
                         $('#edit-date').val(dateToSet);
                         $('#edit-heure').val(data.heure);
                         $('#edit-lieu').val(data.lieu);
                         $('#edit-type').val(data.type);
-                        $('#edit-statut').val(data.statut.toLowerCase() === ['prévu', 'en_cours'] ? 'en_cours' : data.statut);
+                        $('#edit-statut').val(data.statut.toLowerCase());
                         $('#edit-commentaire').val(data.commentaire);
                         $('#edit-id_offre').val(data.id_offre);
                         $('#edit-id_candidat').val(data.id_candidat);
@@ -263,15 +267,16 @@ $(document).ready(function () {
                         $('#modalEditEntretien').modal('show');
                     });
 
-                    let lienCandidature = '#'; // valeur par défaut
-
+                    // Gérer le lien vers les candidatures
                     if (data.offre_id) {
-                        lienCandidature = '/offres/' + data.offre_id + '/candidatures';
-                    } else if (data.candidature_spontanee_id) {
-                        lienCandidature = '/candidatures/spontanees/' + data.candidature_spontanee_id;
+                        const lienCandidature = '/offres/' + data.offre_id + '/candidatures';
+                        $('#btn-candidatures-entretien')
+                            .attr('href', lienCandidature)
+                            .show();
+                    } else {
+                        $('#btn-candidatures-entretien').hide(); // Candidature spontanée
                     }
 
-                    $('#btn-candidatures-entretien').attr('href', lienCandidature);
 
 
                     $('#btn-cancel-entretien').off('click').on('click', function () {

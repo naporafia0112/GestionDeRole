@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <div class="card shadow-lg border-0">
         <div class="card-body">
-            <a href="{{ route('dashboard') }}" class="btn btn-light"><i class="mdi mdi-keyboard-backspace"></i> </a>
+             <button type="button" class="btn-close" ><a href="{{ route('dashboard') }}" class=""><i class="fe-x-circle text-l"></i></a></button>
             <div class="d-flex align-items-center mb-4">
                 <div class="me-4">
                     <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=100&background=4e54c8&color=fff" class="rounded-circle" alt="Avatar">
@@ -18,7 +18,7 @@
 
             <hr>
 
-            <h5 class="mt-4">Rôles :</h5>
+            <h5 class="mt-4">Mon profil :</h5>
             <ul class="list-group mb-3">
                 @forelse($user->roles as $role)
                     <li class="list-group-item">{{ $role->name }}</li>

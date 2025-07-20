@@ -32,7 +32,7 @@ Route::get('/vitrine/catalogue/{offre}', [VitrineController::class, 'detailcatal
 Route::get('/offres/{id}/postuler', [CandidatureController::class, 'create'])->name('candidature.create');
 Route::post('/offres/{id}/postuler', [CandidatureController::class, 'store'])->name('candidature.store');
 
-Route::get('/candidatures/suivi/{uuid}', [VitrineController::class, 'suivi'])->name('candidatures.suivi');
+Route::post('/candidatures/suivi', [VitrineController::class, 'suivi'])->name('candidatures.suivi');
 Route::post('/candidatures/recherche', [CandidatureController::class, 'recherche'])->name('candidatures.recherche');
 Route::get('/candidature-spontanee', [CandidatureSpontaneeController::class, 'create'])->name('candidature.spontanee.form');
 Route::post('/candidature-spontanee', [CandidatureSpontaneeController::class, 'store'])->name('candidature.spontanee.store');
@@ -53,10 +53,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Candidatures générales
     Route::get('/candidatures', [CandidatureController::class, 'all'])->name('candidatures.index');
-    Route::get('/candidatures/{id}/download/{field}', [CandidatureController::class, 'downloadFile'])
-        ->name('candidatures.download')->whereNumber('id');
-    Route::get('/candidatures/{id}/preview/{field}', [CandidatureController::class, 'previewFile'])
-        ->name('candidatures.preview')->whereNumber('id');
+    Route::get('/candidatures/{id}/preview/{field}', [CandidatureController::class, 'preview'])->name('candidatures.preview');
+    Route::get('/candidatures/{id}/download/{field}', [CandidatureController::class, 'downloadFile'])->name('candidatures.download');
+
     Route::get('/candidatures/{id}', [CandidatureController::class, 'show'])
         ->name('candidatures.show')->whereNumber('id');
 
@@ -110,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/directeur/stages/en-cours', [StageController::class, 'stagesAvecTuteur'])->name('stages.en_cours');
+    Route::get('/stages/termines', [StageController::class, 'stagesTermines'])->name('stages.termines');
     Route::get('/directeur/tuteurs', [StageController::class, 'listerTuteursDepartement'])->name('directeur.tuteurs');
     Route::get('/directeur/candidats-stages-en-cours', [StageController::class, 'candidatsStagesEnCours'])->name('stages.candidats_en_cours');
     Route::get('/rh/stages/attente-tuteur', [StageController::class, 'stagesEnAttentePourRH'])
@@ -119,6 +119,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rh/stages/termines', [StageController::class, 'stagesTerminesPourRH'])->name('rh.stages.termines');
     Route::get('/tuteur/stages/en-cours', [StageController::class, 'stagesEnCoursPourtuteur'])
     ->name('tuteur.stages.en_cours');
+    Route::get('/tuteur/stages/termines', [StageController::class, 'stagesTerminesPourTuteur'])->name('tuteur.stages.termines');
     Route::get('/stages/rh/candidats-en-stage', [StageController::class, 'candidatsEnStage'])
         ->name('stages.rh.candidats_en_stage');
     Route::get('/tuteur/liste-candidats', [StageController::class, 'candidatsTuteur'])->name('stages.candidats_tuteurs');

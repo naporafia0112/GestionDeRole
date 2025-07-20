@@ -10,8 +10,8 @@
                     <!-- Titre et breadcrumb -->
                     <div class="row mb-3">
                         <div class="col-12">
-                            <div class="page-title-box d-flex justify-content-between align-items-center">
-                                <div class="page-title-left">
+                            <div class="page-title-box">
+                                <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
                                         <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                         <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
@@ -152,7 +152,7 @@ $(document).ready(function () {
         e.preventDefault();
         Swal.fire({
             title: 'Confirmation',
-            text: "Souhaitez-vous créer ce stage sans tuteur ?",
+            text: "Souhaitez-vous créer ce stage?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#198754',

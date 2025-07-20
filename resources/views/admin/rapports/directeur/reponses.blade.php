@@ -33,6 +33,7 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Tuteur</th>
+                                            <th>Candidat</th>
                                             <th>Date</th>
                                             <th>Action</th>
                                         </tr>
@@ -41,15 +42,26 @@
                                         @foreach($formulaire->reponses as $reponse)
                                             <tr>
                                                 <td>{{ $reponse->tuteur->name }}</td>
+                                                <td>{{ $reponse->stage->candidature->candidat->nom ?? 'N/A' }}</td>
                                                 <td>{{ $reponse->created_at->format('d/m/Y H:i') }}</td>
                                                 <td>
                                                     <!-- Bouton d'ouverture du modal -->
                                                     <button class="btn btn-sm btn-info" title="Voir" data-bs-toggle="modal" data-bs-target="#modal-reponse-{{ $reponse->id }}">
                                                         <i class="fe-eye"></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-success btn-valider" data-reponse-id="{{ $reponse->id }}" title="Valider">
-                                                        <i class="fe-check"></i> OK
+                                                    <button
+                                                        class="btn btn-sm {{ $reponse->valide ? 'btn-danger' : 'btn-success' }} btn-valider"
+                                                        data-reponse-id="{{ $reponse->id }}"
+                                                        title="{{ $reponse->valide ? 'Validation faite' : 'Valider' }}"
+                                                        {{ $reponse->valide ? 'disabled' : '' }}
+                                                    >
+                                                        @if($reponse->valide)
+                                                            <i class="fe-check-circle"></i> Validation faite
+                                                        @else
+                                                            <i class="fe-check"></i> OK
+                                                        @endif
                                                     </button>
+
                                                     <!-- Modal -->
                                                     <div class="modal fade" id="modal-reponse-{{ $reponse->id }}" tabindex="-1" aria-labelledby="modalLabel{{ $reponse->id }}" aria-hidden="true">
                                                     <div class="modal-dialog modal-sm modal-dialog-scrollable">
@@ -112,8 +124,10 @@
             feather.replace();
         }
         $('.btn-valider').on('click', function () {
-            const reponseId = $(this).data('reponse-id');
             const btn = $(this);
+            if(btn.prop('disabled')) return;  // ne rien faire si déjà désactivé
+
+            const reponseId = btn.data('reponse-id');
 
             Swal.fire({
                 title: 'Valider le stage ?',
@@ -165,6 +179,7 @@
                 }
             });
         });
+
     });
 </script>
 @endpush

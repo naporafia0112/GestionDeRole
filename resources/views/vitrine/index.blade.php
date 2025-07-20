@@ -40,7 +40,7 @@
       </div>
     </div>
   </div>
-<div class="position-absolute end-0 bottom-0 p-4 z-3" style="transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">>
+<div class="position-absolute end-0 bottom-0 p-4 z-3" style="transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
     <a href="{{ route('candidature.spontanee.form') }}" class="mb-2 text-white">
         <div class="card bg-white bg-opacity-10 border rounded-4 text-white shadow-sm border-0 hover-shadow" style="transition: all 0.3s ease;">
             <div class="card-body">

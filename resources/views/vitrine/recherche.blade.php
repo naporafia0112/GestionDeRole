@@ -69,7 +69,7 @@
           @endif
 
           <div class="text-center mt-4">
-            <a href="{{ route('vitrine.index') }}" class="btn btn-outline-primary rounded-pill px-4">
+            <a href="{{ route('vitrine.index') }}" class="btn btn-outline-secondary rounded-pill">
               <i class="bi bi-arrow-left me-2"></i> Retour à l'accueil
             </a>
           </div>

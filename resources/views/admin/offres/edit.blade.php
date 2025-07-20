@@ -156,8 +156,10 @@
                                     </div>-->
 
                                     <!-- Boutons -->
-                                    <button type="button" class="btn btn-primary" onclick="confirmUpdate()">Mettre à jour</button>
-                                    <a href="{{ route('offres.index') }}" class="btn btn-secondary">Annuler</a>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-primary" onclick="confirmUpdate()">Mettre à jour</button>
+                                        <a href="{{ route('offres.index') }}" class="btn btn-secondary">Annuler</a>
+                                    </div>
                                 </form>
                             </div>
                         </div>

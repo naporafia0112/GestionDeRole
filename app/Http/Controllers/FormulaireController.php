@@ -133,16 +133,21 @@ class FormulaireController extends Controller
         return view('admin.rapports.directeur.liste', compact('formulaires'));
     }
     //LISTE réponses à un formulaire
-    public function detailformdirecteur(Formulaire $formulaire)
+   public function detailformdirecteur(Formulaire $formulaire)
     {
-         $user = Auth::user();
-        // Sécurité : seul le directeur qui l'a créé peut voir
+        $user = Auth::user();
         abort_if($formulaire->cree_par !== $user->id, 403);
 
-        $formulaire->load(['reponses.tuteur', 'champs']);
+        $formulaire->load(['reponses.tuteur', 'champs', 'reponses.stage.candidature.candidat']); // charger stage avec réponses
+
+        // Ajout d'un attribut 'valide' sur chaque réponse
+        foreach ($formulaire->reponses as $reponse) {
+            $reponse->valide = $reponse->stage ? (bool) $reponse->stage->est_valide : false;
+        }
 
         return view('admin.rapports.directeur.reponses', compact('formulaire'));
     }
+
 
     //DETAIL DE CHAQUE FORMULAIRES DE REPONSES
     public function reponseDetail(ReponseFormulaire $reponse)

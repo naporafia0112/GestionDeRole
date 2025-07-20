@@ -19,7 +19,6 @@ class Entretien extends Model
         'prevu'     => 'Prévu',
         'en_cours'  => 'En cours',
         'effectuee' => 'Effectué',
-        'termine'   => 'Terminé',
         'annule'    => 'Annulé',
     ];
 

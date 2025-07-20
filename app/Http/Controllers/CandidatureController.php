@@ -367,14 +367,16 @@ EOT;
         return view('admin.candidatures.all', compact('candidatures'));
     }
 
-    public function previewFile(int $id, string $field)
+    public function preview($id, $field)
     {
         $candidature = Candidature::findOrFail($id);
-        abort_unless(in_array($field, ['cv_fichier', 'lm_fichier', 'lr_fichier']), 404);
-        $path = $candidature->$field;
-        abort_if(!$path || !Storage::disk('public')->exists($path), 404);
+        $fichier = $candidature->$field;
 
-        return response()->file(storage_path('app/public/' . $path));
+        if (!$fichier || !Storage::disk('public')->exists($fichier)) {
+            abort(404, 'Fichier introuvable');
+        }
+
+        return response()->file(storage_path('app/public/' . $fichier));
     }
 
     public function downloadFile(int $id, string $field)

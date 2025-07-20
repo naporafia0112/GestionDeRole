@@ -100,6 +100,7 @@
                     <li class="menu-title mt-2">STAGES</li>
                     <li><a href="{{ route('stages.candidats_en_cours') }}"><i data-feather="file-text"></i> <span> Candidats </span></a></li>
                     <li><a href="{{ route('stages.en_cours') }}"><i data-feather="database"></i> <span> Stages en cours </span></a></li>
+                    <li><a href="{{ route('stages.termines') }}"><i data-feather="check-circle"></i> <span> Stages terminés </span></a></li>
 
                     <li class="menu-title mt-2">RAPPORTS</li>
                     <li><a href="{{ route('directeur.formulaires.liste') }}"><i data-feather="file"></i> <span> Rapports </span></a></li>
@@ -110,6 +111,7 @@
                     <li class="menu-title mt-2">STAGES</li>
                     <li><a href="{{ route('stages.candidats_tuteurs') }}"><i data-feather="file-text"></i> <span>Liste des candidats </span></a></li>
                     <li><a href="{{ route('tuteur.stages.en_cours') }}"><i data-feather="briefcase"></i> <span> Stages en cours </span></a></li>
+                    <li><a href="{{ route('tuteur.stages.termines') }}"><i data-feather="check-circle"></i> <span> Stages terminés </span></a></li>
                     <li class="menu-title mt-2">RAPPORTS</li>
                     <li><a href="{{ route('tuteur.formulaires.affichage') }}"><i data-feather="activity"></i> <span> Rapports candidats </span></a></li>
                 @else
