@@ -28,6 +28,7 @@ class CandidatureSpontanee extends Model
     ];
     protected $casts = [
         'date_soumission' => 'datetime',
+         'uuid' => 'string',
     ];
     protected static function boot()
     {

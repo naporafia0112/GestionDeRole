@@ -12,6 +12,15 @@ use App\Models\Candidat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Mail\TuteurAffecteMail;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StageCreeMail;
+use App\Exports\TousCandidatsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpWord\PhpWord;
+use App\Notifications\NouveauStageNotification;
+use PhpOffice\PhpWord\IOFactory;
 
 class StageController extends Controller
 {
@@ -63,6 +72,7 @@ class StageController extends Controller
     /**
      * Enregistrement d’un nouveau stage.
      */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -78,7 +88,6 @@ class StageController extends Controller
                     if ($request->has('date_debut')) {
                         $dateDebut = Carbon::parse($request->input('date_debut'));
                         $dateFin = Carbon::parse($value);
-
                         if ($dateFin->lt($dateDebut->copy()->addMonth())) {
                             $fail('La date de fin doit être au moins 1 mois après la date de début.');
                         }
@@ -111,10 +120,10 @@ class StageController extends Controller
                 return back()->with('error', 'Candidature classique introuvable.');
             }
 
-            // Vérifier doublon : stage actif (en_cours ou en_attente) pour ce candidat et cette offre
+            // Vérifier doublon
             $stageExistant = Stage::whereHas('candidature', function ($query) use ($candidature) {
                 $query->where('candidat_id', $candidature->candidat_id)
-                      ->where('offre_id', $candidature->offre_id);
+                    ->where('offre_id', $candidature->offre_id);
             })->whereIn('statut', [
                 Stage::STATUTS['EN_COURS'],
                 Stage::STATUTS['EN_ATTENTE'],
@@ -127,13 +136,18 @@ class StageController extends Controller
             $data['id_candidature'] = $candidature->id;
             $data['id_candidature_spontanee'] = null;
 
+            $stage = Stage::create($data);
+
+            // Récupérer le candidat lié
+            $candidat = $candidature->candidat;
+
         } else { // spontanee
             $candidatureSpontanee = CandidatureSpontanee::with('candidat')->find($request->id_candidature_spontanee);
             if (!$candidatureSpontanee) {
                 return back()->with('error', 'Candidature spontanée introuvable.');
             }
 
-            // Vérifier doublon : stage actif (en_cours ou en_attente) pour cette candidature spontanée
+            // Vérifier doublon
             $stageExistant = Stage::where('id_candidature_spontanee', $candidatureSpontanee->id)
                 ->whereIn('statut', [
                     Stage::STATUTS['EN_COURS'],
@@ -147,11 +161,27 @@ class StageController extends Controller
 
             $data['id_candidature_spontanee'] = $candidatureSpontanee->id;
             $data['id_candidature'] = null;
+
+            $stage = Stage::create($data);
+            
+            $stage->load('user');
+            $directeur = User::whereHas('roles', function ($query) {
+                $query->where('name', 'directeur');
+            })->where('departement_id', $stage->user->departement_id)->first();
+
+            if ($directeur) {
+                $directeur->notify(new NouveauStageNotification($stage));
+            }
+            // Récupérer le candidat lié
+            $candidat = $candidatureSpontanee->candidat;
         }
 
-        Stage::create($data);
+        // ENVOI DU MAIL AU CANDIDAT
+        if ($candidat && !empty($candidat->email)) {
+            Mail::to($candidat->email)->send(new StageCreeMail($candidat, $stage));
+        }
 
-        return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès.');
+        return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès et mail envoyé au candidat.');
     }
 
     /**
@@ -255,7 +285,7 @@ class StageController extends Controller
     /**
      * Affecter un tuteur à un stage (directeur uniquement).
      */
-    public function affecterTuteur(Request $request, $id)
+  public function affecterTuteur(Request $request, $id)
     {
         $stage = Stage::findOrFail($id);
 
@@ -269,9 +299,16 @@ class StageController extends Controller
             'id_tuteur' => 'required|exists:users,id',
         ]);
 
-        $stage->id_tuteur = $request->id_tuteur;
+        $tuteur = User::findOrFail($request->id_tuteur);
+
+        $stage->id_tuteur = $tuteur->id;
         $stage->statut = Stage::STATUTS['EN_COURS'];
         $stage->save();
+
+        // On suppose que la relation "candidature" existe dans le modèle Stage
+        $candidature = $stage->candidature;
+
+        Mail::to($tuteur->email)->send(new TuteurAffecteMail($tuteur, $candidature));
 
         return redirect()->route('stages.en_cours')->with('success', 'Tuteur affecté avec succès.');
     }
@@ -755,4 +792,113 @@ class StageController extends Controller
             'typesDepot' => $typesDepot,
         ]);
     }
+    public function exportTous(Request $request)
+    {
+        $query = Candidat::whereHas('candidatures.stage', function ($q) use ($request) {
+        if ($request->filled('date_debut')) {
+            $q->whereDate('date_debut', '>=', $request->date_debut);
+        }
+        if ($request->filled('date_fin')) {
+            $q->whereDate('date_debut', '<=', $request->date_fin);
+        }
+        });
+
+        $candidats = $query->get();
+
+        if ($candidats->isEmpty()) {
+            return back()->with('no_data', 'Aucune donnée trouvée pour cette période.');
+        }
+
+        return Excel::download(new TousCandidatsExport($candidats), 'tous_les_candidats.xlsx');
+    }
+
+
+   public function exportPDF(Request $request)
+    {
+       $query = Candidat::whereHas('candidatures.stage', function ($q) use ($request) {
+        if ($request->filled('date_debut')) {
+            $q->whereDate('date_debut', '>=', $request->date_debut);
+        }
+        if ($request->filled('date_fin')) {
+            $q->whereDate('date_debut', '<=', $request->date_fin);
+        }
+        });
+
+        $candidats = $query->get();
+
+        if ($candidats->isEmpty()) {
+            return redirect()->back()->with('no_data', 'Aucune donnée trouvée pour cette période.');
+        }
+
+        $pdf = Pdf::loadView('admin.rapports.candidats-pdf', compact('candidats'));
+        return $pdf->download('candidats_complets.pdf');
+    }
+
+
+   public function exportWord(Request $request)
+    {
+        $query = Candidat::query();
+
+        // Appliquer les filtres sur les dates
+        if ($request->filled('date_debut')) {
+            $query->whereDate('created_at', '>=', $request->date_debut);
+        }
+
+        if ($request->filled('date_fin')) {
+            $query->whereDate('created_at', '<=', $request->date_fin);
+        }
+
+        $candidats = $query->get();
+
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection();
+        $section->addText("Liste des candidats", ['bold' => true, 'size' => 16]);
+
+        $table = $section->addTable();
+
+        // En-têtes
+        $table->addRow();
+        $table->addCell()->addText('ID');
+        $table->addCell()->addText('Nom');
+        $table->addCell()->addText('Prénom');
+        $table->addCell()->addText('Email');
+        $table->addCell()->addText('Téléphone');
+        $table->addCell()->addText('Type dépôt');
+        $table->addCell()->addText('Date création');
+
+        foreach ($candidats as $candidat) {
+            $table->addRow();
+            $table->addCell()->addText($candidat->id);
+            $table->addCell()->addText($candidat->nom);
+            $table->addCell()->addText($candidat->prenoms);
+            $table->addCell()->addText($candidat->email);
+            $table->addCell()->addText($candidat->telephone);
+            $table->addCell()->addText($candidat->type_depot);
+            $table->addCell()->addText($candidat->created_at->format('d/m/Y'));
+        }
+
+        $fileName = 'candidats.docx';
+        $tempFile = storage_path($fileName);
+        $phpWord->save($tempFile, 'Word2007');
+
+        return response()->download($tempFile)->deleteFileAfterSend(true);
+    }
+  public function imprimer(Request $request)
+    {
+        $query = Candidat::query();
+
+        // Appliquer les filtres sur les dates
+        if ($request->filled('date_debut')) {
+            $query->whereDate('created_at', '>=', $request->date_debut);
+        }
+
+        if ($request->filled('date_fin')) {
+            $query->whereDate('created_at', '<=', $request->date_fin);
+        }
+
+        $candidats = $query->get();
+
+       return view('admin.rapports.candidats-print', compact('candidats'));
+    }
+
 }

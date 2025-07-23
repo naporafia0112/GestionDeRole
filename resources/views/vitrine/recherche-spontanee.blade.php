@@ -14,15 +14,14 @@
             <h2 class="h3">Résultat de votre recherche</h2>
           </div>
 
-          @if(isset($message))
-            <div class="d-flex align-items-center p-3 rounded"
-                 style="background-color: #e7f8ff; border-left: 4px solid #4fc3f7;">
-              <i class="bi bi-info-circle-fill me-3" style="color: #4fc3f7; font-size: 1.2rem;"></i>
-              <div>
-                <p class="mb-0" style="color: #00688b;">{!! $message !!}</p>
-              </div>
-            </div>
-          @endif
+         @if(isset($message))
+        <div class="d-flex align-items-center p-3 rounded" style="background-color: #e7f8ff; border-left: 4px solid #4fc3f7;">
+        <i class="bi bi-info-circle-fill me-3" style="color: #4fc3f7; font-size: 1.2rem;"></i>
+        <div>
+            <p class="mb-0" style="color: #00688b;">{!! $message !!}</p>
+        </div>
+        </div>
+        @endif
 
           @if(isset($candidature))
           <div class="result-content">
@@ -34,47 +33,36 @@
                 </div>
               </div>
               <div class="col-md-8">
-                <h3 class="h4">
-                  @if($type === 'spontanee')
-                    {{ $candidature->nom }}
-                  @else
-                    {{ $candidature->candidat->nom }} {{ $candidature->candidat->prenoms }}
-                  @endif
-                </h3>
+                <h3 class="h4">{{ $candidature->candidat->nom }} {{ $candidature->candidat->prenoms }}</h3>
                 <p class="text-muted mb-3">Candidature #{{ $candidature->uuid }}</p>
 
                 <div class="d-flex align-items-center mb-3">
                   <div class="me-3">
-                    @php $statut = $candidature->statut; @endphp
-                    @if($statut === 'en_cours'|| $statut === 'reçue')
-                      <span class="badge bg-warning text-dark">En cours de traitement</span>
-                    @elseif($statut === 'retenu')
-                      <span class="badge bg-success">Retenu</span>
-                    @elseif($statut === 'rejete')
-                      <span class="badge bg-danger">Rejeté</span>
-                    @else
-                      <span class="badge bg-secondary">Inconnu</span>
-                    @endif
+                    @if($candidature->statut === 'en_cours')
+                                                                    <span class="badge bg-warning text-dark">En cours de traitement</span>
+                                                                @elseif($candidature->statut === 'retenu')
+                                                                    <span class="badge bg-success">Retenu</span>
+                                                                @elseif($candidature->statut === 'rejete')
+                                                                    <span class="badge bg-danger">Rejeté</span>
+                                                                @else
+                                                                    <span class="badge bg-secondary">Inconnu</span>
+                                                                @endif
                   </div>
                   <small class="text-muted">Mise à jour: {{ $candidature->updated_at->format('d/m/Y H:i') }}</small>
                 </div>
 
                 <div class="candidature-details">
                   <div class="row">
-                    @if($type === 'classique')
-                      <div class="col-sm-6 mb-3">
-                        <h4 class="h6 text-muted mb-1">Poste</h4>
-                        <p>{{ $candidature->offre->titre ?? 'Non spécifié' }}</p>
-                      </div>
-                    @endif
-
+                    <div class="col-sm-6 mb-3">
+                      <h4 class="h6 text-muted mb-1">Poste</h4>
+                      <p>{{ $candidature->offre->titre ?? 'Non spécifié' }}</p>
+                    </div>
                     <div class="col-sm-6 mb-3">
                       <h4 class="h6 text-muted mb-1">Date de candidature</h4>
                       <p>{{ $candidature->created_at->format('d/m/Y') }}</p>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -100,4 +88,5 @@
     </div>
   </div>
 </section>
+
 @endsection

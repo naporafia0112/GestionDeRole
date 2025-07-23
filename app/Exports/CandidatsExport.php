@@ -3,25 +3,26 @@
 namespace App\Exports;
 
 use App\Models\Candidat;
-use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\FromView;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class CandidatsExport implements FromView
+class CandidatsExport implements FromCollection, WithHeadings
 {
     protected $request;
 
-    public function __construct($request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
 
-    public function view(): View
+    public function collection()
     {
         $query = Candidat::query();
 
-        #if ($this->request->filled('type_stage')) {
-            #$query->where('type_stage', $this->request->type_stage);
-        #}
+        if ($this->request->filled('type_depot')) {
+            $query->where('type_depot', $this->request->type_depot);
+        }
 
         if ($this->request->filled('date_debut')) {
             $query->whereDate('created_at', '>=', $this->request->date_debut);
@@ -31,9 +32,13 @@ class CandidatsExport implements FromView
             $query->whereDate('created_at', '<=', $this->request->date_fin);
         }
 
-        return view('admin.rapports.tables.candidats', [
-            'candidats' => $query->get()
+        return $query->get([
+            'id', 'nom', 'prenoms', 'email', 'telephone', 'type_depot', 'created_at'
         ]);
     }
-}
 
+    public function headings(): array
+    {
+        return ['ID', 'Nom', 'Prénom', 'Email', 'Téléphone', 'Type de dépôt', 'Date de création'];
+    }
+}

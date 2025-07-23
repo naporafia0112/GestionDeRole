@@ -40,6 +40,8 @@ class DashboardController extends Controller
                 + CandidatureSpontanee::where('statut', 'rejete')->count();
         $retenu= Candidature::where('statut', 'retenu')->count()
                 + CandidatureSpontanee::where('statut', 'retenu')->count();
+        $reçue =CandidatureSpontanee::where('statut', 'reçue')->count();
+        $en_cours = Candidature::where('statut', 'en_cours')->count();
 
         $progressionPourcent = $countCandidatures > 0 ? round(($valide / $countCandidatures) * 100, 1) : 0;
 
@@ -98,13 +100,76 @@ class DashboardController extends Controller
             ->groupBy(fn($item) => optional($item->offre)->departement->nom ?? 'Inconnu')
             ->map(fn($group) => $group->sum('total'));
 
-        return view('dashboard', compact(
+        $usersParDepartement = User::with('departement')
+            ->get()
+            ->groupBy(fn($user) => optional($user->departement)->nom ?? 'Inconnu')
+            ->map(fn($group) => $group->count());
+
+        $departementLabels = $usersParDepartement->keys();
+        $departementCounts = $usersParDepartement->values();
+        $stagesParDept = Stage::with('departement')
+        ->select('id_departement', DB::raw('COUNT(*) as total'))
+        ->groupBy('id_departement')
+        ->get()
+        ->groupBy(fn($s) => optional($s->departement)->nom ?? 'Inconnu')
+        ->map(fn($group) => $group->sum('total'));
+
+        // a. Tuteurs par département
+       $tuteursParDepartement = User::with('departement')
+        ->whereHas('roles', fn($q) => $q->where('name', 'TUTEUR'))
+        ->get()
+        ->groupBy(fn($user) => optional($user->departement)->nom ?? 'Inconnu')
+        ->map(fn($group) => $group->count());
+
+
+        // b. Nombre total d’utilisateurs
+        $totalUtilisateurs = User::count();
+
+        // c. Utilisateurs créés par mois (ex : Janvier, Février…)
+        $utilisateursParMois = User::select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois"),
+                DB::raw('count(*) as total')
+            )
+            ->groupBy('mois')
+            ->orderBy('mois')
+            ->pluck('total', 'mois');
+
+        // d. Stages par département
+        $stagesParDepartement = Stage::select('departement', DB::raw('count(*) as total'))
+            ->groupBy('departement')
+            ->pluck('total', 'departement');
+
+        $candidaturesSemaine = Candidature::whereBetween('date_soumission', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->selectRaw('DAYNAME(date_soumission) as jour, COUNT(*) as total')
+            ->groupBy('jour')
+            ->pluck('total', 'jour');
+
+        $offresMois = Candidature::selectRaw('MONTH(date_soumission) as mois, COUNT(*) as total')
+            ->groupBy('mois')->pluck('total', 'mois');
+
+        $spontaneesMois = CandidatureSpontanee::selectRaw('MONTH(date_soumission) as mois, COUNT(*) as total')
+            ->groupBy('mois')->pluck('total', 'mois');
+
+        $stagesEnCours = Stage::where('statut', 'EN_COURS')
+            ->selectRaw('MONTH(date_debut) as mois, COUNT(*) as total')
+            ->groupBy('mois')->pluck('total', 'mois');
+
+        $stagesTermines = Stage::where('statut', 'TERMINE')
+            ->selectRaw('MONTH(date_debut) as mois, COUNT(*) as total')
+            ->groupBy('mois')->pluck('total', 'mois');
+
+        $usersParMois = User::selectRaw('MONTH(created_at) as mois, COUNT(*) as total')
+            ->groupBy('mois')->pluck('total', 'mois');
+
+        return view('dashboard.dashboard', compact(
         'countCandidats',
         'countCandidatures',
         'countUtilisateurs',
         'valide',
         'rejete',
         'retenu',
+        'reçue',
+        'en_cours',
         'chartLabels',
         'chartDataOffres',
         'chartDataSpontanees',
@@ -114,6 +179,26 @@ class DashboardController extends Controller
         'rolesLabels',
         'rolesCounts',
         'validesParDept',
+        'departementLabels',
+        'departementCounts',
+        'progressionPourcent',
+        'candidaturesParMois',
+        'spontaneesParMois',
+        'offresParMois',
+        'usersByRole',
+        'entretiensByStatut',
+        'stagesParDept',
+        'stagesParMois',
+        'tuteursParDepartement',
+        'totalUtilisateurs',
+        'utilisateursParMois',
+        'stagesParDepartement',
+        'candidaturesSemaine',
+        'offresMois',
+        'spontaneesMois',
+        'stagesEnCours',
+        'stagesTermines',
+        'usersParMois'
     ));
 
     }
@@ -157,7 +242,7 @@ class DashboardController extends Controller
             ->pluck('candidat.id') // récupère les ID via l'attribut "getCandidatAttribute"
             ->filter()
             ->count();
-      
+
         // --- 3. Récupération des stages en attente récents ---
         $stagesEnAttenteQuery = Stage::with(['departement', 'candidature.candidat', 'candidatureSpontanee.candidat'])
             ->where('id_departement', $departementId)
@@ -181,7 +266,7 @@ class DashboardController extends Controller
     }
 
 
-     
+
     public function dashboardTuteur()
     {
         $tuteur = Auth::user();

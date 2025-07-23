@@ -19,6 +19,13 @@
                     <input type="date" id="max-date" class="form-control">
                 </div>
             </div>
+            <a href="#" id="export-excel" class="btn btn-success mb-2">
+                <i class="mdi mdi-file-excel"></i> Exporter Excel
+            </a>
+            <a href="#"  id="export-pdf" class="btn btn-danger mb-2"><i class="mdi mdi-file-pdf-box"></i> Export PDF</a>
+            <a href="#"  id="export-word" class="btn btn-primary mb-2"><i class="mdi mdi-file-word-box"></i> Export Word</a>
+            <a href="#" target="_blank"  id="imprimer" class="btn btn-secondary mb-2"><i class="mdi mdi-printer"></i> Imprimer</a>
+
 
                 <div class="table-responsive">
                     <table id="candidats-datatable" class="table table-bordered table-striped dt-responsive nowrap w-100">
@@ -63,81 +70,56 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-$('#candidats-datatable').DataTable({
-    language: {
-        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-    },
-    responsive: true,
-    pageLength: 10,
-    dom: 'Bfrtip',
-    buttons: [
-        {
-            extend: 'pdfHtml5',
-            className: 'btn btn-sm btn-danger',
-            text: '<i class="mdi mdi-file-pdf"></i> Exporter en PDF',
-            orientation: 'landscape',
-            pageSize: 'A4',
-            exportOptions: {
-                modifier: {
-                    search: 'applied'
-                }
-            },
-            customize: function (doc) {
-                // Centrer le titre
-                doc.styles.title = {
-                    alignment: 'center',
-                    fontSize: 14
-                };
+    function getExportUrl(baseUrl) {
+        const dateDebut = $('#min-date').val();
+        const dateFin = $('#max-date').val();
 
-                // Centrer les en-têtes de colonne
-                doc.styles.tableHeader = {
-                    alignment: 'center',
-                    bold: true,
-                    fontSize: 12
-                };
-
-                // Parcourir tous les éléments du document
-                doc.content.forEach(function (contentItem) {
-                    if (contentItem.table && contentItem.table.body) {
-                        contentItem.table.body.forEach(function (row) {
-                            row.forEach(function (cell) {
-                                if (typeof cell === 'object') {
-                                    cell.alignment = 'center';
-                                }
-                            });
-                        });
-                    }
-                });
-            }
+        if (!dateDebut && !dateFin) {
+            return baseUrl;
         }
-    ]
-});
-$.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-    let min = $('#min-date').val();
-    let max = $('#max-date').val();
-    let date = data[4];
 
-    if (!min && !max) return true;
-
-    let dateObj = new Date(date);
-
-    if (
-        (!min || new Date(min) <= dateObj) &&
-        (!max || new Date(max) >= dateObj)
-    ) {
-        return true;
+        return `${baseUrl}?date_debut=${dateDebut}&date_fin=${dateFin}`;
     }
-    return false;
-});
 
-$('#min-date, #max-date').on('change', function () {
-    $('#candidats-datatable').DataTable().draw();
-});
+    $('#export-excel').on('click', function (e) {
+        e.preventDefault();
+        const url = getExportUrl("{{ route('candidats.export.tous') }}");
+        window.location.href = url;
+    });
 
+    $('#export-pdf').on('click', function (e) {
+        e.preventDefault();
+        const url = getExportUrl("{{ route('candidats.export.pdf') }}");
+        window.location.href = url;
+    });
 
+    $('#export-word').on('click', function (e) {
+        e.preventDefault();
+        const url = getExportUrl("{{ route('candidats.export.word') }}");
+        window.location.href = url;
+    });
+
+    $('#imprimer').on('click', function (e) {
+        e.preventDefault();
+        const url = getExportUrl("{{ route('candidats.imprimer') }}");
+        window.open(url, '_blank');
+    });
 </script>
+@if (session('no_data'))
+<script>
+    Swal.fire({
+        icon: 'info',
+        title: 'Aucun résultat',
+        text: '{{ session('no_data') }}',
+    });
+</script>
+@endif
+
 @endpush
 
 @push('styles')

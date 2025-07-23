@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Mail\CandidatureConfirmationMail;
+use App\Models\CandidatureSpontanee;
 
 
 class CandidatureController extends Controller
@@ -351,16 +352,25 @@ EOT;
         return redirect()->route('vitrine.show', $offreId)->with('success', 'Votre candidature a été envoyée avec succès. Un mail de confirmation vous a été envoyé.');
     }
 
-    public function recherche(Request $request)
+   public function recherche(Request $request)
     {
         $request->validate(['uuid' => 'required|string']);
-        $candidature = Candidature::where('uuid', $request->uuid)->with('candidat')->first();
-        $offres = Offre::all();
+
+        // Recherche d'une candidature classique
+        $candidature = Candidature::with('candidat')->where('uuid', $request->uuid)->first();
+        $type = 'classique';
+
+        // Si pas trouvée, recherche une candidature spontanée
+        if (!$candidature) {
+            $candidature = CandidatureSpontanee::where('uuid', $request->uuid)->first();
+            $type = $candidature ? 'spontanee' : null;
+        }
+
+        $offres = Offre::all(); // Si tu veux afficher la liste des offres dans la vue
         $message = !$candidature ? "Aucune candidature trouvée avec cet UUID." : null;
 
-        return view('vitrine.recherche', compact('candidature', 'offres', 'message'));
+        return view('vitrine.recherche', compact('candidature', 'offres', 'message', 'type'));
     }
-
     public function all()
     {
         $candidatures = Candidature::with(['candidat', 'offre'])->latest()->paginate(10);

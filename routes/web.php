@@ -122,6 +122,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tuteur/stages/termines', [StageController::class, 'stagesTerminesPourTuteur'])->name('tuteur.stages.termines');
     Route::get('/stages/rh/candidats-en-stage', [StageController::class, 'candidatsEnStage'])
         ->name('stages.rh.candidats_en_stage');
+    Route::get('/export-candidats-base', [StageController::class, 'exportTous'])->name('candidats.export.tous');
+    Route::get('/export-candidats-pdf', [StageController::class, 'exportPDF'])->name('candidats.export.pdf');
+    Route::get('/export-candidats-word', [StageController::class, 'exportWord'])->name('candidats.export.word');
+    Route::get('/imprimer-candidats', [StageController::class, 'imprimer'])->name('candidats.imprimer');
     Route::get('/tuteur/liste-candidats', [StageController::class, 'candidatsTuteur'])->name('stages.candidats_tuteurs');
     Route::get('/candidats/{id}/details/tuteur', [StageController::class, 'details_candidat_encours_tuteur'])->name('candidats.details');
     Route::get('/candidats/{id}/details/directeur', [StageController::class, 'details_candidat_encours_directeur'])->name('candidats.details.directeur');

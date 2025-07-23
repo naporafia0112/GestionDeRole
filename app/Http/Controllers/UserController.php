@@ -90,9 +90,11 @@ class UserController extends Controller
                 $permissions[] = $permission->name;
             }
         }
-
+        
+        $user->load('departement');
         $permissions = array_unique($permissions);
 
         return view('admin.CreationUtilisateur.user.show', compact('user', 'roles', 'permissions'));
     }
+    
 }

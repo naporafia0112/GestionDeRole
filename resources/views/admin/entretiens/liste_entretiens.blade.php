@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-4">
-   <div class="card shadow-sm">
+    <div class="card shadow-sm">
         <div class="card-body">
             <div class="row mb-2">
                 <div class="col-12">
@@ -15,67 +15,34 @@
                                 </ol>
                             </nav>
                         </div>
-                        <h4 class="mb-4" style="font-size: 25px">Liste de tout les entretiens</h4>
+                        <h4 class="mb-4" style="font-size: 25px">Liste de tous les entretiens</h4>
                     </div>
                 </div>
             </div>
-            <!-- Onglets Bootstrap pour filtrer par statut -->
+
+            <!-- FILTRE STATUT -->
             <div class="mb-3">
-                <strong>Filtrer par statut :</strong>
-                <ul class="nav nav-tabs" id="tabsStatut" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" data-statut="" type="button" role="tab" aria-selected="true">
-                            Tous <span class="badge bg-secondary" id="count-statut-tous"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-statut="prevu" type="button" role="tab" aria-selected="false">
-                            Prévu <span class="badge bg-secondary" id="count-statut-prevu"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-statut="annule" type="button" role="tab" aria-selected="false">
-                            Annulé <span class="badge bg-secondary" id="count-statut-annule"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-statut="encours" type="button" role="tab" aria-selected="false">
-                            En cours <span class="badge bg-secondary" id="count-statut-encours"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-statut="effectuee" type="button" role="tab" aria-selected="false">
-                            Effectuée <span class="badge bg-secondary" id="count-statut-effectuee"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-statut="termine" type="button" role="tab" aria-selected="false">
-                            Terminé <span class="badge bg-secondary" id="count-statut-termine"></span>
-                        </button>
-                    </li>
-                </ul>
+                <label for="filterStatut" class="form-label"><strong>Filtrer par statut :</strong></label>
+                <select id="filterStatut" class="form-select" style="max-width: 300px;">
+                    <option value="" selected>Tous</option>
+                    <option value="prevu">Prévu</option>
+                    <option value="annule">Annulé</option>
+                    <option value="encours">En cours</option>
+                    <option value="effectuee">Effectuée</option>
+                    <option value="termine">Terminé</option>
+                </select>
+                <span class="badge bg-secondary ms-2" id="count-statut"></span>
             </div>
 
-            <!-- Onglets Bootstrap pour filtrer par type de candidature -->
+            <!-- FILTRE TYPE -->
             <div class="mb-3">
-                <strong>Filtrer par type de candidature :</strong>
-                <ul class="nav nav-tabs" id="tabsTypeCandidature" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" data-type="" type="button" role="tab" aria-selected="true">
-                            Tous <span class="badge bg-secondary" id="count-type-tous"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-type="offre" type="button" role="tab" aria-selected="false">
-                            Offre <span class="badge bg-secondary" id="count-type-offre"></span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" data-type="spontanee" type="button" role="tab" aria-selected="false">
-                            Spontanée <span class="badge bg-secondary" id="count-type-spontanee"></span>
-                        </button>
-                    </li>
-                </ul>
+                <label for="filterType" class="form-label"><strong>Filtrer par type de candidature :</strong></label>
+                <select id="filterType" class="form-select" style="max-width: 300px;">
+                    <option value="" selected>Tous</option>
+                    <option value="offre">Offre</option>
+                    <option value="spontanee">Spontanée</option>
+                </select>
+                <span class="badge bg-secondary ms-2" id="count-type"></span>
             </div>
 
             <div class="table-responsive">
@@ -92,9 +59,7 @@
                     </thead>
                     <tbody>
                         @foreach ($entretiens as $entretien)
-                            <tr
-                                data-statut="{{ strtolower($entretien->statut) }}"
-                                data-type="{{ $entretien->offre ? 'offre' : 'spontanee' }}">
+                            <tr data-statut="{{ strtolower($entretien->statut) }}" data-type="{{ $entretien->offre ? 'offre' : 'spontanee' }}">
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $entretien->candidat->nom ?? '-' }} {{ $entretien->candidat->prenoms ?? '' }}</td>
                                 <td>{{ $entretien->offre->titre ?? 'Entretien spontané' }}</td>
@@ -110,7 +75,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>
@@ -133,123 +97,91 @@
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        var table = $('#entretiens-table').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-            },
-            responsive: true,
-            pageLength: 10,
-            dom: 'Bfrtip',
-            buttons: [
-                {
-                    extend: 'pdfHtml5',
-                    className: 'btn btn-sm btn-danger',
-                    text: '<i class="mdi mdi-file-pdf"></i> Exporter en PDF',
-                    orientation: 'landscape',
-                    pageSize: 'A4',
-                    exportOptions: {
-                        rows: function (idx, data, node) {
-                            let statutFiltre = $('#tabsStatut .nav-link.active').data('statut');
-                            let typeFiltre = $('#tabsTypeCandidature .nav-link.active').data('type');
-
-                            let statutRow = $(node).data('statut');
-                            let typeRow = $(node).data('type');
-
-                            let statutOk = !statutFiltre || statutFiltre === "" ? true : statutRow === statutFiltre;
-                            let typeOk = !typeFiltre || typeFiltre === "" ? true : typeRow === typeFiltre;
-
-                            return statutOk && typeOk;
-                        }
+$(document).ready(function () {
+    const table = $('#entretiens-table').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        },
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                className: 'btn btn-sm btn-danger',
+                text: '<i class="mdi mdi-file-pdf"></i> Exporter en PDF',
+                orientation: 'landscape',
+                pageSize: 'A4',
+                exportOptions: {
+                    modifier: {
+                        search: 'applied',
+                        order: 'applied'
                     },
-                    customize: function (doc) {
-                        doc.styles.title = { alignment: 'center', fontSize: 14 };
-                        doc.styles.tableHeader = { alignment: 'center', bold: true, fontSize: 12 };
-                        doc.content.forEach(function (contentItem) {
-                            if (contentItem.table && contentItem.table.body) {
-                                contentItem.table.body.forEach(function (row) {
-                                    row.forEach(function (cell) {
-                                        if (typeof cell === 'object') {
-                                            cell.alignment = 'center';
-                                        }
-                                    });
-                                });
-                            }
+                    columns: ':visible'
+                },
+                customize: function (doc) {
+                    doc.styles.title = {
+                        alignment: 'center',
+                        fontSize: 16,
+                        bold: true,
+                        margin: [0, 0, 0, 12]
+                    };
+
+                    doc.styles.tableHeader = {
+                        alignment: 'center',
+                        bold: true,
+                        fontSize: 12
+                    };
+
+                    const contentTable = doc.content.find(item => item.table);
+                    if (contentTable) {
+                        // Centrer le texte de chaque cellule
+                        contentTable.table.body.forEach(row => {
+                            row.forEach(cell => {
+                                if (typeof cell === 'object') {
+                                    cell.alignment = 'center';
+                                }
+                            });
                         });
+
+                        // Méthode simple et SÛRE pour centrer le tableau : alignement global
+                        contentTable.alignment = 'center';
                     }
                 }
-            ]
-        });
 
-        // Fonction qui calcule et affiche le count dans chaque onglet
-        function updateCounts() {
-            let countsStatut = {
-                tous: 0,
-                prevu: 0,
-                annule: 0,
-                encours: 0,
-                effectuee: 0,
-                termine: 0
-            };
-            let countsType = {
-                tous: 0,
-                offre: 0,
-                spontanee: 0
-            };
-
-            $('#entretiens-table tbody tr').each(function() {
-                countsStatut.tous++;
-                countsType.tous++;
-
-                let statut = $(this).data('statut');
-                let type = $(this).data('type');
-
-                if (statut in countsStatut) countsStatut[statut]++;
-                if (type in countsType) countsType[type]++;
-            });
-
-            $('#count-statut-tous').text(countsStatut.tous);
-            $('#count-statut-prevu').text(countsStatut.prevu);
-            $('#count-statut-annule').text(countsStatut.annule);
-            $('#count-statut-encours').text(countsStatut.encours);
-            $('#count-statut-effectuee').text(countsStatut.effectuee);
-            $('#count-statut-termine').text(countsStatut.termine);
-
-            $('#count-type-tous').text(countsType.tous);
-            $('#count-type-offre').text(countsType.offre);
-            $('#count-type-spontanee').text(countsType.spontanee);
-        }
-
-        function filtrerTable() {
-            let statutFiltre = $('#tabsStatut .nav-link.active').data('statut');
-            let typeFiltre = $('#tabsTypeCandidature .nav-link.active').data('type');
-
-            table.rows().every(function () {
-                let rowStatut = $(this.node()).data('statut');
-                let rowType = $(this.node()).data('type');
-
-                let statutOk = !statutFiltre || statutFiltre === "" ? true : rowStatut === statutFiltre;
-                let typeOk = !typeFiltre || typeFiltre === "" ? true : rowType === typeFiltre;
-
-                $(this.node()).toggle(statutOk && typeOk);
-            });
-        }
-
-        // Clic onglets statut
-        $('#tabsStatut .nav-link').on('click', function () {
-            $('#tabsStatut .nav-link').removeClass('active');
-            $(this).addClass('active');
-            filtrerTable();
-        });
-
-        // Clic onglets type candidature
-        $('#tabsTypeCandidature .nav-link').on('click', function () {
-            $('#tabsTypeCandidature .nav-link').removeClass('active');
-            $(this).addClass('active');
-            filtrerTable();
-        });
-
-        updateCounts();
+            },
+            {
+                extend: 'excelHtml5',
+                className: 'btn btn-sm btn-success',
+                text: '<i class="mdi mdi-file-excel"></i> Exporter en Excel',
+                exportOptions: {
+                    modifier: {
+                        search: 'applied',
+                        order: 'applied'
+                    },
+                    columns: ':visible'
+                }
+            }
+        ]
     });
+
+    function filtrerTable() {
+        const statut = $('#filterStatut').val();
+        const type = $('#filterType').val();
+
+        table.rows().every(function () {
+            const $row = $(this.node());
+            const rowStatut = $row.data('statut');
+            const rowType = $row.data('type');
+
+            const matchStatut = !statut || rowStatut === statut;
+            const matchType = !type || rowType === type;
+
+            $row.toggle(matchStatut && matchType);
+        });
+    }
+
+    $('#filterStatut, #filterType').on('change', function () {
+        filtrerTable();
+    });
+});
 </script>
 @endpush

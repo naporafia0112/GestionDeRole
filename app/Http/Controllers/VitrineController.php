@@ -90,10 +90,24 @@ class VitrineController extends Controller
 {
     return view('vitrine.consulter');
 }
-    public function suivi($uuid)
-    {
-        $candidature = Candidature::with('candidat')->where('uuid', $uuid)->firstOrFail();
-        return view('vitrine.recherche', compact('candidature'));
+   public function suivi(Request $request)
+{
+    $uuid = $request->input('uuid'); // Si ton champ input s'appelle "uuid"
+
+    // Chercher d'abord dans les candidatures classiques
+    $candidature = \App\Models\Candidature::with('candidat')->where('uuid', $uuid)->first();
+
+    // Sinon, chercher dans les candidatures spontanées
+    if (!$candidature) {
+        $candidature = \App\Models\CandidatureSpontanee::with('candidat')->where('uuid', $uuid)->first();
+
+        if ($candidature) {
+            return view('vitrine.recherche-spontanee', compact('candidature'));
+        }
     }
+
+    return view('vitrine.recherche')->with('message', 'Aucune candidature trouvée avec ce code.');
+}
+
 
 }

@@ -40,11 +40,30 @@
       </div>
     </div>
   </div>
-<div class="position-absolute end-0 bottom-0 p-4 z-3" style="transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-    <a href="{{ route('candidature.spontanee.form') }}" class="mb-2 text-white">
-        <div class="card bg-white bg-opacity-10 border rounded-4 text-white shadow-sm border-0 hover-shadow" style="transition: all 0.3s ease;">
-            <div class="card-body">
-                <p class="mb-2">Vous ne trouvez pas d’offre qui correspond à votre profil ?<br/>Faire un dépôt spontané</p>
+<div class="position-fixed end-0 bottom-0 p-4 z-3" style="transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);">
+    <a href="{{ route('candidature.spontanee.form') }}" class="text-decoration-none">
+        <div class="card bg-primary-gradient border-0 rounded-4 text-white shadow-lg hover-shadow-lg"
+             style="transition: all 0.4s ease; backdrop-filter: blur(8px); background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);"
+             onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 12px 20px -8px rgba(0,0,0,0.2)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 16px -4px rgba(0,0,0,0.1)'">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="mb-0 fw-semibold">Pas d'offre correspondante ?</p>
+                        <p class="mb-0 opacity-75">Postulez spontanément</p>
+                    </div>
+                    <div class="flex-shrink-0 ms-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
     </a>

@@ -105,6 +105,7 @@
                     <li class="menu-title mt-2">RAPPORTS</li>
                     <li><a href="{{ route('directeur.formulaires.liste') }}"><i data-feather="file"></i> <span> Rapports </span></a></li>
                     <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
+                    
                 @elseif (Auth::user()->hasRole('TUTEUR'))
                     <li class="menu-title">TUTEUR</li>
                     <li><a href="{{ route('dashboard.tuteur') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>

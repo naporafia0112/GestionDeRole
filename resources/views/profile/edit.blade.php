@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <div class="card shadow-lg border-0">
         <div class="card-body">
-             <button type="button" class="btn-close" ><a href="{{ route('dashboard') }}" class=""><i class="fe-x-circle text-l"></i></a></button>
+             <button type="button"><a href="{{ url()->previous() }}" class="btn-close" title="Retour"></i></a></button>
             <div class="d-flex align-items-center mb-4">
                 <div class="me-4">
                     <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=100&background=4e54c8&color=fff" class="rounded-circle" alt="Avatar">
@@ -26,6 +26,9 @@
                     <li class="list-group-item text-muted">Aucun rôle attribué</li>
                 @endforelse
             </ul>
+            <p><strong>Département :</strong> 
+                {{ $user->departement ? $user->departement->nom : 'Aucun département attribué' }}
+            </p>
         </div>
     </div>
 </div>

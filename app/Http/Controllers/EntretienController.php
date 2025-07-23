@@ -8,7 +8,8 @@ use App\Models\Offre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-
+use App\Mail\EntretienCreeMail;
+use Illuminate\Support\Facades\Mail;
 class EntretienController extends Controller
 {
     // Affiche la vue calendrier (avec FullCalendar)
@@ -129,25 +130,32 @@ class EntretienController extends Controller
             $debut = $entretienDateTime;
             $fin = $debut->copy()->addHour();
 
-            Entretien::create([
-                'date' => $request->date,
-                'heure' => $request->heure,
-                'lieu' => $request->lieu,
-                'type' => $request->type,
-                'statut' =>'prevu',
-                'commentaire' => $request->commentaire,
-                'id_candidat' => $request->id_candidat,
-                'id_offre' => $request->id_offre ?? null,
-                'candidature_spontanee_id' => $request->candidature_spontanee_id ?? null,
-                // Ajout des dates de début et de fin
-                'date_debut' => $debut,
-                'date_fin' => $fin,
-            ]);
+          $entretien = Entretien::create([
+            'date' => $request->date,
+            'heure' => $request->heure,
+            'lieu' => $request->lieu,
+            'type' => $request->type,
+            'statut' => 'prevu',
+            'commentaire' => $request->commentaire,
+            'id_candidat' => $request->id_candidat,
+            'id_offre' => $request->id_offre ?? null,
+            'candidature_spontanee_id' => $request->candidature_spontanee_id ?? null,
+            'date_debut' => $debut,
+            'date_fin' => $fin,
+        ]);
 
-            return redirect()->route('entretiens.calendrier')
+        // Récupérer le candidat
+        $candidat = Candidat::find($request->id_candidat);
+
+        if ($candidat && !empty($candidat->email)) {
+            Mail::to($candidat->email)->send(new EntretienCreeMail($candidat, $entretien));
+        }
+
+
+        return redirect()->route('entretiens.calendrier')
                 ->with('success', 'Entretien créé avec succès !');
         } catch (\Exception $e) {
-            return redirect()->back()
+        return redirect()->back()
                 ->with('error', 'Erreur lors de la création de l\'entretien : ' . $e->getMessage())
                 ->withInput();
         }

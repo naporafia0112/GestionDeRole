@@ -59,6 +59,6 @@ class DepartementController extends Controller
     {
         $departement->delete();
 
-        return response()->json(['message' => 'Département supprimé avec succès.']);
+        return redirect()->route('departements.index')->with('success', 'Département supprimé avec succès.');
     }
 }

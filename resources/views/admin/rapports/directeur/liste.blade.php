@@ -2,12 +2,13 @@
 
 @section('content')
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+    {{-- En-tête de la page --}}
+    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap">
         <div>
             <h2 class="mb-1 fw-bold">Formulaires d'évaluation</h2>
-            <p class="text-muted mb-0">Gérez vos formulaires d'évaluation</p>
+            <p class="text-muted mb-0">Historique de la création des formulaires</p>
         </div>
-        <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success btn-sm mt-2 mt-md-0">
+        <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success">
             <i data-feather="plus" class="me-1"></i> Créer un formulaire
         </a>
     </div>
@@ -17,255 +18,221 @@
             Aucun formulaire créé pour le moment.
         </div>
     @else
-        <div class="timeline" id="timeline">
+        {{-- Début de la Timeline --}}
+        <ul class="timeline">
             @foreach($formulaires as $index => $formulaire)
-                <div class="timeline-item {{ $index % 2 === 0 ? 'left' : 'right' }}" data-index="{{ $index }}">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content card shadow-sm">
-                        <div class="card-body">
-                            <div class="timeline-date text-muted">
-                                {{ $formulaire->created_at->format('d/m/Y à H\hi') }}
-                            </div>
-                            <h5 class="card-title mb-2">{{ $formulaire->titre }}</h5>
-                             <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-secondary btn-sm">
-                                <i data-feather="file-text" class="me-1"></i> Voir réponses
+                <li class="{{ $index % 2 !== 0 ? 'timeline-inverted' : '' }}">
+                    <div class="timeline-badge success"><i data-feather="file-plus"></i></div>
+                    <div class="timeline-panel">
+                        <div class="timeline-heading">
+                            <h4 class="timeline-title">{{ $formulaire->titre }}</h4>
+                            <p>
+                                <small class="text-muted">
+                                    <i data-feather="clock" class="feather-sm"></i>
+                                    Créé le {{ $formulaire->created_at->format('d/m/Y à H\hi') }}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="timeline-body">
+                            <p>Cliquez sur le bouton ci-dessous pour consulter les réponses pour ce formulaire.</p>
+                            <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-primary btn-sm mt-3">
+                                <i data-feather="file-text" class="feather-sm me-1"></i> Voir les réponses
                             </a>
                         </div>
                     </div>
-                </div>
+                </li>
             @endforeach
-        </div>
+        </ul>
+        {{-- Fin de la Timeline --}}
     @endif
 </div>
 @endsection
 
 @push('styles')
 <style>
-/* Container */
+/* ---------------------------------------------------
+    TIMELINE STYLING (Animé et Compact)
+-----------------------------------------------------*/
+
+/* Ligne centrale */
 .timeline {
+    list-style: none;
+    padding: 20px 0 20px;
     position: relative;
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 0 1rem;
 }
 
-/* Ligne centrale verticale */
-.timeline::before {
-    content: '';
-    position: absolute;
-    width: 4px;
-    background: linear-gradient(180deg, #6c6e71 0%, #6c6e71 100%);
+.timeline:before {
     top: 0;
     bottom: 0;
+    position: absolute;
+    content: " ";
+    width: 3px;
+    background-color: #f1f1f1;
     left: 50%;
-    transform: translateX(-50%);
-    border-radius: 4px;
-    box-shadow: 0 0 8px rgba(30, 144, 255, 0.3);
+    margin-left: -1.5px;
+    border-radius: 3px;
 }
 
-/* Timeline Item commun */
-.timeline-item {
+/* Items de la timeline (li) */
+.timeline > li {
+    margin-bottom: 20px;
     position: relative;
-    width: 35%; /* largeur réduite */
-    margin-bottom: 2rem; /* marge verticale réduite */
-    opacity: 0;
-    transition: all 0.5s ease, opacity 0.5s ease;
-    cursor: default;
-}
 
-/* Apparition avec translation latérale */
-.timeline-item.show.left {
+    /* STYLES POUR L'ANIMATION - ÉTAT INITIAL */
+    opacity: 0;
+    transform: translateX(-100px); /* Par défaut pour les éléments à gauche */
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.timeline > li.timeline-inverted {
+    /* ÉTAT INITIAL pour les éléments à droite */
+    transform: translateX(100px);
+}
+.timeline > li.is-visible {
+    /* ÉTAT FINAL (quand l'élément est visible) */
     opacity: 1;
     transform: translateX(0);
-    box-shadow: 0 10px 25px rgba(104, 104, 105, 0.15);
-}
-.timeline-item.show.right {
-    opacity: 1;
-    transform: translateX(0);
-    box-shadow: 0 10px 25px rgba(94, 94, 94, 0.15);
 }
 
-/* Position à gauche */
-.timeline-item.left {
-    left: 0;
-    transform: translateX(-80px);
-    text-align: right;
+
+.timeline > li:before,
+.timeline > li:after {
+    content: " ";
+    display: table;
+}
+.timeline > li:after {
+    clear: both;
 }
 
-/* Position à droite */
-.timeline-item.right {
-    left: 55%;
-    transform: translateX(80px);
-    text-align: left;
-}
-
-/* Marker - Cercle avec ombre */
-.timeline-marker {
-    position: absolute;
-    top: 1.5rem;
-    width: 14px; /* plus petit */
-    height: 14px;
-    background: #fff;
-    border: 3px solid #6c6e71; /* bord plus fin */
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(91, 91, 92, 0.4);
-    z-index: 10;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Marker à droite pour items gauche, à gauche pour items droite */
-.timeline-item.left .timeline-marker {
-    right: -30px;
-}
-.timeline-item.right .timeline-marker {
-    left: -30px;
-}
-
-/* Flèche "pointe" sur la carte */
-.timeline-content {
-    background: #fff;
-    border-radius: 12px;
-    padding: 0.75rem 1rem; /* padding réduit */
-    position: relative;
-    border-left: 6px solid #6c6e71; /* plus fin */
-    transition: box-shadow 0.3s ease, border-left-color 0.3s ease;
-}
-
-/* Flèche CSS */
-.timeline-item.left .timeline-content::after,
-.timeline-item.right .timeline-content::after {
-    content: "";
-    position: absolute;
-    top: 1.5rem;
-    width: 0;
-    height: 0;
-    border-style: solid;
-}
-
-/* Flèche pointant vers droite */
-.timeline-item.left .timeline-content::after {
-    right: -24px;
-    border-width: 12px 0 12px 16px;
-    border-color: transparent transparent transparent #6c6e71;
-}
-
-/* Flèche pointant vers gauche */
-.timeline-item.right .timeline-content::after {
-    left: -24px;
-    border-width: 12px 16px 12px 0;
-    border-color: transparent #6c6e71 transparent transparent;
-}
-
-/* Hover & focus state */
-.timeline-content:hover, .timeline-content:focus-within {
-    box-shadow: 0 15px 30px rgba(95, 96, 96, 0.25);
-    border-left-color: #6c6e71;
-    outline: none;
-}
-
-/* Title */
-.card-title {
-    font-weight: 700;
-    font-size: 1.1rem; /* plus petit */
-    color: #212529;
-}
-
-/* Date */
-.timeline-date {
-    font-size: 0.75rem; /* plus petit */
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.5rem;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Bouton Toggle */
-.btn-toggle {
-    margin-top: 0.75rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    background-color: #6c6e71;
-    border: none;
-    border-radius: 6px;
-    padding: 0.3rem 0.8rem; /* padding réduit */
-    color: white;
-    box-shadow: 0 3px 10px rgba(63, 63, 63, 0.5);
-    user-select: none;
-}
-.btn-toggle:hover, .btn-toggle:focus {
-    background-color: #6c6e71;
-    box-shadow: 0 6px 16px rgba(63, 63, 63, 0.5);
-    outline: none;
-}
-
-/* Réponses */
-.responses {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: opacity 0.35s ease, max-height 0.35s ease;
-    color: #495057;
-    font-size: 0.95rem;
-    padding-left: 0.75rem;
-}
-.responses.show {
-    opacity: 1;
-    max-height: 600px;
-}
-
-/* Responsive */
-@media (max-width: 992px) {
-    .timeline-item {
-        width: 90% !important;
-        left: 5% !important;
-        transform: translateX(0) !important;
-        text-align: left !important;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .timeline-item.left .timeline-marker,
-    .timeline-item.right .timeline-marker {
-        left: -30px !important;
-        right: auto !important;
-    }
-    .timeline-content::after {
-        display: none;
-    }
-}
-
-/* Header & Button */
-.header-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #d3d5d5 100%);
-    padding: 1.5rem;
-    border-radius: 12px;
+/* Panneaux de contenu (CARTE RÉDUITE) */
+.timeline > li .timeline-panel {
+    width: 45%; /* Légèrement plus fin */
+    float: left;
     border: 1px solid #e9ecef;
+    border-radius: 10px; /* Bords plus arrondis */
+    padding: 15px; /* Padding réduit */
+    position: relative;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+    background-color: #fff;
+    transition: box-shadow 0.3s ease;
+}
+.timeline > li .timeline-panel:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-.btn-create {
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(40,167,69,0.35);
-    background: linear-gradient(45deg, #28a745, #218838);
-    border: none;
-    color: white;
+/* Flèches pointant vers la ligne centrale */
+.timeline > li .timeline-panel:before {
+    position: absolute;
+    top: 21px; /* Ajusté pour le badge plus petit */
+    right: -15px;
+    display: inline-block;
+    border-top: 15px solid transparent;
+    border-left: 15px solid #e9ecef;
+    border-right: 0 solid #e9ecef;
+    border-bottom: 15px solid transparent;
+    content: " ";
+}
+.timeline > li .timeline-panel:after {
+    position: absolute;
+    top: 22px; /* Ajusté */
+    right: -14px;
+    display: inline-block;
+    border-top: 14px solid transparent;
+    border-left: 14px solid #fff;
+    border-right: 0 solid #fff;
+    border-bottom: 14px solid transparent;
+    content: " ";
+}
+
+/* Cercles sur la ligne centrale (BADGE RÉDUIT) */
+.timeline > li .timeline-badge {
+    color: #fff;
+    width: 40px; /* Réduit */
+    height: 40px; /* Réduit */
+    line-height: 40px;
+    font-size: 1.2em;
+    text-align: center;
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    margin-left: -20px; /* Ajusté (moitié de la nouvelle largeur) */
+    background-color: #adb5bd;
+    z-index: 100;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    justify-content: center;
+    border: 3px solid #fff;
 }
-.btn-create:hover, .btn-create:focus {
-    background: linear-gradient(45deg, #218838, #1e7e34);
-    box-shadow: 0 8px 20px rgba(33,136,56,0.5);
-    transform: translateY(-2px);
-    outline: none;
+.timeline-badge i {
+    width: 20px; /* Icône plus petite */
+    height: 20px;
+}
+
+/* Items inversés (à droite) */
+.timeline > li.timeline-inverted > .timeline-panel {
+    float: right;
+}
+.timeline > li.timeline-inverted > .timeline-panel:before {
+    border-left-width: 0;
+    border-right-width: 15px;
+    left: -15px;
+    right: auto;
+}
+.timeline > li.timeline-inverted > .timeline-panel:after {
+    border-left-width: 0;
+    border-right-width: 14px;
+    left: -14px;
+    right: auto;
+}
+
+/* Couleurs des badges */
+.timeline-badge.success { background-color: #c9ebdb !important; }
+/* ... autres couleurs ... */
+
+/* Contenu du panneau (STYLES RÉDUITS) */
+.timeline-title {
+    margin-top: 0;
+    color: #343a40;
+    font-weight: 600;
+    font-size: 1.1rem; /* Police du titre réduite */
+}
+.timeline-body > p {
+    margin-bottom: 0;
+    font-size: 0.9rem; /* Police du texte réduite */
+    color: #6c757d;
+}
+.feather-sm { /* Classe utilitaire pour petites icônes */
+    width: 14px; height: 14px; vertical-align: -2px;
+}
+
+/* Responsive (pas de changement ici, c'est déjà bon) */
+@media (max-width: 767px) {
+    .timeline:before { left: 35px; }
+    .timeline > li {
+        /* Animation pour mobile, toujours depuis la gauche */
+        transform: translateX(-30px);
+    }
+    .timeline > li.timeline-inverted {
+        transform: translateX(-30px);
+    }
+    .timeline > li .timeline-panel,
+    .timeline > li.timeline-inverted > .timeline-panel {
+        width: calc(100% - 75px);
+        float: right;
+    }
+    .timeline > li .timeline-panel:before,
+    .timeline > li.timeline-inverted > .timeline-panel:before {
+        border-left-width: 0; border-right-width: 15px;
+        left: -15px; right: auto;
+    }
+    .timeline > li .timeline-panel:after,
+    .timeline > li.timeline-inverted > .timeline-panel:after {
+        border-left-width: 0; border-right-width: 14px;
+        left: -14px; right: auto;
+    }
+    .timeline > li .timeline-badge {
+        left: 15px; margin-left: 0; top: 16px;
+    }
 }
 </style>
 @endpush
@@ -273,44 +240,35 @@
 @push('scripts')
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Feather icons
-    if(typeof feather !== 'undefined'){
+    // 1. Rendre les icônes Feather
+    if (typeof feather !== 'undefined') {
         feather.replace();
     }
 
-    // Animation zigzag apparition progressive
-    const items = document.querySelectorAll('.timeline-item');
-    items.forEach((item, idx) => {
-        setTimeout(() => {
-            item.classList.add('show');
-            if(item.classList.contains('left')){
-                item.style.transform = 'translateX(0)';
-            } else {
-                item.style.transform = 'translateX(0)';
-            }
-        }, idx * 250);
-    });
+    // 2. Logique d'animation à l'apparition
+    const timelineItems = document.querySelectorAll(".timeline > li");
 
-    // Toggle réponses
-    const toggles = document.querySelectorAll('.btn-toggle');
-    toggles.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('aria-controls');
-            const content = document.getElementById(targetId);
-            if(!content) return;
-
-            const shown = content.classList.toggle('show');
-            btn.setAttribute('aria-expanded', shown);
-            btn.innerHTML = shown
-                ? '<i data-feather="chevron-up" class="me-1"></i> Masquer réponses'
-                : '<i data-feather="file-text" class="me-1"></i> Voir réponses';
-
-            if(typeof feather !== 'undefined'){
-                feather.replace();
-            }
+    if (timelineItems.length > 0) {
+        // Créer un "observateur" qui surveillera les éléments de la timeline
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                // Si l'élément est maintenant visible dans le viewport...
+                if (entry.isIntersecting) {
+                    // ...on lui ajoute la classe qui déclenche l'animation CSS
+                    entry.target.classList.add("is-visible");
+                    // On arrête de l'observer pour ne pas répéter l'animation
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1 // L'animation se déclenche quand 10% de l'élément est visible
         });
-    });
+
+        // Demander à l'observateur de surveiller chaque item de la timeline
+        timelineItems.forEach(item => {
+            observer.observe(item);
+        });
+    }
 });
 </script>
 @endpush
-

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\CandidatureSpontanee;
 use App\Models\Candidat;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CandidatureSpontaneeMail;
 
 class CandidatureSpontaneeController extends Controller
 {
@@ -52,7 +54,7 @@ class CandidatureSpontaneeController extends Controller
         $lm = $request->file('lm_fichier')?->store('lms', 'public');
         $lr = $request->file('lr_fichier')?->store('lrs', 'public');
 
-        CandidatureSpontanee::create([
+        $candidature = CandidatureSpontanee::create([
             'candidat_id' => $candidat->id,
             'cv_fichier' => $cv,
             'lm_fichier' => $lm,
@@ -61,7 +63,10 @@ class CandidatureSpontaneeController extends Controller
             'statut' => 'reçue',
         ]);
 
-        return redirect()->route('vitrine.index')->with('success', 'Candidature envoyée avec succès.');
+
+        Mail::to($candidat->email)->send(new CandidatureSpontaneeMail($candidature));
+
+        return redirect()->route('vitrine.index')->with('success', 'Candidature envoyée avec succès. Un mail de confirmation vous a été envoyé.');
     }
 
     public function show($id)

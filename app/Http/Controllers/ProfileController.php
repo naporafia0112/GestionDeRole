@@ -17,10 +17,9 @@ class ProfileController extends Controller
      */
     public function edit(User $user): View
     {
-        $user = auth()->user();
-
-        return view('profile.edit', compact('user','roles'));
-
+        $user = auth()->user()->load(['roles', 'departements']);
+        $user->load('departement');
+        return view('profile.edit', compact('user'));
 
     }
 
@@ -64,7 +63,7 @@ class ProfileController extends Controller
 
     public function show()
     {
-        $user = Auth::user(); 
+        $user = Auth::user();
         return view('profile.edit', compact('user'));
     }
 }

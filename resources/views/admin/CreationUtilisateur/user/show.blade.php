@@ -26,6 +26,9 @@
             <div class="mt-4">
                 <p><strong>Nom :</strong> {{ $user->name }}</p>
                 <p><strong>Email :</strong> {{ $user->email }}</p>
+                <p><strong>Département :</strong> 
+                    {{ $user->departement ? $user->departement->nom : 'Aucun département attribué' }}
+                </p>
 
                 <h5 class="mt-4"><strong>Rôles :</strong></h5>
                 @forelse($roles as $role)
