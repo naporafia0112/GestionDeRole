@@ -13,26 +13,21 @@
         <ul class="list-unstyled topnav-menu mb-0 d-flex align-items-center">
 
             {{-- Notifications --}}
-            <li class="dropdown notification-list topbar-dropdown me-3">
-                <a class="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fe-bell noti-icon"></i>
-                    <span class="badge bg-danger rounded-circle noti-icon-badge">3</span>
+                    @if(isset($notifications) && count($notifications) > 0)
+                        <span class="badge bg-danger rounded-circle noti-icon-badge">{{ count($notifications) }}</span>
+                    @endif
                 </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-lg">
-                    <div class="dropdown-item noti-title">
-                        <h5 class="m-0">Notifications</h5>
-                    </div>
-                    <div class="noti-scroll" data-simplebar>
-                        <a href="#" class="dropdown-item notify-item">
-                            <div class="notify-icon bg-info"><i class="mdi mdi-comment-account-outline"></i></div>
-                            <p class="notify-details">Nouvelle candidature</p>
-                            <p class="text-muted mb-0"><small>Il y a 2 minutes</small></p>
+                <div class="dropdown-menu dropdown-menu-end">
+                    @forelse ($notifications as $notif)
+                        <a href="{{ $notif['link'] }}" class="dropdown-item">
+                            <i class="{{ $notif['icon'] }}"></i> {{ $notif['message'] }}
                         </a>
-                        <!-- Autres notifications -->
-                    </div>
-                    <a href="#" class="dropdown-item text-center text-primary notify-item notify-all">
-                        Voir toutes <i class="fe-arrow-right"></i>
-                    </a>
+                    @empty
+                        <span class="dropdown-item text-muted">Aucune notification</span>
+                    @endforelse
                 </div>
             </li>
 

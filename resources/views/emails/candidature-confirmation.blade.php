@@ -25,13 +25,13 @@
             <td align="center" style="padding: 20px 0;">
                 <!-- Conteneur principal - Largeur fixe sur desktop, pleine largeur sur mobile -->
                 <table class="container" width="600" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width: 600px; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 6px;">
-                    
+
                     <!-- Section En-tête avec Logo -->
                     <tr>
                         <td align="center" style="padding: 24px; border-bottom: 1px solid #e1e4e8;">
                             <!-- Remplacez par l'URL absolue de votre logo (idéalement en SVG ou PNG transparent) -->
                             <a href="http://127.0.0.1:8000" target="_blank" style="text-decoration: none;">
-                                <img src="{{ asset('assets/images/logo.jpg') }}" alt="Logo de l'entreprise" width="48" style="display: block; border: 0;">
+                                <img src="https://i.pinimg.com/736x/2b/36/12/2b3612426dad8e23b17e6bfd56a6db91.jpg" alt="Logo de l'entreprise" width="48" style="display: block; border: 0;">
                             </a>
                         </td>
                     </tr>
@@ -40,7 +40,7 @@
                     <tr>
                         <td class="content-padding" style="padding: 32px 40px;">
                             <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-                                
+
                                 <!-- Message de salutation et corps du texte -->
                                 <tr>
                                     <td>
@@ -76,7 +76,7 @@
                                     <td>
                                         <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #24292e;">
                                             Merci et bonne chance !<br>
-                                            L'équipe de recrutement
+                                            L'équipe du RH
                                         </p>
                                     </td>
                                 </tr>
@@ -91,7 +91,7 @@
                     <tr>
                         <td align="center" style="padding: 24px;">
                             <p style="margin: 0; font-size: 12px; color: #6a737d;">
-                                © {{ date('Y') }} Nom de Votre Entreprise.
+                                © {{ date('Y') }} .cagecfi. All Rights Reserved
                             </p>
                             <p style="margin: 4px 0 0; font-size: 12px;">
                                <a href="http://127.0.0.1:8000" target="_blank" style="color: #0366d6; text-decoration: none;">Visitez notre site</a>

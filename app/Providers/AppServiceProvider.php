@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('layouts.home', function ($view) {
+        View::composer('*', function ($view) {
         $directeur = Auth::user();
 
         $nombreStagesAttente = 0;
@@ -31,7 +31,34 @@ class AppServiceProvider extends ServiceProvider
                 ->count();
         }
 
-        $view->with('nombreStagesAttente', $nombreStagesAttente);
+        $notifications = [];
+
+        $user = Auth::user();
+        if ($user) {
+            if ($user->hasRole('DIRECTEUR')) {
+                $departementId = $user->id_departement;
+
+                $countEnAttente = \App\Models\Stage::where('id_departement', $departementId)
+                    ->where('statut', \App\Models\Stage::STATUTS['EN_ATTENTE'])
+                    ->whereNull('id_tuteur')
+                    ->count();
+
+                if ($countEnAttente > 0) {
+                    $notifications[] = [
+                        'icon' => 'fe-users text-warning',
+                        'message' => "Stages à affecter tuteur ({$countEnAttente})",
+                        'link' => route('directeur.stages'),
+                    ];
+                }
+            }
+
+            // Tu pourras ajouter ici les cas RH et TUTEUR plus tard
+        }
+        $view->with([
+            'nombreStagesAttente' => $nombreStagesAttente,
+            'notifications' => $notifications,
+        ]);
+
     });
     }
 }

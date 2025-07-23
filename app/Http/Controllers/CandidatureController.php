@@ -115,110 +115,343 @@ class CandidatureController extends Controller
 public function preselectionner($offreId)
 {
     try {
-        $offre = Offre::with('candidatures.candidat')->findOrFail($offreId);
+        // Récupérer l'offre avec ses candidatures
+        $offre = Offre::with(['candidatures.candidat', 'candidatures' => function($query) {
+            $query->where('statut', 'en_cours'); // Seulement les non traitées
+        }])->findOrFail($offreId);
+
+        if ($offre->candidatures->isEmpty()) {
+            return response()->json([
+                'message' => 'Aucune candidature en cours à analyser.'
+            ], 422);
+        }
+
+        Log::info("Début de présélection pour l'offre {$offreId} - {$offre->candidatures->count()} candidatures");
 
         $parser = new Parser();
-        $cvs = [];
+        $candidaturesData = [];
+        $candidaturesValides = [];
 
+        // Phase 1: Extraction et validation des CVs
         foreach ($offre->candidatures as $candidature) {
             $cvPath = storage_path('app/public/' . $candidature->cv_fichier);
+
             if (!file_exists($cvPath)) {
-                Log::warning("CV manquant pour la candidature ID {$candidature->id}");
+                Log::warning("CV manquant pour candidature ID {$candidature->id}: {$cvPath}");
                 continue;
             }
 
             try {
                 $text = $parser->parseFile($cvPath)->getText();
-                // Inclure l'ID réel dans le prompt
-                $cvs[] = "---CV ID {$candidature->id}---\n" . $text;
+
+                // Nettoyer et valider le texte
+                $text = trim(preg_replace('/\s+/', ' ', $text));
+
+                if (strlen($text) < 100) { // CV trop court
+                    Log::warning("CV ID {$candidature->id} trop court ({$candidature->candidat->nom})");
+                    continue;
+                }
+
+                $candidaturesData[] = [
+                    'id' => $candidature->id,
+                    'nom' => $candidature->candidat->nom . ' ' . $candidature->candidat->prenoms,
+                    'texte' => $text
+                ];
+
+                $candidaturesValides[] = $candidature;
+
+                Log::info("CV ID {$candidature->id} extrait avec succès ({$candidature->candidat->nom})");
+
             } catch (\Exception $e) {
-                Log::error("Erreur parsing CV ID {$candidature->id} : " . $e->getMessage());
+                Log::error("Erreur parsing CV ID {$candidature->id}: " . $e->getMessage());
+                continue;
             }
         }
 
-        if (empty($cvs)) {
-            return response()->json(['message' => 'Aucun CV valide à analyser (PDFs manquants ou illisibles).'], 422);
+        if (empty($candidaturesData)) {
+            return response()->json([
+                'message' => 'Aucun CV valide trouvé. Vérifiez que les fichiers PDF sont présents et lisibles.'
+            ], 422);
         }
 
-        $cvContent = implode("\n", $cvs);
+        // Phase 2: Préparation du prompt optimisé
+        $cvContent = '';
+        foreach ($candidaturesData as $cv) {
+            $cvContent .= "---CV ID {$cv['id']} - {$cv['nom']}---\n";
+            $cvContent .= substr($cv['texte'], 0, 2000) . "\n\n"; // Limiter la taille
+        }
 
-        $prompt = <<<EOT
-Tu es un recruteur.
+        $prompt = $this->construirePrompt($offre, $cvContent, count($candidaturesData));
 
-Voici une offre d'emploi :
+        Log::info("Envoi de la requête à Ollama - " . count($candidaturesData) . " CVs à analyser");
 
-Titre : {$offre->titre}
+        // Phase 3: Appel à l'IA avec retry
+        $response = $this->appellerOllamaAvecRetry($prompt, 3);
 
-Description :
-{$offre->description}
+        if (!$response['success']) {
+            return response()->json([
+                'message' => $response['error']
+            ], 500);
+        }
 
-Tâche :
-1. Analyse les CV suivants.
-2. Donne une note sur 100 à chacun.
-3. Classe-les.
-4. Retiens les 20 meilleurs en "selectionnes", les autres en "rejetes".
+        // Phase 4: Traitement de la réponse
+        $resultats = $this->traiterReponseIA($response['data'], $candidaturesValides);
 
-Voici maintenant une liste de CV :
+        if (!$resultats['success']) {
+            return response()->json([
+                'message' => $resultats['error']
+            ], 500);
+        }
 
-{$cvContent}
+        // Phase 5: Mise à jour en base de données
+        $stats = $this->mettreAJourCandidatures($resultats['data'], $candidaturesValides);
 
-Peux-tu faire une pré-sélection des CV et attribuer une note sur 100 à chaque profil avec un commentaire ?
-Réponds uniquement en JSON :
-{
-  "selectionnes": [
-    { "id": 123, "score": 92, "commentaire": "..." }
-  ],
-  "rejetes": [
-    { "id": 456, "score": 45, "commentaire": "..." }
-  ]
-}
-EOT;
+        Log::info("Présélection terminée - Retenus: {$stats['retenus']}, Rejetés: {$stats['rejetes']}");
 
-        $response = Http::timeout(120)->post(config('ollama.url') . '/api/generate', [
-            'model' => config('ollama.model'),
-            'prompt' => $prompt,
-            'stream' => false,
+        return response()->json([
+            'message' => "Présélection terminée avec succès. {$stats['retenus']} candidats retenus, {$stats['rejetes']} rejetés.",
+            'stats' => $stats
         ]);
 
-        if (!$response->successful()) {
-            Log::error("Erreur lors de la requête à l’IA : " . $response->body());
-            return response()->json(['message' => 'Erreur lors de la communication avec l’IA.'], 500);
-        }
+    } catch (\Exception $e) {
+        Log::critical("Échec critique de la présélection offre {$offreId}: " . $e->getMessage());
+        return response()->json([
+            'message' => 'Une erreur critique est survenue. Veuillez contacter l\'administrateur.'
+        ], 500);
+    }
+}
 
-        $reponseBrute = $response->json()['response'] ?? '';
+/**
+ * Construit un prompt optimisé pour l'IA
+ */
+private function construirePrompt($offre, $cvContent, $nbCandidats)
+{
+    $nbAReterenir = min(20, max(3, ceil($nbCandidats * 0.3))); // 30% ou max 20
+
+    return <<<EOT
+Tu es un expert en recrutement. Analyse ces CVs pour cette offre d'emploi.
+
+OFFRE D'EMPLOI:
+Titre: {$offre->titre}
+Description: {$offre->description}
+
+CRITÈRES D'ÉVALUATION:
+- Adéquation compétences/poste (40%)
+- Expérience pertinente (30%)
+- Formation appropriée (20%)
+- Autres atouts (10%)
+
+TÂCHE:
+1. Analyse chaque CV individuellement
+2. Attribue un score de 0 à 100 (entier)
+3. Classe les candidats par score décroissant
+4. Retiens les {$nbAReterenir} meilleurs comme "selectionnes"
+5. Classe les autres comme "rejetes"
+6. Écris un commentaire court (max 100 caractères) pour chaque candidat
+
+CVS À ANALYSER:
+{$cvContent}
+
+RÉPONSE ATTENDUE:
+TU DOIS ABSOLUMENT RÉPONDRE AVEC DU JSON VALIDE ET RIEN D'AUTRE.
+LA RÉPONSE DOIT ÊTRE UN OBJET JSON CONTENANT DEUX CLÉS, "selectionnes" ET "rejetes", CHACUNE CONTENANT UN TABLEAU D'OBJETS AVEC LES CLÉS "id", "score", et "commentaire".
+NE RENVOIE AUCUN TEXTE ADDITIONNEL, AUCUNE INTRODUCTION, AUCUNE EXPLICATION AVANT OU APRÈS LE JSON.
+EOT;
+}
+
+/**
+ * Appelle Ollama avec système de retry
+ */
+private function appellerOllamaAvecRetry($prompt, $maxRetries = 3)
+{
+    $tentative = 0;
+
+    while ($tentative < $maxRetries) {
+        $tentative++;
 
         try {
-            $json = json_decode($reponseBrute, true);
-            if (!is_array($json)) {
-                throw new \Exception("JSON invalide");
+            $response = Http::timeout(300)->post(config('ollama.url') . '/api/generate', [
+                'model' => config('ollama.model', 'llama3.1:8b'),
+                'prompt' => $prompt,
+                'stream' => false,
+                'options' => [
+                    'temperature' => 0.3, // Plus déterministe
+                    'top_p' => 0.9,
+                    'repeat_penalty' => 1.1
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $body = $response->json();
+                if (isset($body['response'])) {
+                    return [
+                        'success' => true,
+                        'data' => $body['response']
+                    ];
+                }
             }
-        } catch (\Throwable $e) {
-            Log::error("Erreur de décodage JSON : " . $reponseBrute);
-            return response()->json(['message' => 'Réponse IA non exploitable.'], 500);
+
+            Log::warning("Tentative {$tentative} échouée - Code: " . $response->status());
+
+        } catch (\Exception $e) {
+            Log::error("Erreur tentative {$tentative}: " . $e->getMessage());
         }
 
-        foreach (['selectionnes' => 'retenu', 'rejetes' => 'rejete'] as $groupe => $statut) {
-            foreach ($json[$groupe] ?? [] as $item) {
-                $id = $item['id'] ?? null;
+        if ($tentative < $maxRetries) {
+            sleep(2 * $tentative); // Délai progressif
+        }
+    }
 
-                if ($id && $offre->candidatures->contains('id', $id)) {
-                    $candidature = $offre->candidatures->firstWhere('id', $id);
-                    $candidature->score = $item['score'] ?? 0;
-                    $candidature->commentaire = $item['commentaire'] ?? '';
-                    $candidature->statut = $statut;
-                    $candidature->save();
+    return [
+        'success' => false,
+        'error' => 'Impossible de communiquer avec l\'IA après ' . $maxRetries . ' tentatives.'
+    ];
+}
+
+/**
+ * Traite et valide la réponse de l'IA
+ */
+/**
+ * Traite et valide la réponse de l'IA
+ */
+private function traiterReponseIA($reponseIA, $candidaturesValides)
+{
+    try {
+        // Enregistrer la réponse brute pour le débogage
+        Log::info("Réponse brute de l'IA reçue: " . $reponseIA);
+
+        // --- 1. Extraire la partie JSON avec une approche plus robuste ---
+        // Chercher le premier caractère '{' et le dernier '}' pour isoler le JSON
+        $debut = strpos($reponseIA, '{');
+        $fin = strrpos($reponseIA, '}');
+
+        if ($debut !== false && $fin !== false && $fin > $debut) {
+            $jsonString = substr($reponseIA, $debut, $fin - $debut + 1);
+        } else {
+            throw new \Exception('Aucun bloc JSON exploitable trouvé dans la réponse.');
+        }
+
+        // --- 2. Tenter de décoder le JSON nettoyé ---
+        $json = json_decode($jsonString, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('JSON invalide: ' . json_last_error_msg() . '. JSON brut: ' . $jsonString);
+        }
+
+        // --- 3. Validation de la structure JSON (clés principales) ---
+        if (!isset($json['selectionnes']) || !isset($json['rejetes'])) {
+            throw new \Exception('Structure JSON incorrecte - clés manquantes');
+        }
+
+        // --- 4. Validation et nettoyage des données internes ---
+        $idsValides = collect($candidaturesValides)->pluck('id')->toArray();
+        $idsRecus = [];
+        $dataTraitee = ['selectionnes' => [], 'rejetes' => []];
+
+        foreach (['selectionnes', 'rejetes'] as $groupe) {
+            foreach ($json[$groupe] as $item) {
+                // Vérifier si l'item a les clés requises
+                if (!isset($item['id']) || !isset($item['score']) || !isset($item['commentaire'])) {
+                    Log::warning("Item invalide dans {$groupe}: structure incomplète. Ignoré.");
+                    continue;
+                }
+
+                $id = (int)$item['id'];
+
+                // Vérifier si l'ID est bien dans notre liste de candidatures à traiter
+                if (!in_array($id, $idsValides)) {
+                    Log::warning("ID {$id} non valide pour cette offre dans {$groupe}. Ignoré.");
+                    continue;
+                }
+
+                // Vérifier les doublons
+                if (in_array($id, $idsRecus)) {
+                    Log::warning("ID {$id} en double. Ignoré.");
+                    continue;
+                }
+
+                // Si tout est bon, on ajoute l'ID à la liste des IDs traités et on nettoie les valeurs
+                $idsRecus[] = $id;
+
+                $score = (int)$item['score'];
+                $commentaire = substr(trim($item['commentaire']), 0, 200);
+
+                // Ajouter l'élément validé à notre tableau final
+                $dataTraitee[$groupe][] = [
+                    'id' => $id,
+                    'score' => max(0, min(100, $score)), // S'assurer que le score est entre 0 et 100
+                    'commentaire' => $commentaire
+                ];
+            }
+        }
+
+        Log::info("Validation réussie - IDs traités: " . implode(', ', $idsRecus));
+
+        return [
+            'success' => true,
+            'data' => $dataTraitee // Retourner le tableau nettoyé
+        ];
+
+    } catch (\Exception $e) {
+        // En cas d'échec, on log l'erreur avec un message explicite
+        Log::error("Erreur traitement réponse IA: " . $e->getMessage());
+
+        return [
+            'success' => false,
+            'error' => 'Réponse de l\'IA non exploitable: ' . $e->getMessage()
+        ];
+    }
+}
+/**
+ * Met à jour les candidatures en base
+ */
+/**
+ * Met à jour les candidatures en base
+ */
+private function mettreAJourCandidatures($resultats, $candidaturesValides)
+{
+    $stats = ['retenus' => 0, 'rejetes' => 0, 'erreurs' => 0];
+
+    // Convertir le tableau en une collection pour utiliser firstWhere()
+    $candidaturesCollection = collect($candidaturesValides);
+
+    DB::beginTransaction();
+
+    try {
+        foreach (['selectionnes' => 'retenu', 'rejetes' => 'rejete'] as $groupe => $statut) {
+            foreach ($resultats[$groupe] as $item) {
+                // Utiliser la collection pour la recherche
+                $candidature = $candidaturesCollection->firstWhere('id', $item['id']);
+
+                if ($candidature) {
+                    $candidature->update([
+                        'score' => (int)$item['score'],
+                        'commentaire' => $item['commentaire'],
+                        'statut' => $statut,
+                        'date_traitement' => now()
+                    ]);
+
+                    $stats[$statut === 'retenu' ? 'retenus' : 'rejetes']++;
+
+                    Log::info("Candidature ID {$candidature->id} mise à jour: {$statut}, score: {$item['score']}");
+                } else {
+                    $stats['erreurs']++;
+                    Log::error("Candidature ID {$item['id']} introuvable pour mise à jour");
                 }
             }
         }
 
-        return response()->json(['message' => 'Préselection terminée avec succès.']);
+        DB::commit();
+        return $stats;
+
     } catch (\Exception $e) {
-        Log::critical("Échec de la présélection : " . $e->getMessage());
-        return response()->json(['message' => 'Une erreur est survenue : ' . $e->getMessage()], 500);
+        DB::rollBack();
+        Log::error("Erreur mise à jour base: " . $e->getMessage());
+        throw $e;
     }
 }
 
-    /**
+/**
      * Liste des candidatures liées à une offre.
      */
     public function index($offreId)

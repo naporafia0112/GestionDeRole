@@ -43,14 +43,36 @@
                 </div>
             </div>
 
-            <!-- Tabs Bootstrap pour filtrer avec meilleur espacement -->
+            <!-- Bouton de présélection IA -->
+            <div class="mb-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <button id="preselection-btn" class="btn btn-primary"
+                                data-offre-id="{{ $offre->id }}"
+                                @if($offre->candidatures->where('statut', 'en_cours')->count() == 0) disabled @endif>
+                            <i class="mdi mdi-robot me-2"></i>
+                            Présélection IA automatique
+                        </button>
+                        <small class="text-muted d-block mt-1">
+                            Analyse tous les CVs et classe automatiquement les candidatures
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="badge bg-info">
+                            {{ $offre->candidatures->where('statut', 'en_cours')->count() }} candidatures à traiter
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Bootstrap pour filtrer -->
             <div class="mb-4">
                 <ul class="nav nav-tabs" id="statutTabs" role="tablist">
                     @foreach($noms as $key => $label)
                         <li class="nav-item" role="presentation">
                             <button class="nav-link @if($loop->first) active @endif" data-status="{{ $key }}" data-bs-toggle="tab" type="button">
                                 {{ $label }}
-                                <span class="badge bg-light text-dark ">
+                                <span class="badge bg-light text-dark">
                                     {{ $key === '' ? $offre->candidatures->count() : (isset($candidaturesParStatut[$key]) ? $candidaturesParStatut[$key]->count() : 0) }}
                                 </span>
                             </button>
@@ -59,7 +81,7 @@
                 </ul>
             </div>
 
-            <!-- Table avec meilleur espacement -->
+            <!-- Table -->
             <div class="table-responsive">
                 <table id="candidatures-datatable" class="table table-hover align-middle mb-0">
                     <thead class="table-light">
@@ -75,7 +97,7 @@
                     </thead>
                     <tbody>
                         @foreach($offre->candidatures as $candidature)
-                            <tr data-statut="{{ $candidature->statut }}">
+                            <tr data-statut="{{ $candidature->statut }}" id="candidature-{{ $candidature->id }}">
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -84,7 +106,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="statut-{{ $candidature->id }}">
                                     <span class="badge bg-{{ $labels[$candidature->statut] ?? 'secondary' }} rounded-pill">
                                         {{ \App\Models\Candidature::STATUTS[$candidature->statut] ?? ucfirst($candidature->statut) }}
                                     </span>
@@ -117,7 +139,7 @@
                                         @endif
 
                                         @if($candidature->statut !== 'rejete')
-                                            <button class="btn btn-sm btn-outline-primary ms-1 analyze-btn" data-id="{{ $candidature->id }}" title="Analyser">
+                                            <button class="btn btn-sm btn-outline-primary ms-1 analyze-btn" data-id="{{ $candidature->id }}" title="Analyser individuellement">
                                                 <i class="mdi mdi-robot"></i>
                                             </button>
                                         @endif
@@ -127,7 +149,6 @@
                                                 <i class="mdi mdi-calendar-check-outline"></i>
                                             </a>
                                         @endif
-
 
                                         @if($candidature->statut === 'retenu' && $candidature->entretien && $candidature->entretien->statut === 'effectuee')
                                             <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}" class="d-inline ms-1">
@@ -144,16 +165,39 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>
+
+<!-- Modal de progression pour la présélection -->
+<div class="modal fade" id="preselectionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Présélection IA en cours</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i class="mdi mdi-robot mdi-spin" style="font-size: 3rem; color: #007bff;"></i>
+                </div>
+                <h6>Analyse des candidatures en cours...</h6>
+                <p class="text-muted">L'IA analyse tous les CVs et attribue automatiquement les scores et statuts. Cela peut prendre quelques minutes.</p>
+                <div class="progress mt-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
 @push('scripts')
 <script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js') }}"></script>
+
 <script>
 $(document).ready(function () {
     const table = $('#candidatures-datatable').DataTable({
@@ -176,7 +220,83 @@ $(document).ready(function () {
         table.draw(false);
     });
 
-    //SweetAlert pour toutes les confirmations d'action
+    // Présélection IA automatique
+    $('#preselection-btn').on('click', function () {
+        const btn = $(this);
+        const offreId = btn.data('offre-id');
+
+        // Afficher la modal de progression
+        $('#preselectionModal').modal('show');
+        btn.prop('disabled', true);
+
+        fetch(`/offres/${offreId}/preselectionner`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            $('#preselectionModal').modal('hide');
+
+            if (data.message) {
+                Swal.fire({
+                    title: 'Succès !',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Recharger la page pour voir les résultats
+                    location.reload();
+                });
+            }
+        })
+        .catch(error => {
+            $('#preselectionModal').modal('hide');
+            console.error('Erreur:', error);
+
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Une erreur est survenue lors de la présélection.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        })
+        .finally(() => {
+            btn.prop('disabled', false);
+        });
+    });
+
+    // Analyse individuelle (votre code existant)
+    $('.analyze-btn').on('click', function () {
+        const btn = $(this);
+        const id = btn.data('id');
+        btn.prop('disabled', true).html('<i class="mdi mdi-loading mdi-spin"></i>');
+
+        fetch(`/candidatures/${id}/analyze`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            $('.score-' + id).html(`<span class="badge bg-light text-dark">${data.score}/100</span>`);
+            $('.commentaire-' + id).text(data.commentaire);
+        })
+        .catch(() => {
+            $('.score-' + id).text('Erreur');
+            $('.commentaire-' + id).text('Analyse échouée');
+        })
+        .finally(() => {
+            btn.prop('disabled', false).html('<i class="mdi mdi-robot"></i>');
+        });
+    });
+
+    // Confirmations (votre code existant)
     $(document).on('submit', '.confirm-action', function (e) {
         e.preventDefault();
         const form = this;
@@ -217,41 +337,14 @@ $(document).ready(function () {
             if (result.isConfirmed) form.submit();
         });
     });
-
-    // Bouton d'analyse
-    $('.analyze-btn').on('click', function () {
-        const btn = $(this);
-        const id = btn.data('id');
-        btn.prop('disabled', true).html('<i class="mdi mdi-loading mdi-spin"></i>');
-
-        fetch(`/candidatures/${id}/analyze`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            $('.score-' + id).html(`<span class="badge bg-light text-dark">${data.score}/100</span>`);
-            $('.commentaire-' + id).text(data.commentaire);
-        })
-        .catch(() => {
-            $('.score-' + id).text('Erreur');
-            $('.commentaire-' + id).text('Analyse échouée');
-        })
-        .finally(() => {
-            btn.prop('disabled', false).html('<i class="mdi mdi-robot"></i>');
-        });
-    });
 });
 </script>
 @endpush
+
 @push('styles')
 <link href="{{ asset('assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
 <link href="{{ asset('assets/libs/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css') }}" rel="stylesheet">
 <style>
-    /* Styles personnalisés pour améliorer l'espacement */
     .page-header {
         margin-bottom: 2rem;
     }
@@ -281,6 +374,28 @@ $(document).ready(function () {
     .badge {
         font-size: 0.85em;
         padding: 0.5em 0.75em;
+    }
+
+    #preselection-btn {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    #preselection-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    }
+
+    #preselection-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
     }
 </style>
 @endpush
