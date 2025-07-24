@@ -98,4 +98,5 @@ class UserController extends Controller
         return view('admin.CreationUtilisateur.user.show', compact('user', 'roles', 'permissions'));
     }
 
+    
 }

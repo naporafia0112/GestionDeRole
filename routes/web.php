@@ -18,7 +18,8 @@ use App\Http\Controllers\{
     FormulaireController,
     CandidatureSpontaneeController,
     PermissionController,
-    PasswordChangeController
+    PasswordChangeController,
+    NotificationController
 };
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjetCreateMail;
@@ -215,5 +216,7 @@ Route::get('/test-mail', function () {
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 Route::get('/changer-mot-de-passe', [PasswordChangeController::class, 'edit'])->name('password.change.form');
 Route::put('/changer-mot-de-passe', [PasswordChangeController::class, 'update'])->name('password.change.update');
+Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
 // Auth routes (login, logout, register, reset, etc.)
 require __DIR__ . '/auth.php';

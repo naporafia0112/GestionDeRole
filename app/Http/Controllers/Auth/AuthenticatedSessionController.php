@@ -29,23 +29,21 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
-        
+
          if ($user->must_change_password) {
             return redirect()->route('password.change.form');
         }
-        if ($user->hasRole('ADMIN')) {
-        return redirect()->route('dashboard');
-        }
+       $redirectRoutes = [
+            'ADMIN' => 'dashboard',
+            'RH' => 'dashboard.RH',
+            'DIRECTEUR' => 'dashboard.directeur',
+            'TUTEUR' => 'dashboard.tuteur',
+        ];
 
-        if ($user->hasRole('RH')) {
-            return redirect()->route('dashboard.RH');
-        }
-
-        if ($user->hasRole('DIRECTEUR')) {
-            return redirect()->route('dashboard.directeur');
-        }
-        if ($user->hasRole('TUTEUR')) {
-            return redirect()->route('dashboard.tuteur');
+        foreach ($redirectRoutes as $role => $route) {
+            if ($user->hasRole($role)) {
+                return redirect()->route($route);
+            }
         }
 
 

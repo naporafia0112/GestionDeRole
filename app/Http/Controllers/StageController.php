@@ -163,15 +163,15 @@ class StageController extends Controller
             $data['id_candidature'] = null;
 
             $stage = Stage::create($data);
-            
-            $stage->load('user');
+
             $directeur = User::whereHas('roles', function ($query) {
                 $query->where('name', 'directeur');
-            })->where('departement_id', $stage->user->departement_id)->first();
+            })->where('departement_id', $stage->id_departement)->first();
 
             if ($directeur) {
-                $directeur->notify(new NouveauStageNotification($stage));
+                $directeur->notify(new \App\Notifications\NouveauStageNotification($stage));
             }
+
             // Récupérer le candidat lié
             $candidat = $candidatureSpontanee->candidat;
         }

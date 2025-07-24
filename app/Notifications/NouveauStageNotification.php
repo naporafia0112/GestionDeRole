@@ -16,10 +16,12 @@ class NouveauStageNotification extends Notification
         $this->stage = $stage;
     }
 
-    public function via($notifiable)
+   public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
+
+    
 
     public function toMail($notifiable)
     {
@@ -28,9 +30,22 @@ class NouveauStageNotification extends Notification
             ->greeting('Bonjour Directeur,')
             ->line('Un nouveau stage a été ajouté dans votre département.')
             ->line('Détails du stage :')
-            ->line('Titre : ' . $this->stage->titre)
+            ->line('Titre : ' . $this->stage->sujet)
             ->line('Déposé par : ' . $this->stage->user->name)
             ->action('Voir le stage', url('/stages/' . $this->stage->id))
             ->line('Merci de votre collaboration.');
     }
+    public function toArray($notifiable)
+{
+    return [
+        'title' => 'Nouveau stage',
+        'message' => 'Un nouveau stage a été ajouté dans votre département.',
+        'icon' => 'fe-briefcase',
+        'bg' => 'bg-success',
+        'link' => url('/stages/' . $this->stage->id),
+        'time' => now()->diffForHumans(),
+        'sujet' => $this->stage->sujet,
+    ];
+}
+
 }
