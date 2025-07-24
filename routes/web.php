@@ -17,7 +17,8 @@ use App\Http\Controllers\{
     RapportController,
     FormulaireController,
     CandidatureSpontaneeController,
-    PermissionController
+    PermissionController,
+    PasswordChangeController
 };
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjetCreateMail;
@@ -181,6 +182,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('user', UserController::class);
+
         Route::resource('departements', DepartementController::class)->except(['show', 'edit', 'create']);
     });
 
@@ -211,6 +213,7 @@ Route::get('/test-mail', function () {
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
+Route::get('/changer-mot-de-passe', [PasswordChangeController::class, 'edit'])->name('password.change.form');
+Route::put('/changer-mot-de-passe', [PasswordChangeController::class, 'update'])->name('password.change.update');
 // Auth routes (login, logout, register, reset, etc.)
 require __DIR__ . '/auth.php';

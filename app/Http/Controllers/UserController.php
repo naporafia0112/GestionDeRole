@@ -39,6 +39,7 @@ class UserController extends Controller
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
             'id_departement' => $request->id_departement,
+            'must_change_password' => true,
         ]);
 
         $user->roles()->sync([$request->role_id]);
@@ -90,11 +91,11 @@ class UserController extends Controller
                 $permissions[] = $permission->name;
             }
         }
-        
+
         $user->load('departement');
         $permissions = array_unique($permissions);
 
         return view('admin.CreationUtilisateur.user.show', compact('user', 'roles', 'permissions'));
     }
-    
+
 }

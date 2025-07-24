@@ -29,7 +29,10 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
-
+        
+         if ($user->must_change_password) {
+            return redirect()->route('password.change.form');
+        }
         if ($user->hasRole('ADMIN')) {
         return redirect()->route('dashboard');
         }
