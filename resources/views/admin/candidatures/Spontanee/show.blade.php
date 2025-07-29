@@ -118,13 +118,13 @@
                                 <label class="form-label"><strong>{{ $label }}</strong></label>
 
                                 <!-- Aperçu PDF -->
-                                <embed src="{{ route('candidatures.preview', ['id' => $candidature->id, 'field' => $champ]) }}"
+                                <embed src="{{ route('candidaturespontanee.preview', ['id' => $candidature->id, 'field' => $champ]) }}"
                                        type="application/pdf"
                                        width="100%" height="250"
                                        class="border rounded" />
 
                                 <!-- Boutons -->
-                                <a href="{{ route('candidatures.download', ['id' => $candidature->id, 'field' => $champ]) }}"
+                                <a href="{{ route('candidaturespontanee.download', ['id' => $candidature->id, 'field' => $champ]) }}"
                                    class="btn btn-sm btn-outline-primary w-100 mt-2">
                                     <i class="mdi mdi-download"></i> Télécharger {{ strtolower($label) }}
                                 </a>

@@ -7,10 +7,18 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $notifications = Auth::user()->notifications;
+        $user = Auth::user();
+
+        if (!$user) {
+            // Ici, tu peux rediriger vers la page de login, ou afficher une erreur
+            return redirect()->route('login')->with('error', 'Vous devez être connecté pour voir les notifications.');
+        }
+
+        $notifications = $user->notifications; // ou unreadNotifications si tu veux que celles non lues
 
         return view('emails.notification', compact('notifications'));
     }
+
 }

@@ -120,8 +120,15 @@
                                     @endif
                                 </td>
                                 <td class="commentaire-{{ $candidature->id }}">
-                                    {{ Str::limit($candidature->commentaire ?? '-', 50) }}
+                                    @if($candidature->commentaire && strlen($candidature->commentaire) > 50)
+                                        <span class="short-comment">{{ Str::limit($candidature->commentaire, 50) }}</span>
+                                        <span class="full-comment d-none">{{ $candidature->commentaire }}</span>
+                                        <button class="btn btn-link btn-sm toggle-comment" data-id="{{ $candidature->id }}">Voir plus</button>
+                                    @else
+                                        {{ $candidature->commentaire ?? '-' }}
+                                    @endif
                                 </td>
+
                                 <td class="text-center action-buttons">
                                     <div class="d-flex justify-content-center">
                                         <a href="{{ route('candidatures.show', $candidature->id) }}" class="btn btn-sm btn-info ms-1" title="Voir">
@@ -337,6 +344,24 @@ $(document).ready(function () {
             if (result.isConfirmed) form.submit();
         });
     });
+    $(document).on('click', '.toggle-comment', function () {
+        const id = $(this).data('id');
+        const row = $('.commentaire-' + id);
+        const short = row.find('.short-comment');
+        const full = row.find('.full-comment');
+        const btn = row.find('.toggle-comment');
+
+        if (short.hasClass('d-none')) {
+            short.removeClass('d-none');
+            full.addClass('d-none');
+            btn.text('Voir plus');
+        } else {
+            short.addClass('d-none');
+            full.removeClass('d-none');
+            btn.text('Voir moins');
+        }
+    });
+
 });
 </script>
 @endpush

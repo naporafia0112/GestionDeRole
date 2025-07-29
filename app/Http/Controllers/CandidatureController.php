@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Mail\CandidatureConfirmationMail;
 use App\Models\CandidatureSpontanee;
-
+use App\Models\User;
+use App\Notifications\NouvelleCandidatureNotification;
 
 class CandidatureController extends Controller
 {
@@ -578,7 +579,14 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
                 'lr_fichier' => $lrPath,
             ]);
 
-            // Envoyer l'email de confirmation au candidat
+            $rhs = User::whereHas('roles', function ($q) {
+                $q->where('name', 'RH');
+            })->get();
+
+            foreach ($rhs as $rh) {
+                $rh->notify(new NouvelleCandidatureNotification($candidature));
+            }
+                        // Envoyer l'email de confirmation au candidat
             Mail::to($candidat->email)->send(new CandidatureConfirmationMail($candidature));
         });
 
@@ -621,7 +629,6 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
 
         return response()->file(storage_path('app/public/' . $fichier));
     }
-
     public function downloadFile(int $id, string $field)
     {
         $candidature = Candidature::findOrFail($id);

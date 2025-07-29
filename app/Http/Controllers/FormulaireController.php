@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Stage;
 use App\Models\ReponseFormulaire;
 use App\Models\ReponseChamp;
-use Illuminate\Validation\Rule; // tout en haut du fichier
+use Illuminate\Validation\Rule;
+use App\Notifications\NouveauFormulaireRapportNotification;
+use App\Models\User;
 
 class FormulaireController extends Controller
 {
@@ -47,6 +49,13 @@ class FormulaireController extends Controller
                 'options' => in_array($champ['type'], ['select', 'checkbox']) ? $champ['options'] ?? null : null,            ]);
         }
 
+        $tuteurs = User::where('id_departement', $user->id_departement)
+               ->where('role', 'tuteur') 
+               ->get();
+
+        foreach ($tuteurs as $tuteur) {
+            $tuteur->notify(new NouveauFormulaireRapportNotification($formulaire)); 
+        }
         return redirect()->route('directeur.formulaires.liste')->with('success', 'Formulaire créé avec succès.');
     }
 
@@ -118,6 +127,9 @@ class FormulaireController extends Controller
             ]);
 
         }
+        $directeur = $formulaire->createur;
+        $directeur->notify(new \App\Notifications\ReponseFormulaireSoumise($reponse));
+
 
         return redirect()->route('tuteur.formulaires.affichage')->with('success', 'Formulaire rempli avec succès.');
     }

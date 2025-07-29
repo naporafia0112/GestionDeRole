@@ -34,7 +34,7 @@ Route::get('/vitrine/catalogue/{offre}', [VitrineController::class, 'detailcatal
 Route::get('/offres/{id}/postuler', [CandidatureController::class, 'create'])->name('candidature.create');
 Route::post('/offres/{id}/postuler', [CandidatureController::class, 'store'])->name('candidature.store');
 
-Route::post('/candidatures/suivi', [VitrineController::class, 'suivi'])->name('candidatures.suivi');
+Route::match(['get', 'post'], '/candidatures/suivi/{uuid?}', [VitrineController::class, 'suivi'])->name('candidatures.suivi');
 Route::post('/candidatures/recherche', [CandidatureController::class, 'recherche'])->name('candidatures.recherche');
 Route::get('/candidature-spontanee', [CandidatureSpontaneeController::class, 'create'])->name('candidature.spontanee.form');
 Route::post('/candidature-spontanee', [CandidatureSpontaneeController::class, 'store'])->name('candidature.spontanee.store');
@@ -88,10 +88,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('candidatures-spontanees/{id}/rejeter', [CandidatureSpontaneeController::class, 'rejeter'])->name('candidatures.spontanees.rejeter');
     Route::post('candidatures-spontanees/{id}/analyze', [CandidatureSpontaneeController::class, 'analyze'])->name('candidatures.spontanees.analyze');
     // Aperçu PDF dans navigateur
-    Route::get('/candidatures/{id}/preview/{field}', [CandidatureSpontaneeController::class, 'preview'])->name('candidatures.preview');
+    Route::get('/candidatures-spontanees/{id}/preview/{field}', [CandidatureSpontaneeController::class, 'preview'])->name('candidaturespontanee.preview');
+    Route::get('/candidatures-spontanees/{id}/download/{field}', [CandidatureSpontaneeController::class, 'download'])->name('candidaturespontanee.download');
 
-    // Téléchargement du fichier
-    Route::get('/candidatures/{id}/download/{field}', [CandidatureSpontaneeController::class, 'download'])->name('candidatures.download');
 
     // Routes personnalisées pour les types de stages
 

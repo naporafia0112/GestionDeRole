@@ -36,7 +36,7 @@
                         <div class="timeline-body">
                             <p>Cliquez sur le bouton ci-dessous pour consulter les réponses pour ce formulaire.</p>
                             <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-primary btn-sm mt-3">
-                                <i data-feather="file-text" class="feather-sm me-1"></i> Voir les réponses
+                                <i data-feather="file-text" class="feather-sm me-1"></i> Voir rapports
                             </a>
                         </div>
                     </div>

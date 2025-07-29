@@ -98,5 +98,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Stage::class, 'id_tuteur');
     }
-
+    
 }

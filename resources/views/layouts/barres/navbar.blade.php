@@ -14,34 +14,41 @@
 
             {{-- Notifications --}}
             <li class="dropdown notification-list topbar-dropdown">
-                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                     <i class="fe-bell noti-icon"></i>
-                    @if(isset($notifications) && count($notifications) > 0)
-                        <span class="badge bg-danger rounded-circle noti-icon-badge">{{ count($notifications) }}</span>
+                   @if(isset($notifications) && count($notifications) > 0)
+                        <span id="notif-badge" class="badge bg-danger rounded-circle noti-icon-badge">{{ count($notifications) }}</span>
                     @endif
+
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-end dropdown-lg">
+
+                    <!-- Titre -->
                     <div class="dropdown-item noti-title">
                         <h5 class="m-0">
                             <span class="float-end">
-                                <a href="#" class="text-dark"><small>Tout effacer</small></a>
+                                <a href="" class="text-dark">
+                                    <small>Tout effacer</small>
+                                </a>
                             </span>
                             Notifications
                         </h5>
                     </div>
 
+                    <!-- Notifications list -->
                     <div class="noti-scroll" data-simplebar style="max-height: 300px;">
                         @forelse ($notifications as $notif)
-                            <a href="{{ $notif['link'] }}" class="dropdown-item notify-item">
+                            <a href="#" class="dropdown-item notify-item @if(isset($notif['unread']) && $notif['unread']) active @endif">
                                 <div class="notify-icon {{ $notif['bg'] ?? 'bg-primary' }}">
                                     @if(isset($notif['image']))
                                         <img src="{{ asset($notif['image']) }}" class="img-fluid rounded-circle" alt="" />
                                     @else
-                                        <i class="{{ $notif['icon'] }}"></i>
+                                        <i class="{{ $notif['icon'] ?? 'mdi mdi-bell-outline' }}"></i>
                                     @endif
                                 </div>
-                                <p class="notify-details">{{ $notif['title'] ?? 'Notification' }}
+                                <p class="notify-details">
+                                    {{ $notif['title'] ?? 'Notification' }}
                                     @if(isset($notif['time']))
                                         <small class="text-muted">{{ $notif['time'] }}</small>
                                     @endif
@@ -57,11 +64,14 @@
                         @endforelse
                     </div>
 
+                    <!-- Voir toutes -->
                     <a href="{{ route('notifications.index') }}" class="dropdown-item text-center text-primary notify-item notify-all">
                         Voir toutes les notifications <i class="fe-arrow-right"></i>
                     </a>
+
                 </div>
             </li>
+
 
             {{-- Utilisateur --}}
             <li>
@@ -74,11 +84,114 @@
             </li>
 
             {{-- Paramètres --}}
-            <li class="notification-list ms-2">
-                <a href="javascript:void(0);" class="nav-link waves-light">
+            <li class="dropdown notification-list">
+                <a href="javascript:void(0);" class="nav-link right-bar-toggle waves-effect waves-light">
                     <i class="fe-settings noti-icon"></i>
                 </a>
             </li>
         </ul>
     </div>
 </div>
+
+{{-- Barre latérale des paramètres --}}
+<div class="right-bar">
+    <div data-simplebar class="h-100">
+        <div class="tab-pane active" id="settings-tab" role="tabpanel">
+            <h6 class="fw-medium px-3 m-0 py-2 font-13 text-uppercase bg-light">
+                <span class="d-block py-1">Paramètres de l'application</span>
+            </h6>
+
+            <div class="p-3">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Personnalisez</strong> les couleurs, les menus, la langue, etc.
+                </div>
+
+                {{-- Schéma de couleurs --}}
+                <h6 class="fw-medium font-14 mt-4 mb-2 pb-1">Schéma de couleurs</h6>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="layout-color" value="light" id="light-mode-check" checked />
+                    <label class="form-check-label" for="light-mode-check">Mode clair</label>
+                </div>
+
+                {{-- Largeur --}}
+                <h6 class="fw-medium font-14 mt-4 mb-2 pb-1">Largeur de l'affichage</h6>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="layout-width" value="fluid" id="fluid-check" checked />
+                    <label class="form-check-label" for="fluid-check">Fluide</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="layout-width" value="boxed" id="boxed-check" />
+                    <label class="form-check-label" for="boxed-check">Encadré</label>
+                </div>
+
+                {{-- Position des menus --}}
+                <h6 class="fw-medium font-14 mt-4 mb-2 pb-1">Position des menus</h6>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="menu-position" value="fixed" id="fixed-check" checked />
+                    <label class="form-check-label" for="fixed-check">Fixé</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="menu-position" value="scrollable" id="scrollable-check" />
+                    <label class="form-check-label" for="scrollable-check">Défilable</label>
+                </div>
+
+                {{-- Couleur de la barre latérale --}}
+                <h6 class="fw-medium font-14 mt-4 mb-2 pb-1">Couleur de la barre latérale</h6>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="leftbar-color" value="light" id="light-check" />
+                    <label class="form-check-label" for="light-check">Clair</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="leftbar-color" value="dark" id="dark-check" checked />
+                    <label class="form-check-label" for="dark-check">Sombre</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="leftbar-color" value="brand" id="brand-check" />
+                    <label class="form-check-label" for="brand-check">Couleur de marque</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input type="checkbox" class="form-check-input" name="leftbar-color" value="gradient" id="gradient-check" />
+                    <label class="form-check-label" for="gradient-check">Dégradé</label>
+                </div>
+
+                {{-- Taille barre latérale --}}
+                <h6 class="fw-medium font-14 mt-4 mb-2 pb-1">Taille de la barre latérale</h6>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="leftbar-size" value="default" id="default-size-check" checked />
+                    <label class="form-check-label" for="default-size-check">Par défaut</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="leftbar-size" value="condensed" id="condensed-check" />
+                    <label class="form-check-label" for="condensed-check">Condensée</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="leftbar-size" value="compact" id="compact-check" />
+                    <label class="form-check-label" for="compact-check">Compacte</label>
+                </div>
+
+                {{-- Topbar --}}
+                <h6 class="fw-medium font-14 mt-4 mb-2 pb-1">Barre supérieure</h6>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="topbar-color" value="dark" id="darktopbar-check" checked />
+                    <label class="form-check-label" for="darktopbar-check">Sombre</label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                    <input type="checkbox" class="form-check-input" name="topbar-color" value="light" id="lighttopbar-check" />
+                    <label class="form-check-label" for="lighttopbar-check">Clair</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const notifIcon = document.querySelector('.notification-list .nav-link');
+        const badge = document.getElementById('notif-badge');
+
+        if (notifIcon && badge) {
+            notifIcon.addEventListener('click', function () {
+                badge.style.display = 'none'; // Cache le badge
+            });
+        }
+    });
+</script>

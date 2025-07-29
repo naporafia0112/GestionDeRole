@@ -21,6 +21,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpWord\PhpWord;
 use App\Notifications\NouveauStageNotification;
 use PhpOffice\PhpWord\IOFactory;
+use App\Notifications\StageValideNotification;
 
 class StageController extends Controller
 {
@@ -72,7 +73,6 @@ class StageController extends Controller
     /**
      * Enregistrement d’un nouveau stage.
      */
-
     public function store(Request $request)
     {
         $request->validate([
@@ -111,16 +111,15 @@ class StageController extends Controller
             'remuneration',
         ]);
 
-        // Statut par défaut
         $data['statut'] = $data['statut'] ?? Stage::STATUTS['EN_ATTENTE'];
 
+        // Création du stage
         if ($request->type === 'classique') {
             $candidature = Candidature::with(['candidat', 'offre'])->find($request->id_candidature);
             if (!$candidature) {
                 return back()->with('error', 'Candidature classique introuvable.');
             }
 
-            // Vérifier doublon
             $stageExistant = Stage::whereHas('candidature', function ($query) use ($candidature) {
                 $query->where('candidat_id', $candidature->candidat_id)
                     ->where('offre_id', $candidature->offre_id);
@@ -137,17 +136,14 @@ class StageController extends Controller
             $data['id_candidature_spontanee'] = null;
 
             $stage = Stage::create($data);
-
-            // Récupérer le candidat lié
             $candidat = $candidature->candidat;
 
-        } else { // spontanee
+        } else {
             $candidatureSpontanee = CandidatureSpontanee::with('candidat')->find($request->id_candidature_spontanee);
             if (!$candidatureSpontanee) {
                 return back()->with('error', 'Candidature spontanée introuvable.');
             }
 
-            // Vérifier doublon
             $stageExistant = Stage::where('id_candidature_spontanee', $candidatureSpontanee->id)
                 ->whereIn('statut', [
                     Stage::STATUTS['EN_COURS'],
@@ -163,26 +159,26 @@ class StageController extends Controller
             $data['id_candidature'] = null;
 
             $stage = Stage::create($data);
-
-            $directeur = User::whereHas('roles', function ($query) {
-                $query->where('name', 'directeur');
-            })->where('departement_id', $stage->id_departement)->first();
-
-            if ($directeur) {
-                $directeur->notify(new \App\Notifications\NouveauStageNotification($stage));
-            }
-
-            // Récupérer le candidat lié
             $candidat = $candidatureSpontanee->candidat;
         }
 
-        // ENVOI DU MAIL AU CANDIDAT
-        if ($candidat && !empty($candidat->email)) {
-            Mail::to($candidat->email)->send(new StageCreeMail($candidat, $stage));
+        //  Notification au directeur du département (TOUJOURS)
+        $directeur = User::whereHas('roles', function ($query) {
+            $query->where('name', 'directeur');
+        })->where('id_departement', $stage->id_departement)->first();
+
+        if ($directeur) {
+            $directeur->notify(new \App\Notifications\NouveauStageNotification($stage));
         }
 
-        return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès et mail envoyé au candidat.');
+        // Envoi du mail au candidat
+        if ($candidat && !empty($candidat->email)) {
+            Mail::to($candidat->email)->send(new \App\Mail\StageCreeMail($candidat, $stage));
+        }
+
+        return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès, notification envoyée au directeur, et mail envoyé au candidat.');
     }
+
 
     /**
      * Détail d’un stage (pour RH).
@@ -748,7 +744,6 @@ class StageController extends Controller
 
         return view('admin.stages.directeurs.details_candidat_directeur', compact('candidat', 'stage', 'progression'));
     }
-
     /**
      * Validation par directeur.
      */
@@ -769,6 +764,13 @@ class StageController extends Controller
         }
 
         $stage->update(['validation_directeur' => true]);
+       $rhs = User::whereHas('roles', function ($q) {
+            $q->where('name', 'RH');
+        })->get();
+
+        foreach ($rhs as $rh) {
+            $rh->notify(new StageValideNotification($stage));
+        }
 
         return response()->json(['success' => true]);
     }

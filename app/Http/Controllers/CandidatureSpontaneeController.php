@@ -8,6 +8,8 @@ use App\Models\CandidatureSpontanee;
 use App\Models\Candidat;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CandidatureSpontaneeMail;
+use App\Models\User;
+use App\Notifications\NouvelleCandidatureNotification;
 
 class CandidatureSpontaneeController extends Controller
 {
@@ -63,6 +65,13 @@ class CandidatureSpontaneeController extends Controller
             'statut' => 'reçue',
         ]);
 
+        $rhs = User::whereHas('roles', function ($q) {
+                $q->where('name', 'RH');
+            })->get();
+
+        foreach ($rhs as $rh) {
+                $rh->notify(new NouvelleCandidatureNotification($candidature));
+            }
 
         Mail::to($candidat->email)->send(new CandidatureSpontaneeMail($candidature));
 
