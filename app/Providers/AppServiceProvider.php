@@ -73,8 +73,22 @@ class AppServiceProvider extends ServiceProvider
                         ];
                     })->toArray();
                 }
+                elseif ($user->hasRole('TUTEUR')) {
+                    $notifications = $user->unreadNotifications->map(function ($notif) {
+                        return [
+                            'id' => $notif->id,
+                            'title' => $notif->data['title'] ?? 'Notification',
+                            'message' => $notif->data['message'] ?? '',
+                            'icon' => $notif->data['icon'] ?? 'mdi mdi-bell-outline',
+                            'bg' => $notif->data['bg'] ?? 'bg-success',
+                            'link' => $notif->data['link'] ?? '#',
+                            'time' => $notif->created_at->diffForHumans(),
+                            'unread' => is_null($notif->read_at),
+                            'created_at' => $notif->created_at,
+                        ];
+                    })->toArray();
+                }
 
-                // Autres rôles ou cas (ex: TUTEUR), tu peux compléter ici...
             }
 
             // Envoie les données à toutes les vues

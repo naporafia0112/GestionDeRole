@@ -112,7 +112,7 @@
 
                         <div class="text-end">
                             <button type="submit" class="btn btn-success">Créer l'entretien</button>
-                            <a href="{{ isset($offre) ? route('offres.candidatures', $offre->id) : route('admin.candidatures.spontanees.index') }}" class="btn btn-light">Annuler</a>
+                            <a href="{{ url()->previous() }}" class="btn btn-light">Annuler</a>
                         </div>
                     </form>
                 </div> <!-- end card-body -->
@@ -121,7 +121,6 @@
     </div> <!-- end row -->
 </div>
 @endsection
-
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

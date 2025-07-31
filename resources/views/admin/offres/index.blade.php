@@ -13,9 +13,39 @@
                                 <li class="breadcrumb-item"><a href="{{ route('offres.index') }}">Liste des offres</a></li>
                             </ol>
                         </div>
-                        <h4 class="page-title">
+                        <h2 class="page-title">
                             <strong>Liste des offres</strong>
-                        </h4>
+                        </h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Bloc des boutons -->
+                    <div class="col-lg-12 col-md-6 mb-2"> <!-- Réduction de mb-4 à mb-2 -->
+                        <div class="card" style="border: 2px solid #dee2e6;">
+                            <div class="card-body py-2"> <!-- Réduction du padding vertical -->
+                                <h5 class="mb-3">Description des boutons</h5>
+                                <div class="button-list">
+                                    <button type="button" class="btn btn-sm btn-primary waves-effect waves-light">
+                                        <i class="mdi mdi-send"></i> => Publié
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-secondary waves-effect waves-light">
+                                        <i class="mdi mdi-account-multiple"></i> => Candidatures
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-info waves-effect waves-light">
+                                        <i class="fe-eye"></i> => Voir détails
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-warning waves-effect waves-light">
+                                        <i class="mdi mdi-square-edit-outline"></i> => Modifier
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger waves-effect waves-light">
+                                        <i class="mdi mdi-delete"></i> => Supprimer
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-primary waves-effect waves-light">
+                                        <i data-feather="plus-circle" class="icon-dual"></i> => Voir tous les boutons disponibles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

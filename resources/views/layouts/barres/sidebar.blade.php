@@ -85,7 +85,7 @@
                     <li><a href="{{ route('stages.rh.candidats_en_stage') }}"><i data-feather="list"></i> <span> Liste Candidats </span></a></li>
                     <li><a href="{{ route('entretiens.liste') }}"><i data-feather="file"></i> <span> Liste Entretiens </span></a></li>
                     <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
-                    <li><a href="#"><i data-feather="activity"></i> <span> Situation </span></a></li>
+                    <li><a href="#"><i data-feather="activity"></i> <span> Attestation </span></a></li>
 
                 @elseif (Auth::user()->hasRole('DIRECTEUR'))
                     <li class="menu-title">DIRECTEUR</li>
@@ -105,7 +105,7 @@
                     <li class="menu-title mt-2">RAPPORTS</li>
                     <li><a href="{{ route('directeur.formulaires.liste') }}"><i data-feather="file"></i> <span> Rapports </span></a></li>
                     <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
-                    
+
                 @elseif (Auth::user()->hasRole('TUTEUR'))
                     <li class="menu-title">TUTEUR</li>
                     <li><a href="{{ route('dashboard.tuteur') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>
@@ -120,7 +120,7 @@
                     <li><a href="{{ route('dashboard') }}"><i data-feather="airplay"></i> <span> Tableau de bord </span></a></li>
                 @endif
 
-                <!-- Déconnexion -->
+                <!-- Déconnexion
                 <li class="mt-3">
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
                         <i data-feather="log-out"></i>
@@ -129,7 +129,7 @@
                     <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf
                     </form>
-                </li>
+                </li>-->
             </ul>
         </div>
 

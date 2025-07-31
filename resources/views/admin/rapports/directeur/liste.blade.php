@@ -8,9 +8,15 @@
             <h2 class="mb-1 fw-bold">Formulaires d'évaluation</h2>
             <p class="text-muted mb-0">Historique de la création des formulaires</p>
         </div>
-        <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success">
-            <i data-feather="plus" class="me-1"></i> Créer un formulaire
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('formulaires.archives') }}" class="btn btn-outline-secondary">
+                <i data-feather="archive" class="me-1"></i> Archives
+            </a>
+            <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success">
+                <i data-feather="plus" class="me-1"></i> Créer un formulaire
+            </a>
+        </div>
+
     </div>
 
     @if($formulaires->isEmpty())
@@ -35,9 +41,26 @@
                         </div>
                         <div class="timeline-body">
                             <p>Cliquez sur le bouton ci-dessous pour consulter les réponses pour ce formulaire.</p>
-                            <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-primary btn-sm mt-3">
-                                <i data-feather="file-text" class="feather-sm me-1"></i> Voir rapports
-                            </a>
+                           <div class="d-flex flex-wrap gap-2 mt-3">
+                                <a href="{{ route('directeur.formulaires.reponses', $formulaire) }}" class="btn btn-primary btn-sm">
+                                    <i data-feather="file-text" class="feather-sm me-1"></i> Voir reponses
+                                </a>
+
+                                <a href="{{ route('formulaires.edit', $formulaire) }}" class="btn btn-warning btn-sm" title="Modifier le formulaire">
+                                    <i data-feather="edit" class="feather-sm me-1"></i>
+                                </a>
+
+                               <form method="POST" action="{{ route('formulaires.archiver', $formulaire) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-warning btn-sm btn-archiver" title="Archiver ce formulaire" data-titre="{{ $formulaire->titre }}">
+                                        <i data-feather="archive" class="feather-sm me-1"></i>
+                                    </button>
+
+                                </form>
+
+                            </div>
+
                         </div>
                     </div>
                 </li>
@@ -269,6 +292,31 @@ document.addEventListener("DOMContentLoaded", () => {
             observer.observe(item);
         });
     }
+    const formsArchiver = document.querySelectorAll('form[action*="archiver"]');
+
+    formsArchiver.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // stop submit
+
+            const btn = form.querySelector('.btn-archiver');
+            const titre = btn.getAttribute('data-titre') || 'ce formulaire';
+
+            Swal.fire({
+                title: 'Êtes-vous sûr ?',
+                text: `Voulez-vous vraiment archiver "${titre}" ?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, archiver',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
 });
 </script>
 @endpush

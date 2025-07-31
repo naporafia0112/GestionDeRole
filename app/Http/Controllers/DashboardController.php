@@ -270,30 +270,38 @@ class DashboardController extends Controller
     public function dashboardTuteur()
     {
         $tuteur = Auth::user();
+
         if (!$tuteur->hasRole('TUTEUR')) {
             abort(403);
-            }
+        }
 
-        // Récupère tous les stages assignés à ce tuteur
         $stages = Stage::with(['candidature.candidat', 'candidatureSpontanee.candidat'])
             ->where('id_tuteur', $tuteur->id)
             ->get();
 
-        // Filtrage par statut
-        $stagesEnCours = $stages->where('statut', Stage::STATUTS['EN_COURS']);
-        $stagesTermines = $stages->where('statut', Stage::STATUTS['TERMINE']);
+        $stagesEnCours = $stages->filter(function ($stage) {
+            return $stage->statut === Stage::STATUTS['EN_COURS'];
+        });
 
-        // Comptage des candidats uniques
-        $countCandidatsEnCours = $stagesEnCours->map(function ($stage) {
-            return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
-        })->filter()->unique('id')->count();
+        $stagesTermines = $stages->filter(function ($stage) {
+            return $stage->statut === Stage::STATUTS['TERMINE'];
+        });
 
-        $countCandidatsTermines = $stagesTermines->map(function ($stage) {
-            return $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat;
-        })->filter()->unique('id')->count();
+        $countCandidatsEnCours = $stagesEnCours
+            ->map(fn($stage) => $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat)
+            ->filter()
+            ->unique('id')
+            ->count();
+
+        $countCandidatsTermines = $stagesTermines
+            ->map(fn($stage) => $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat)
+            ->filter()
+            ->unique('id')
+            ->count();
 
         return view('dashboard.dashboardtuteur', compact('countCandidatsEnCours', 'countCandidatsTermines'));
     }
+
 
     /**
      * Affichage du dashboard RH

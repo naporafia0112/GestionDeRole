@@ -43,7 +43,7 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $d->nom }}</td>
                                 <td>{{ $d->description ?? 'Aucune description pour ce departement'}}</td>
-                                <td>{{ $d->directeur?->name ?? 'Non défini' }}</td>
+                                <td> {{ $d->directeur?->name ?? 'Non défini' }}</td>
                                 <td>
                                     <div class="d-flex gap-1">
                                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editDepartementModal{{ $d->id }}">
@@ -58,7 +58,6 @@
                                     </div>
                                 </td>
                             </tr>
-
                             <!-- Modal Modification -->
                             <div class="modal fade" id="editDepartementModal{{ $d->id }}" tabindex="-1">
                                 <div class="modal-dialog">

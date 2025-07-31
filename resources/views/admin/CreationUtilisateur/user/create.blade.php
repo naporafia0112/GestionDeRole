@@ -62,11 +62,10 @@
                                 </div>
                                 <!-- Champ Département ajouté -->
                                 <div class="mb-3">
-                                    <label for="id_departement" class="form-label">Département</label>
-                                    <select id="id_departement" name="id_departement" class="form-select">
-                                        <option value="">-- Choisir un département --</option>
+                                    <label for="departement_id">Départements (directeur)</label>
+                                    <select id="departement_id" name="departement_id[]" class="form-select" multiple>
                                         @foreach($departements as $departement)
-                                            <option value="{{ $departement->id }}" {{ old('id_departement') == $departement->id ? 'selected' : '' }}>
+                                            <option value="{{ $departement->id }}" {{ (collect(old('departement_id'))->contains($departement->id)) ? 'selected' : '' }}>
                                                 {{ $departement->nom }}
                                             </option>
                                         @endforeach

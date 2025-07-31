@@ -1,5 +1,4 @@
 @extends('layouts.home')
-
 @section('content')
 <div class="container mt-4">
     <div class="card shadow-sm">
@@ -9,7 +8,7 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href="">Liste des candidatures retenus</a></li>
                             </ol>
                         </div>
@@ -39,22 +38,10 @@
                             <td>{{ $candidature->created_at->format('d/m/Y') }}</td>
                             <td class="text-center">
                             @if($candidature->statut === 'retenu')
-                                @if($candidature->entretien && $candidature->entretien->statut === 'effectuee')
-                                    <form method="POST" action="{{ route('candidatures.valider', $candidature->id) }}">
-                                        @csrf
-                                        <button class="btn btn-sm btn-success confirm-validate">
-                                            <i class="mdi mdi-check"></i> Valider
-                                        </button>
-                                    </form>
-                                @else
-                                    <!-- Debug : Affiche pourquoi le bouton n'apparaît pas -->
-                                    <span class="badge bg-warning">
-                                        @if(!$candidature->entretien)
-                                            Pas d'entretien
-                                        @else
-                                            Statut: {{ $candidature->entretien->statut }}
-                                        @endif
-                                    </span>
+                                @if(!$candidature->candidat->entretien)
+                                   <a href="{{ route('entretiens.slots.page', ['id_candidat' => $candidature->candidat->id, 'id_offre' => $candidature->offre->id]) }}" class="btn btn-sm btn-outline-info ms-1" title="Choisir un créneau">
+                                        <i class="mdi mdi-calendar-check-outline"></i>
+                                    </a>
                                 @endif
                             @endif
                             </td>

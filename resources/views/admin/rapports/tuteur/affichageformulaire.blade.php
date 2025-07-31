@@ -9,9 +9,6 @@
                 <h2 class="mb-1 fw-bold">Formulaires d'évaluation</h2>
                 <p class="text-muted mb-0">Gérez vos formulaires d'évaluation</p>
             </div>
-            <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success btn-create">
-                <i data-feather="plus" class="me-1"></i> Créer un formulaire
-            </a>
         </div>
     </div>
 
@@ -22,10 +19,6 @@
                 <i data-feather="file-text" style="width: 48px; height: 48px; color: #6c757d;"></i>
             </div>
             <h4 class="mb-2">Aucun formulaire disponible</h4>
-            <p class="text-muted mb-4">Commencez par créer votre premier formulaire d'évaluation.</p>
-            <a href="{{ route('formulairedynamique.creation') }}" class="btn btn-success btn-create">
-                <i data-feather="plus" class="me-1"></i>Créer un formulaire
-            </a>
         </div>
     @else
         {{-- Début de la Timeline (Structure de la liste <ul>/<li>) --}}

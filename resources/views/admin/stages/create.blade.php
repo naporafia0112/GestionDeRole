@@ -121,9 +121,8 @@
 
                             <div class="col-12 text-end mt-4">
                                 <button type="submit" class="btn btn-success">Enregistrer</button>
-                                <a href="{{ route('rh.stages.en_cours') }}" class="btn btn-secondary ms-2">Retour</a>
+                                <a href="{{ route('offres.candidatures', $candidature->offre->id) }}" class="btn btn-secondary ms-2">Retour</a>
                             </div>
-
                         </div>
                     </form>
 

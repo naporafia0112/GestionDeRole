@@ -5,7 +5,6 @@
     <div class="content">
         <!-- Start Content-->
         <div class="container-fluid">
-
             <!-- Calendrier -->
             <div class="card">
                 <div class="card-body">
@@ -18,11 +17,26 @@
                                         <li class="breadcrumb-item active">Calendrier des entretiens</li>
                                     </ol>
                                 </div>
-                                <h4 class="page-title">Calendrier des entretiens</h4>
+                                <h4 class="page-title mb-2">Calendrier des entretiens</h4>
+                            </div>
+                             <div class="row">
+                                <!-- Bloc des boutons -->
+                                <div class="col-lg-8 col-md-4 mb-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="button-list">
+                                                <button type="button" class="btn waves-effect waves-light" style="background-color: #198754; color: white;">Effectué</button>
+                                                <button type="button" class="btn waves-effect waves-light" style="background-color: #0d6efd; color: white;">Prévu</button>
+                                                <button type="button" class="btn waves-effect waves-light" style="background-color: #dc3545; color: white;">Annulé</button>
+                                                <button type="button" class="btn waves-effect waves-light" style="background-color: #6c757d; color: white;">Cliquez sur un évenement pour voir les details</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div id="calendar"></div>
+                    <div id="calendar" class="mt-2"></div>
                 </div>
             </div>
         </div>

@@ -35,22 +35,13 @@
                                     Annulé ({{ $entretiensAnnules->count() }})
                                 </button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="encours-tab" data-bs-toggle="tab" data-bs-target="#encours" type="button" role="tab" aria-controls="encours" aria-selected="false">
-                                    En cours ({{ $entretiensEncours->count() }})
-                                </button>
-                            </li>
+                           
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="effectuee-tab" data-bs-toggle="tab" data-bs-target="#effectuee" type="button" role="tab" aria-controls="effectuee" aria-selected="false">
                                     Effectuée ({{ $entretiensEffectues->count() }})
                                 </button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="termine-tab" data-bs-toggle="tab" data-bs-target="#termine" type="button" role="tab" aria-controls="termine" aria-selected="false">
-                                    Terminé ({{ $entretiensTermines->count() }})
-                                </button>
-                            </li>
-
+                            
                         </ul>
 
                         {{-- Contenu des onglets --}}
@@ -64,15 +55,9 @@
                                 @include('admin.entretiens.partials', ['entretiens' => $entretiensAnnules])
                             </div>
 
-                            <div class="tab-pane fade" id="encours" role="tabpanel" aria-labelledby="encours-tab">
-                                @include('admin.entretiens.partials', ['entretiens' => $entretiensEncours])
-                            </div>
+                           
                             <div class="tab-pane fade" id="effectuee" role="tabpanel" aria-labelledby="effectuee-tab">
                                 @include('admin.entretiens.partials', ['entretiens' => $entretiensEffectues])
-                            </div>
-
-                            <div class="tab-pane fade" id="termine" role="tabpanel" aria-labelledby="termine-tab">
-                                @include('admin.entretiens.partials', ['entretiens' => $entretiensTermines])
                             </div>
 
                         </div>

@@ -20,14 +20,8 @@
                             @case('prevu')
                                 <span class="badge bg-info">Prévu</span>
                                 @break
-                            @case('en_cours')
-                                <span class="badge bg-warning text-dark">En cours</span>
-                                @break
                             @case('effectuee')
                                 <span class="badge bg-primary">Effectuée</span>
-                                @break
-                            @case('termine')
-                                <span class="badge bg-success">Terminé</span>
                                 @break
                             @case('annule')
                                 <span class="badge bg-danger">Annulé</span>

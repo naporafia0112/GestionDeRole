@@ -1,42 +1,44 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use App\Models\Formulaire;
 
 class NouveauFormulaireRapportNotification extends Notification
 {
     use Queueable;
 
-    protected $stage;
+    protected $formulaire;
 
-    public function __construct($stage)
+    public function __construct(Formulaire $formulaire)
     {
-        $this->stage = $stage;
+        $this->formulaire = $formulaire;
     }
 
     public function via($notifiable)
     {
-        return ['mail', 'database']; // email + notification en base
+        return ['mail', 'database'];
     }
 
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Nouveau formulaire de rapport disponible')
-                    ->greeting('Bonjour ' . $notifiable->name)
-                    ->line('Un nouveau formulaire de rapport a été créé pour le stage de votre candidat.')
-                    ->action('Voir le stage', url(route('tuteur.formulaires.affichage', $this->stage->id)))
-                    ->line('Merci de vérifier et remplir ce formulaire dès que possible.');
+            ->subject('Nouveau formulaire de rapport disponible')
+            ->greeting('Bonjour ' . $notifiable->name)
+            ->line('Un nouveau formulaire de rapport a été créé pour votre département.')
+            ->action('Voir les formulaires', route('tuteur.formulaires.affichage'))
+            ->line('Merci de remplir les formulaires correspondants dès que possible.');
     }
 
     public function toArray($notifiable)
     {
         return [
-            'stage_id' => $this->stage->id,
-            'message' => 'Un nouveau formulaire de rapport a été créé pour votre stage.',
+            'formulaire_id' => $this->formulaire->id,
+            'titre' => $this->formulaire->titre,
+            'message' => 'Un nouveau formulaire de rapport a été créé.',
         ];
     }
 }
+

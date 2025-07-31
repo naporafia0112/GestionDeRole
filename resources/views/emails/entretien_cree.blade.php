@@ -26,36 +26,36 @@
 </head>
 
 <body itemscope itemtype="http://schema.org/EmailMessage"
-      style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; 
-             -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; 
+      style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px;
+             -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%;
              line-height: 1.6em; background-color: #f4f4f4; margin: 0;"
       bgcolor="#f4f4f4">
 
 <table class="body-wrap"
-       style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; 
+       style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px;
               width: 100%; background-color: #f4f4f4; margin: 0;"
        bgcolor="#f4f4f4">
   <tr>
-    <td valign="top" 
+    <td valign="top"
         style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;">
     </td>
     <td class="container" width="600"
         valign="top"
-        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; 
+        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px;
                vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto;">
       <div class="content"
-           style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; 
+           style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px;
                   max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
         <table class="main" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff"
-               style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; 
+               style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px;
                       border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;">
           <!-- En-tête -->
           <tr>
-            <td align="center" class="header-padding" 
-                style="padding: 40px 20px 20px 20px; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 16px; 
-                       line-height: 1.6; color: #333333; border-radius: 8px 8px 0 0; background-color: #ffffff;">
+            <td align="center" class="header-padding"
+                style="padding: 40px 20px 20px 20px; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; font-size: 16px;
+                       line-height: 1.6; color: #ffff; border-radius: 8px 8px 0 0; background-color: #38414a;">
               <a href="{{ url('/') }}" target="_blank" style="text-decoration: none;">
-                <img alt="Logo de l'entreprise" src="https://i.pinimg.com/736x/2b/36/12/2b3612426dad8e23b17e6bfd56a6db91.jpg" 
+                <img alt="Logo de l'entreprise" src="https://i.pinimg.com/736x/2b/36/12/2b3612426dad8e23b17e6bfd56a6db91.jpg"
                      width="180" style="display: block; border: 0;"/>
               </a>
             </td>
@@ -64,7 +64,7 @@
           <!-- Corps du mail -->
           <tr>
             <td align="left" class="content-padding"
-                style="padding: 40px 30px 20px 30px; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; 
+                style="padding: 40px 30px 20px 30px; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
                        font-size: 16px; line-height: 24px; color: #333333;">
               <h1 style="font-size: 24px; font-weight: 600; margin: 0 0 20px 0; color: #1a202c;">
                 Bonjour {{ $candidat->firstname }},
@@ -74,7 +74,7 @@
               </p>
 
               <!-- Carte d'information -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" 
+              <table border="0" cellpadding="0" cellspacing="0" width="100%"
                      style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; background-color: #f8fafc; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;">
                 <tr>
                   <td align="left" valign="top" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;">
@@ -109,8 +109,8 @@
         </table>
 
         <!-- Pied de page -->
-        <div class="footer" 
-             style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; 
+        <div class="footer"
+             style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px;
                     width: 100%; clear: both; color: #888888; margin: 0; padding: 20px; text-align:center;">
           <p style="margin: 0;">© {{ date('Y') }}.cagecfi. All Rights Reserved</p>
           <p style="margin: 4px 0 0; font-size: 12px;">
@@ -119,11 +119,10 @@
         </div>
       </div>
     </td>
-    <td valign="top" 
+    <td valign="top"
         style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;">
     </td>
   </tr>
 </table>
-
 </body>
 </html>

@@ -9,7 +9,7 @@
                     <div class="page-title-box">
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.directeur') }}">DIPRH</a></li>
                                 <li class="breadcrumb-item"><a href="{{route('stages.en_cours')}}">Stages en cours</a></li>
                                 <li class="breadcrumb-item active"><strong>Détails du stage</strong></li>
                             </ol>

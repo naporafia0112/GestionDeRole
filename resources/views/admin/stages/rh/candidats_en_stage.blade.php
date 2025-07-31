@@ -4,6 +4,18 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard.RH') }}">DIPRH</a></li>
+                                <li class="breadcrumb-item"><a href="">Candidats en stage</a></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <h4 class="mb-4">Candidats actuellement en stage</h4>
 
             @if ($candidats->isEmpty())

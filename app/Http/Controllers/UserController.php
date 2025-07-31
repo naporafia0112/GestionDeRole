@@ -31,18 +31,28 @@ class UserController extends Controller
             'email'           => 'required|email|unique:users,email',
             'password'        => 'required|confirmed|min:6',
             'role_id'         => 'required|exists:roles,id',
-            'id_departement'  => 'nullable|exists:departements,id',
+            'departement_id'  => 'nullable|array', // tableau pour plusieurs départements
+            'departement_id.*'=> 'exists:departements,id',
         ]);
 
         $user = User::create([
             'name'           => $request->name,
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
-            'id_departement' => $request->id_departement,
+            'id_departement' => $request->departement_id ? $request->departement_id[0] : null, // facultatif pour la FK utilisateur
             'must_change_password' => true,
         ]);
 
         $user->roles()->sync([$request->role_id]);
+
+        // Récupérer le nom du rôle (via modèle Role)
+        $role = Role::find($request->role_id);
+
+        if ($role && strtoupper($role->name) === 'DIRECTEUR' && $request->departement_id) {
+            foreach ($request->departement_id as $depId) {
+                Departement::where('id', $depId)->update(['id_directeur' => $user->id]);
+            }
+        }
 
         return redirect()->route('user.index')->with('success', 'Utilisateur ajouté avec succès !');
     }
@@ -98,5 +108,5 @@ class UserController extends Controller
         return view('admin.CreationUtilisateur.user.show', compact('user', 'roles', 'permissions'));
     }
 
-    
+
 }

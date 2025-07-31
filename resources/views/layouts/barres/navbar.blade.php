@@ -21,7 +21,6 @@
                     @endif
 
                 </a>
-
                 <div class="dropdown-menu dropdown-menu-end dropdown-lg">
 
                     <!-- Titre -->
@@ -71,17 +70,36 @@
 
                 </div>
             </li>
-
-
             {{-- Utilisateur --}}
-            <li>
-                <a class="nav-link nav-user me-0 waves-light" href="{{ route('profil.show') }}" role="button">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=100&background=4e54c8&color=fff" class="rounded-circle" alt="Avatar">
-                    <span class="pro-user-name ms-1">
-                        {{ Auth::user()->name }}
-                    </span>
-                </a>
-            </li>
+            <li class="dropdown notification-list topbar-dropdown">
+                    <a  class="nav-link dropdown-toggle nav-user me-0 waves-effect waves-light" data-bs-toggle="dropdown" href="{{ route('profil.show') }}"  role="button" aria-haspopup="false" aria-expanded="false">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=100&background=4e54c8&color=fff" class="rounded-circle" alt="Avatar">
+                        <span class="pro-user-name ms-1">
+                            {{ Auth::user()->name }}
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end profile-dropdown ">
+                        <!-- item-->
+                        <div class="dropdown-header noti-title">
+                            <h6 class="text-overflow m-0">Bienvenu !</h6>
+                        </div>
+
+                        <!-- item-->
+                        <a href="{{ route('profil.show') }}" class="dropdown-item notify-item">
+                            <i class="fe-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form-navbar').submit();" class="dropdown-item notify-item">
+                            <i class="fe-log-out"></i>
+                            <span> Déconnexion </span>
+                        </a>
+                        <form id="logout-form-navbar" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
+
+                    </div>
+                </li>
 
             {{-- Paramètres --}}
             <li class="dropdown notification-list">

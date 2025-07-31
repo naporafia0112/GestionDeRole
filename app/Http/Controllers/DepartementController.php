@@ -16,7 +16,7 @@ class DepartementController extends Controller
         $departements = Departement::with('directeur')->latest()->get();
 
         $directeurs = User::whereHas('roles', function ($query) {
-            $query->where('name', 'directeur');
+            $query->where('name', 'DIRECTEUR');
         })->get();
 
         return view('admin.CreationUtilisateur.departements.liste', compact('departements', 'directeurs'));

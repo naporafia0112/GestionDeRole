@@ -107,6 +107,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/directeur/formulaires', [FormulaireController::class, 'listeformulairesdirecteur'])->name('directeur.formulaires.liste');
     Route::get('/directeur/formulaires/{formulaire}', [FormulaireController::class, 'detailformdirecteur'])->name('directeur.formulaires.reponses');
     Route::get('/directeur/reponses/{reponse}', [FormulaireController::class, 'reponseDetail'])->name('directeur.reponses.details');
+    Route::get('/formulaires/archives', [FormulaireController::class, 'archives'])->name('formulaires.archives');
+    Route::patch('/formulaires/{formulaire}/archiver', [FormulaireController::class, 'archiver'])->name('formulaires.archiver');
+    Route::get('/formulaires/{formulaire}/edit', [FormulaireController::class, 'edit'])->name('formulaires.edit');
+    Route::put('/formulaires/{formulaire}', [FormulaireController::class, 'update'])->name('formulaires.update');
+
+
     });
 
     Route::get('/directeur/stages/en-cours', [StageController::class, 'stagesAvecTuteur'])->name('stages.en_cours');

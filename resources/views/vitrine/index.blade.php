@@ -9,7 +9,7 @@
 <!--img src="{{ asset('assets-vitrine/img/gif.gif') }}" alt="GIF animé" class="top-right-gif"-->
   <!-- GIF animé en fond -->
   <div class="animated-gif-background">
-    <img src="{{ asset('assets-vitrine/img/fond7.jpg') }}" alt="Background animation" class="gif-bg">
+    <img src="{{ asset('assets-vitrine/img/final.png') }}" alt="Background animation" class="gif-bg">
     <div class="color-overlay"></div>
   </div>
 

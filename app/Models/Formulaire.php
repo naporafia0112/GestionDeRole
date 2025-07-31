@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Formulaire extends Model
 {
-    protected $fillable = ['titre', 'id_departement', 'cree_par','stage_id'];
+    protected $fillable = ['titre', 'id_departement', 'cree_par','stage_id','est_archive'];
 
     public function champs()
     {

@@ -28,7 +28,7 @@ class FormulaireController extends Controller
             'champs.*.label' => ['required', 'string', 'max:255'],
             'champs.*.type' => ['required', Rule::in(['text', 'textarea', 'number', 'date', 'checkbox', 'select', 'file'])],
             'champs.*.requis' => ['nullable', 'boolean'],
-            'champs.*.options' => ['nullable', 'string'], // Pour checkbox ou select uniquement
+            'champs.*.options' => ['nullable', 'string'],
         ]);
 
 
@@ -49,12 +49,14 @@ class FormulaireController extends Controller
                 'options' => in_array($champ['type'], ['select', 'checkbox']) ? $champ['options'] ?? null : null,            ]);
         }
 
-        $tuteurs = User::where('id_departement', $user->id_departement)
-               ->where('role', 'tuteur') 
-               ->get();
+       $tuteurs = User::whereHas('roles', function ($query) {
+            $query->where('name', 'tuteur');
+        })
+        ->where('id_departement', $user->id_departement)
+        ->get();
 
         foreach ($tuteurs as $tuteur) {
-            $tuteur->notify(new NouveauFormulaireRapportNotification($formulaire)); 
+            $tuteur->notify(new NouveauFormulaireRapportNotification($formulaire));
         }
         return redirect()->route('directeur.formulaires.liste')->with('success', 'Formulaire créé avec succès.');
     }
@@ -65,7 +67,8 @@ class FormulaireController extends Controller
         $user = Auth::user();
 
         // Récupérer tous les formulaires créés pour le département du tuteur
-        $formulaires = Formulaire::where('id_departement', $user->id_departement)->get();
+        $formulaires = Formulaire::where('id_departement', $user->id_departement)
+        ->where('est_archive', false)->get();
 
         return view('admin.rapports.tuteur.affichageformulaire', compact('formulaires'));
     }
@@ -140,7 +143,9 @@ class FormulaireController extends Controller
     {
         $user = Auth::user();
 
-        $formulaires = Formulaire::where('cree_par', $user->id)->get();
+        $formulaires = Formulaire::where('cree_par', $user->id)
+        ->where('est_archive', false)
+        ->get();
 
         return view('admin.rapports.directeur.liste', compact('formulaires'));
     }
@@ -150,9 +155,7 @@ class FormulaireController extends Controller
         $user = Auth::user();
         abort_if($formulaire->cree_par !== $user->id, 403);
 
-        $formulaire->load(['reponses.tuteur', 'champs', 'reponses.stage.candidature.candidat']); // charger stage avec réponses
-
-        // Ajout d'un attribut 'valide' sur chaque réponse
+        $formulaire->load(['reponses.tuteur', 'champs', 'reponses.stage.candidature.candidat']);
         foreach ($formulaire->reponses as $reponse) {
             $reponse->valide = $reponse->stage ? (bool) $reponse->stage->est_valide : false;
         }
@@ -173,6 +176,53 @@ class FormulaireController extends Controller
         return view('admin.rapports.directeur.reponse-detail', compact('reponse'));
     }
 
+    public function archiver(Formulaire $formulaire)
+    {
+        $formulaire->update(['est_archive' => true]);
+        return redirect()->back()->with('success', 'Formulaire archivé avec succès.');
+    }
+
+    public function archives()
+    {
+        $formulaires = Formulaire::where('est_archive', true)->latest()->get();
+        return view('admin.rapports.directeur.archives', compact('formulaires'));
+    }
+
+    public function edit(Formulaire $formulaire)
+    {
+        return view('admin.rapports.directeur.modifier', compact('formulaire'));
+    }
+    public function update(Request $request, Formulaire $formulaire)
+    {
+        $request->validate([
+            'titre' => ['required', 'string', 'max:255'],
+            'champs' => ['required', 'array'],
+            'champs.*.label' => ['required', 'string', 'max:255'],
+            'champs.*.type' => ['required', Rule::in(['text', 'textarea', 'number', 'date', 'checkbox', 'select', 'file'])],
+            'champs.*.requis' => ['nullable', 'boolean'],
+            'champs.*.options' => ['nullable', 'string'],
+        ]);
+
+        $formulaire->update([
+            'titre' => $request->titre,
+        ]);
+
+        // Supprimer les anciens champs
+        $formulaire->champs()->delete();
+
+        // Recréer les nouveaux champs
+        foreach ($request->champs as $champ) {
+            ChampFormulaire::create([
+                'formulaire_id' => $formulaire->id,
+                'label' => $champ['label'],
+                'type' => $champ['type'],
+                'requis' => isset($champ['requis']),
+                'options' => in_array($champ['type'], ['select', 'checkbox']) ? $champ['options'] ?? null : null,
+            ]);
+        }
+
+        return redirect()->route('formulaires.archives')->with('success', 'Formulaire mis à jour avec succès.');
+    }
 
 
-}
+    }
