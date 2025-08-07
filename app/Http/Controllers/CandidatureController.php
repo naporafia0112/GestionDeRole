@@ -247,14 +247,15 @@ TÂCHE:
 1. Analyse chaque CV individuellement
 2. Attribue un score de 0 à 100 (entier)
 3. Classe les candidats par score décroissant
-4. Retiens les {$nbAReterenir} meilleurs comme "selectionnes"
+4. Retiens uniquement les candidats ayant un score strictement supérieur à 80 dans "selectionnes"
 5. Classe les autres comme "rejetes"
 6. Écris un commentaire court (max 100 caractères) pour chaque candidat
 
 CVS À ANALYSER:
 {$cvContent}
-    Règles obligatoires :
-- Ne jamais inclure un score < 50 dans "selectionnes".
+
+Règles obligatoires :
+- Ne jamais inclure dans "selectionnes" un candidat avec un score ≤ 80.
 - Le champ "commentaire" doit toujours être une phrase complète.
 - Le total des candidats dans "selectionnes" + "rejetes" doit égaler le nombre total d’entrées fournies.
 
