@@ -44,7 +44,7 @@
                         </div>
                          <div class="text-end">
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <a href="{{ route('rh.stages.termines') }}" class="btn btn-light">Annuler</a>
+                        <a href="{{ route('rh.stages.en_cours') }}" class="btn btn-light">Annuler</a>
                         </div>
                     </form>
 

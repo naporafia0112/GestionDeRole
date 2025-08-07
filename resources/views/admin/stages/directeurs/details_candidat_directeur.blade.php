@@ -206,7 +206,7 @@
 
     .progress-bar .bg-gradient {
     height: 100%;
-    background-color: #10b981; /* vert */
+    background-color: #10b981;
     width: 0; /* sera modifié en inline style */
     transition: width 0.4s ease;
     border-radius: 10px 0 0 10px; /* arrondir côté gauche seulement */

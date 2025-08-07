@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\candidatureSpontanee;
 use Illuminate\Support\Collection;
 use App\Models\Role;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
 {
@@ -201,6 +202,15 @@ class DashboardController extends Controller
         'usersParMois'
     ));
 
+    }
+
+    public function exportGraph(Request $request)
+    {
+        $chartImages = json_decode($request->input('chart_images'), true);
+
+        return Pdf::loadView('admin.rapports.graph-pdf', compact('chartImages'))
+                ->setPaper('a4', 'portrait')
+                ->download('graphes-exportes.pdf');
     }
 
     public function dashboardDirecteur(Request $request)

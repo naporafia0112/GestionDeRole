@@ -22,7 +22,7 @@ class OffreController extends Controller
                 'statut' => 'publie',
             ]);
 
-        $offres = Offre::with('localisation')->orderByDesc('created_at')->paginate(5);
+        $offres = Offre::with('localisation')->orderByDesc('created_at')->get();
         return view('admin.offres.index', compact('offres'));
     }
 

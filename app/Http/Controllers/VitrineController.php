@@ -14,9 +14,14 @@ class VitrineController extends Controller
      */
     public function index()
     {
-        $offres = Offre::where('est_publie', true)->latest()->get();
+        $offres = Offre::where('est_publie', true)
+                        ->latest()
+                        ->take(5)
+                        ->get();
+
         return view('vitrine.index', compact('offres'));
     }
+
 
     public function catalogue()
     {

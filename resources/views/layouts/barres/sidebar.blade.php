@@ -53,8 +53,12 @@
                                 <li><a href="{{ route('user.index') }}">Utilisateurs</a></li>
                             </ul>
                         </div>
-                        <li><a href="{{ route('departements.index') }}"><i data-feather="grid"></i> <span>Départements </span></a></li>
                     </li>
+                    <li><a href="{{ route('departements.index') }}"><i data-feather="grid"></i> <span>Départements </span></a></li>
+                    <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Exports </span></a></li>
+
+
+
 
                 @elseif (Auth::user()->hasRole('RH'))
                     <li class="menu-title">RH</li>
@@ -85,7 +89,7 @@
                     <li><a href="{{ route('stages.rh.candidats_en_stage') }}"><i data-feather="list"></i> <span> Liste Candidats </span></a></li>
                     <li><a href="{{ route('entretiens.liste') }}"><i data-feather="file"></i> <span> Liste Entretiens </span></a></li>
                     <li><a href="{{ route('rapport.form') }}"><i data-feather="bar-chart-2"></i> <span> Synthèse </span></a></li>
-                    <li><a href="#"><i data-feather="activity"></i> <span> Attestation </span></a></li>
+                    <li><a href="{{ route('attestations.liste') }}"><i data-feather="activity"></i> <span> Attestation </span></a></li>
 
                 @elseif (Auth::user()->hasRole('DIRECTEUR'))
                     <li class="menu-title">DIRECTEUR</li>

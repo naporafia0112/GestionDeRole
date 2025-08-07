@@ -99,5 +99,10 @@ class Stage extends Model
 
         return null;
     }
+    public function attestation()
+    {
+        return $this->hasOne(Attestation::class);
+    }
+
 
 }

@@ -24,74 +24,37 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             $user = Auth::user();
-
             $nombreStagesAttente = 0;
             $notifications = [];
 
             if ($user) {
+                // Liste des notifications non lues pour tous les rôles
+                $unreadNotifications = $user->unreadNotifications;
 
-                // Notifications et compteurs pour le DIRECTEUR
+                // Si le rôle est DIRECTEUR, on ajoute une logique spécifique
                 if ($user->hasRole('DIRECTEUR')) {
-                    // Nombre de stages sans tuteur dans son département
                     $nombreStagesAttente = Stage::whereNull('id_tuteur')
                         ->where('id_departement', $user->id_departement)
                         ->count();
-
-                    // Notifications non lues du directeur
-                    $notifications = $user->unreadNotifications->map(function ($notif) {
-                        return [
-                            'id' => $notif->id,
-                            'title' => $notif->data['title'] ?? 'Notification',
-                            'message' => $notif->data['message'] ?? '',
-                            'icon' => $notif->data['icon'] ?? 'mdi mdi-bell-outline',
-                            'bg' => $notif->data['bg'] ?? 'bg-primary',
-                            'link' => $notif->data['link'] ?? '#',
-                            'time' => $notif->created_at->diffForHumans(),
-                            'unread' => is_null($notif->read_at),
-                            'created_at' => $notif->created_at,
-                        ];
-                    })->toArray();
                 }
 
-                // Notifications pour le RH
-                elseif ($user->hasRole('RH')) {
-                    // Par exemple, compter les candidatures en attente
-                    // ou toute autre logique spécifique au RH
-
-                    // Exemple : Récupérer toutes ses notifications non lues
-                    $notifications = $user->unreadNotifications->map(function ($notif) {
-                        return [
-                            'id' => $notif->id,
-                            'title' => $notif->data['title'] ?? 'Notification',
-                            'message' => $notif->data['message'] ?? '',
-                            'icon' => $notif->data['icon'] ?? 'mdi mdi-bell-outline',
-                            'bg' => $notif->data['bg'] ?? 'bg-primary',
-                            'link' => $notif->data['link'] ?? '#',
-                            'time' => $notif->created_at->diffForHumans(),
-                            'unread' => is_null($notif->read_at),
-                            'created_at' => $notif->created_at,
-                        ];
-                    })->toArray();
-                }
-                elseif ($user->hasRole('TUTEUR')) {
-                    $notifications = $user->unreadNotifications->map(function ($notif) {
-                        return [
-                            'id' => $notif->id,
-                            'title' => $notif->data['title'] ?? 'Notification',
-                            'message' => $notif->data['message'] ?? '',
-                            'icon' => $notif->data['icon'] ?? 'mdi mdi-bell-outline',
-                            'bg' => $notif->data['bg'] ?? 'bg-success',
-                            'link' => $notif->data['link'] ?? '#',
-                            'time' => $notif->created_at->diffForHumans(),
-                            'unread' => is_null($notif->read_at),
-                            'created_at' => $notif->created_at,
-                        ];
-                    })->toArray();
-                }
-
+                // Formatage des notifications
+                $notifications = $unreadNotifications->map(function ($notif) use ($user) {
+                    return [
+                        'id' => $notif->id,
+                        'title' => $notif->data['title'] ?? 'Notification',
+                        'message' => $notif->data['message'] ?? '',
+                        'icon' => $notif->data['icon'] ?? 'mdi mdi-bell-outline',
+                        'bg' => $notif->data['bg'] ?? ($user->hasRole('TUTEUR') ? 'bg-success' : 'bg-primary'),
+                        'link' => $notif->data['link'] ?? '#',
+                        'time' => $notif->created_at->diffForHumans(),
+                        'unread' => is_null($notif->read_at),
+                        'created_at' => $notif->created_at,
+                    ];
+                })->toArray();
             }
 
-            // Envoie les données à toutes les vues
+            // Partage des données avec toutes les vues
             $view->with([
                 'nombreStagesAttente' => $nombreStagesAttente,
                 'notifications' => $notifications,

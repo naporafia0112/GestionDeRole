@@ -71,7 +71,7 @@ class UserController extends Controller
             'email'           => "required|email|unique:users,email,{$user->id}",
             'roles'           => 'required|array',
             'roles.*'         => 'exists:roles,id',
-            'id_departement'  => 'nullable|exists:departements,id',
+            'id_departement'  => 'required|exists:departements,id',
         ]);
 
         $user->update([
@@ -106,6 +106,19 @@ class UserController extends Controller
         $permissions = array_unique($permissions);
 
         return view('admin.CreationUtilisateur.user.show', compact('user', 'roles', 'permissions'));
+    }
+
+    public function toggleActive(User $user)
+    {
+        // Empêcher un utilisateur de se désactiver lui-même
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+        }
+
+        $user->active = !$user->active;
+        $user->save();
+
+        return redirect()->back()->with('success', 'Le statut du compte a été mis à jour.');
     }
 
 

@@ -51,81 +51,87 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($candidatures as $loopIndex => $c)
+                         @if($candidatures->isEmpty())
                             <tr>
-                                <td>{{ $loopIndex + 1 }}</td>
-                                <td><strong>{{ $c->candidat->nom }} {{ $c->candidat->prenoms }}</strong></td>
-                                <td>
-                                    <div>{{ $c->candidat->email }}</div>
-                                    <div>{{ $c->candidat->telephone }}</div>
-                                </td>
-                                <td>{{ $c->candidat->ville }} / {{ $c->candidat->quartier }}</td>
-                               <td>
-                                     <span class="badge bg-{{ $labels[$c->statut] ?? 'secondary' }} rounded-pill">
-                                        {{ \App\Models\CandidatureSpontanee::STATUTS[$c->statut] ?? ucfirst($c->statut) }}
-                                    </span>
-                                </td>
-
-                                <td>{{ $c->created_at->format('d/m/Y H:i') }}</td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center">
-                                        <a href="{{ route('candidatures.spontanees.show', $c->id) }}" class="btn btn-sm btn-info ms-1" title="Voir">
-                                            <i class="fe-eye"></i>
-                                        </a>
-
-                                        {{--@if($c->statut !== 'retenu')
-                                            <form action="{{ route('candidatures.spontanees.retenir', $c->id) }}" method="POST" class="d-inline ms-1 confirm-action" data-message="Retenir cette candidature ?">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button class="btn btn-sm btn-outline-warning" title="Retenir">
-                                                    <i class="mdi mdi-star-outline"></i>
-                                                </button>
-                                            </form>
-                                        @endif
-                                        <form action="{{ route('candidatures.spontanees.valider', $c->id) }}" method="POST" class="d-inline ms-1 confirm-action" data-message="Valider cette candidature ?">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button class="btn btn-sm btn-outline-success" title="Valider" {{ $c->statut !== 'retenu' ? 'disabled' : '' }}>
-                                                <i class="mdi mdi-check-circle-outline"></i>
-                                            </button>
-                                        </form>
-
-                                        <form action="{{ route('candidatures.spontanees.rejeter', $c->id) }}" method="POST" class="d-inline ms-1 confirm-action" data-message="Rejeter cette candidature ?">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button class="btn btn-sm btn-outline-danger" title="Rejeter">
-                                                <i class="mdi mdi-close-circle-outline"></i>
-                                            </button>
-                                        </form>--}}
-                                        @if($c->statut === 'reçue')
-                                            <form action="{{ route('candidatures.spontanees.retenir', $c->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer la retenue ?">
-                                                @csrf @method('PATCH')
-                                                <button class="btn btn-sm btn-outline-success ms-1" title="Retenir"><i class="mdi mdi-check-circle-outline"></i></button>
-                                            </form>
-                                            <form action="{{ route('candidatures.spontanees.rejeter', $c->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer le rejet ?">
-                                                @csrf @method('PATCH')
-                                                <button class="btn btn-sm btn-outline-danger ms-1" title="Rejeter"><i class="mdi mdi-close-circle-outline"></i></button>
-                                            </form>
-                                        @endif
-
-                                        @if($c->statut === 'retenu' && !$c->a_un_entretien_effectue)
-                                            <a href="{{ route('entretiens.slots.page', ['id_candidat' => $c->candidat->id]) }}" class="btn btn-sm btn-outline-info ms-1" title="Choisir un créneau">
-                                                <i class="mdi mdi-calendar-check-outline"></i>
-                                            </a>
-                                        @endif
-                                        @if($c->statut === 'retenu' && $c->a_un_entretien_effectue)
-                                            <form method="POST" action="{{ route('candidatures.spontanees.valider', $c->id)}}" class="d-inline ms-1">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button class="btn btn-sm btn-success confirm-validate" title="Valider">
-                                                    <i class="mdi mdi-check"></i>
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </td>
+                                <td colspan="7" class="text-center text-muted">Aucune donnée</td>
                             </tr>
-                        @endforeach
+                        @else
+                            @foreach ($candidatures as $loopIndex => $c)
+                                <tr>
+                                    <td>{{ $loopIndex + 1 }}</td>
+                                    <td><strong>{{ $c->candidat->nom }} {{ $c->candidat->prenoms }}</strong></td>
+                                    <td>
+                                        <div>{{ $c->candidat->email }}</div>
+                                        <div>{{ $c->candidat->telephone }}</div>
+                                    </td>
+                                    <td>{{ $c->candidat->ville }} / {{ $c->candidat->quartier }}</td>
+                                <td>
+                                        <span class="badge bg-{{ $labels[$c->statut] ?? 'secondary' }} rounded-pill">
+                                            {{ \App\Models\CandidatureSpontanee::STATUTS[$c->statut] ?? ucfirst($c->statut) }}
+                                        </span>
+                                    </td>
+
+                                    <td>{{ $c->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center">
+                                            <a href="{{ route('candidatures.spontanees.show', $c->id) }}" class="btn btn-sm btn-info ms-1" title="Voir">
+                                                <i class="fe-eye"></i>
+                                            </a>
+
+                                            {{--@if($c->statut !== 'retenu')
+                                                <form action="{{ route('candidatures.spontanees.retenir', $c->id) }}" method="POST" class="d-inline ms-1 confirm-action" data-message="Retenir cette candidature ?">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button class="btn btn-sm btn-outline-warning" title="Retenir">
+                                                        <i class="mdi mdi-star-outline"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            <form action="{{ route('candidatures.spontanees.valider', $c->id) }}" method="POST" class="d-inline ms-1 confirm-action" data-message="Valider cette candidature ?">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button class="btn btn-sm btn-outline-success" title="Valider" {{ $c->statut !== 'retenu' ? 'disabled' : '' }}>
+                                                    <i class="mdi mdi-check-circle-outline"></i>
+                                                </button>
+                                            </form>
+
+                                            <form action="{{ route('candidatures.spontanees.rejeter', $c->id) }}" method="POST" class="d-inline ms-1 confirm-action" data-message="Rejeter cette candidature ?">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button class="btn btn-sm btn-outline-danger" title="Rejeter">
+                                                    <i class="mdi mdi-close-circle-outline"></i>
+                                                </button>
+                                            </form>--}}
+                                            @if($c->statut === 'reçue')
+                                                <form action="{{ route('candidatures.spontanees.retenir', $c->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer la retenue ?">
+                                                    @csrf @method('PATCH')
+                                                    <button class="btn btn-sm btn-outline-success ms-1" title="Retenir"><i class="mdi mdi-check-circle-outline"></i></button>
+                                                </form>
+                                                <form action="{{ route('candidatures.spontanees.rejeter', $c->id) }}" method="POST" class="d-inline confirm-action" data-message="Confirmer le rejet ?">
+                                                    @csrf @method('PATCH')
+                                                    <button class="btn btn-sm btn-outline-danger ms-1" title="Rejeter"><i class="mdi mdi-close-circle-outline"></i></button>
+                                                </form>
+                                            @endif
+
+                                            @if($c->statut === 'retenu' && !$c->a_un_entretien_effectue)
+                                                <a href="{{ route('entretiens.slots.page', ['id_candidat' => $c->candidat->id]) }}" class="btn btn-sm btn-outline-info ms-1" title="Choisir un créneau">
+                                                    <i class="mdi mdi-calendar-check-outline"></i>
+                                                </a>
+                                            @endif
+                                            @if($c->statut === 'retenu' && $c->a_un_entretien_effectue)
+                                                <form method="POST" action="{{ route('candidatures.spontanees.valider', $c->id)}}" class="d-inline ms-1">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button class="btn btn-sm btn-success confirm-validate" title="Valider">
+                                                        <i class="mdi mdi-check"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
             </div>

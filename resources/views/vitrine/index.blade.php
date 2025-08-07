@@ -108,7 +108,6 @@ Nous vous souhaitons plein succès dans votre recherche de stage !</p>
         </div>
       @endforelse
     </div>
-
   </div>
 </section>
 @endsection

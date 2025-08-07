@@ -196,6 +196,7 @@
     .progress-bar.bg-gradient {
         background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         transition: width 0.4s ease;
+        background-color: #f81e6e;
     }
 
     .empty-state {

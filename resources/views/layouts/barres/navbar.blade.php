@@ -38,7 +38,7 @@
                     <!-- Notifications list -->
                     <div class="noti-scroll" data-simplebar style="max-height: 300px;">
                         @forelse ($notifications as $notif)
-                            <a href="#" class="dropdown-item notify-item @if(isset($notif['unread']) && $notif['unread']) active @endif">
+                            <a href="{{ route('notifications.read', $notif['id']) }}" class="dropdown-item notify-item @if(isset($notif['unread']) && $notif['unread']) active @endif">
                                 <div class="notify-icon {{ $notif['bg'] ?? 'bg-primary' }}">
                                     @if(isset($notif['image']))
                                         <img src="{{ asset($notif['image']) }}" class="img-fluid rounded-circle" alt="" />
@@ -203,13 +203,18 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const notifIcon = document.querySelector('.notification-list .nav-link');
-        const badge = document.getElementById('notif-badge');
-
-        if (notifIcon && badge) {
-            notifIcon.addEventListener('click', function () {
-                badge.style.display = 'none'; // Cache le badge
-            });
-        }
+    document.querySelectorAll('.notify-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+            const badge = document.getElementById('notif-badge');
+            if (badge) {
+                let count = parseInt(badge.textContent.trim());
+                if (count > 1) {
+                    badge.textContent = count - 1;
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        });
     });
+});
 </script>

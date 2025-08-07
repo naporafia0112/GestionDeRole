@@ -221,7 +221,7 @@ class FormulaireController extends Controller
             ]);
         }
 
-        return redirect()->route('formulaires.archives')->with('success', 'Formulaire mis à jour avec succès.');
+        return redirect()->route('directeur.formulaires.liste')->with('success', 'Formulaire mis à jour avec succès.');
     }
 
 

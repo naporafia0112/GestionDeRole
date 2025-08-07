@@ -46,6 +46,7 @@
                                     <i data-feather="file-text" class="feather-sm me-1"></i> Voir reponses
                                 </a>
 
+                                {{-- Boutons d'action pour modifier et archiver --}}
                                 <a href="{{ route('formulaires.edit', $formulaire) }}" class="btn btn-warning btn-sm" title="Modifier le formulaire">
                                     <i data-feather="edit" class="feather-sm me-1"></i>
                                 </a>

@@ -35,7 +35,7 @@ class ReponseFormulaireSoumise extends Notification
             ->line('Merci.');
     }
 
-    public function toArray($notifiable)
+    public function toDatabase($notifiable)
     {
         return [
             'title' => 'Réponse au formulaire',
@@ -43,6 +43,11 @@ class ReponseFormulaireSoumise extends Notification
             'etudiant' => $this->reponse->user->nom . ' ' . $this->reponse->user->prenoms,
             'formulaire_id' => $this->reponse->formulaire->id,
             'reponse_id' => $this->reponse->id,
+            'link' => route('directeur.formulaires.reponses', $this->reponse->formulaire->id),
+            'icon' => 'mdi mdi-file-document',
+            'bg' => 'bg-success',
+            'created_at' => now()->toDateTimeString(),
         ];
     }
+
 }

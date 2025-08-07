@@ -12,6 +12,8 @@ use App\Models\Candidat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use App\Mail\TuteurAffecteMail;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StageCreeMail;
@@ -172,11 +174,17 @@ class StageController extends Controller
         }
 
         // Envoi du mail au candidat
+        // Envoi du mail au candidat
         if ($candidat && !empty($candidat->email)) {
-            Mail::to($candidat->email)->send(new \App\Mail\StageCreeMail($candidat, $stage));
+            try {
+                Mail::to($candidat->email)->send(new \App\Mail\StageCreeMail($candidat, $stage));
+            } catch (\Exception $e) {
+                Log::error("Erreur lors de l'envoi du mail de stage à {$candidat->email} : " . $e->getMessage());
+            }
         }
 
-        return redirect()->route('rh.stages.en_cours')->with('success', 'Stage créé avec succès, notification envoyée au directeur, et mail envoyé au candidat.');
+
+        return redirect()->route('rh.stages.attente_tuteur')->with('success', 'Stage créé avec succès, notification envoyée au directeur, et mail envoyé au candidat.');
     }
 
 
@@ -303,8 +311,13 @@ class StageController extends Controller
 
         // On suppose que la relation "candidature" existe dans le modèle Stage
         $candidature = $stage->candidature;
-
-        Mail::to($tuteur->email)->send(new TuteurAffecteMail($tuteur, $candidature));
+        if (!empty($tuteur->email)) {
+            try {
+                Mail::to($tuteur->email)->send(new TuteurAffecteMail($tuteur, $candidature));
+            } catch (\Exception $e) {
+                Log::error("Erreur lors de l'envoi du mail d'affectation au tuteur {$tuteur->email} : " . $e->getMessage());
+            }
+        }
 
         return redirect()->route('stages.en_cours')->with('success', 'Tuteur affecté avec succès.');
     }
@@ -352,8 +365,9 @@ class StageController extends Controller
 
         $stage->update($data);
 
-        return redirect()->route('rh.stages.en_cours', $stage->id)
-            ->with('success', 'Le stage a été terminé avec succès.');
+       return redirect()->route('attestations.create', ['stage_id' => $stage->id])
+            ->with('success', 'Le stage a été terminé avec succès. Générer une attestation.');
+
     }
 
     /**
@@ -714,7 +728,7 @@ class StageController extends Controller
             $aujourdHui = Carbon::today();
 
             $total = $dateDebut->diffInDays($dateFin);
-            $ecoules = $dateDebut->diffInDays(min($aujourdHui, $dateFin));
+            $ecoules = $dateDebut->diffInDays($aujourdHui > $dateFin ? $dateFin : $aujourdHui);
 
             $progression = $total > 0 ? round(($ecoules / $total) * 100) : 0;
         }
@@ -851,7 +865,9 @@ class StageController extends Controller
         }
 
         $candidats = $query->get();
-
+         if ($candidats->isEmpty()) {
+        return redirect()->back()->with('no_data', 'Aucune donnée à exporter en Word.');
+    }
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
         $section->addText("Liste des candidats", ['bold' => true, 'size' => 16]);
@@ -899,6 +915,9 @@ class StageController extends Controller
         }
 
         $candidats = $query->get();
+        if ($candidats->isEmpty()) {
+        return redirect()->back()->with('no_data', 'Aucune donnée à imprimer.');
+    }
 
        return view('admin.rapports.candidats-print', compact('candidats'));
     }

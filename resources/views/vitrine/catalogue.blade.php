@@ -23,7 +23,7 @@
             @forelse($offres as $offre)
                 <div class="col-md-12">
                     <div class="card border-0 rounded-4 overflow-hidden shadow-sm h-100 hover-effect">
-                        <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-start" style="background-color: #ffffff;">
+                        <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-start" style="background-color: #eaf6ff;;">
                             <div class="me-3 flex-grow-1">
                                 <div class="d-flex align-items-center mb-2">
                                     <h5 class="card-title mb-0 fw-bold" style="color: #2c3e50;">

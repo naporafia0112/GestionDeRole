@@ -36,7 +36,7 @@ class NouveauFormulaireRapportNotification extends Notification
     {
         return [
             'formulaire_id' => $this->formulaire->id,
-            'titre' => $this->formulaire->titre,
+            'title' => $this->formulaire->titre,
             'message' => 'Un nouveau formulaire de rapport a été créé.',
         ];
     }

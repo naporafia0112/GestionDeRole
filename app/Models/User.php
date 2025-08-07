@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'id_departement',
         'must_change_password',
+        'active',
     ];
 
     protected $hidden = [
@@ -98,5 +99,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Stage::class, 'id_tuteur');
     }
-    
+
 }

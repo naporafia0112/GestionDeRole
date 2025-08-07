@@ -19,7 +19,8 @@ use App\Http\Controllers\{
     CandidatureSpontaneeController,
     PermissionController,
     PasswordChangeController,
-    NotificationController
+    NotificationController,
+    AttestationController
 };
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjetCreateMail;
@@ -45,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/directeur', [DashboardController::class, 'dashboardDirecteur'])->name('dashboard.directeur');
     Route::get('/dashboard/rh', [DashboardController::class, 'dashboardRH'])->name('dashboard.RH');
     Route::get('/dashboard/tuteur', [DashboardController::class, 'dashboardTuteur'])->name('dashboard.tuteur');
+    Route::post('/admin/export-graphes', [DashboardController::class, 'exportGraph'])->name('graph.export');
 
     // Profil utilisateur
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -112,7 +114,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/formulaires/{formulaire}/edit', [FormulaireController::class, 'edit'])->name('formulaires.edit');
     Route::put('/formulaires/{formulaire}', [FormulaireController::class, 'update'])->name('formulaires.update');
 
-
     });
 
     Route::get('/directeur/stages/en-cours', [StageController::class, 'stagesAvecTuteur'])->name('stages.en_cours');
@@ -157,6 +158,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rapports/export', [RapportController::class, 'form'])->name('rapport.form');
     Route::get('/rapports/generer', [RapportController::class, 'generer'])->name('rapport.generer');
 
+
     // Routes Entretiens accessibles uniquement aux RH et ADMIN
     Route::middleware(['role:RH,ADMIN'])->prefix('entretiens')->name('entretiens.')->group(function () {
         Route::get('/', [EntretienController::class, 'index'])->name('index');
@@ -188,12 +190,24 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('user', UserController::class);
-
+        Route::patch('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('user.toggleActive');
         Route::resource('departements', DepartementController::class)->except(['show', 'edit', 'create']);
     });
 
     Route::get('/cv/analyze', [CVAnalyzerController::class, 'form'])->name('cv.form');
     Route::post('/cv/analyze', [CVAnalyzerController::class, 'analyze'])->name('cv.analyze');
+
+    // Routes pour les attestations
+
+    Route::prefix('attestations')->name('attestations.')->group(function () {
+    Route::get('/liste', [AttestationController::class, 'index'])->name('liste');
+    Route::get('/create', [AttestationController::class, 'create'])->name('create');
+    Route::post('/', [AttestationController::class, 'store'])->name('store');
+    Route::get('/{attestation}', [AttestationController::class, 'show'])->name('show');
+    Route::get('/{attestation}/pdf', [AttestationController::class, 'exportPDF'])->name('export.pdf');
+    Route::get('/{attestation}/word', [AttestationController::class, 'exportWord'])->name('export.word');
+});
+
 
 });
 
@@ -217,11 +231,12 @@ Route::get('/test-mail', function () {
 
     return "Email envoyé avec succès !";
 });
-
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 Route::get('/changer-mot-de-passe', [PasswordChangeController::class, 'edit'])->name('password.change.form');
 Route::put('/changer-mot-de-passe', [PasswordChangeController::class, 'update'])->name('password.change.update');
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
 
 // Auth routes (login, logout, register, reset, etc.)
 require __DIR__ . '/auth.php';

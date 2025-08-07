@@ -19,30 +19,29 @@
                     </div>
                 </div>
             </div>
+             <div class="row">
+                <!-- FILTRE STATUT -->
+                <div class="col-6 mb-3">
+                    <label for="filterStatut" class="form-label"><strong>Filtrer par statut :</strong></label>
+                    <select id="filterStatut" class="form-select" style="max-width: 300px;">
+                        <option value="" selected>Tous</option>
+                        <option value="prevu">Prévu</option>
+                        <option value="annule">Annulé</option>
+                        <option value="encours">En cours</option>
+                        <option value="effectuee">Effectuée</option>
+                        <option value="termine">Terminé</option>
+                    </select>
+                </div>
 
-            <!-- FILTRE STATUT -->
-            <div class="mb-3">
-                <label for="filterStatut" class="form-label"><strong>Filtrer par statut :</strong></label>
-                <select id="filterStatut" class="form-select" style="max-width: 300px;">
-                    <option value="" selected>Tous</option>
-                    <option value="prevu">Prévu</option>
-                    <option value="annule">Annulé</option>
-                    <option value="encours">En cours</option>
-                    <option value="effectuee">Effectuée</option>
-                    <option value="termine">Terminé</option>
-                </select>
-                <span class="badge bg-secondary ms-2" id="count-statut"></span>
-            </div>
-
-            <!-- FILTRE TYPE -->
-            <div class="mb-3">
-                <label for="filterType" class="form-label"><strong>Filtrer par type de candidature :</strong></label>
-                <select id="filterType" class="form-select" style="max-width: 300px;">
-                    <option value="" selected>Tous</option>
-                    <option value="offre">Offre</option>
-                    <option value="spontanee">Spontanée</option>
-                </select>
-                <span class="badge bg-secondary ms-2" id="count-type"></span>
+                <!-- FILTRE TYPE -->
+                <div class="col-6 mb-3">
+                    <label for="filterType" class="form-label"><strong>Filtrer par type de candidature :</strong></label>
+                    <select id="filterType" class="form-select" style="max-width: 300px;">
+                        <option value="" selected>Tous</option>
+                        <option value="offre">Offre</option>
+                        <option value="spontanee">Spontanée</option>
+                    </select>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -83,6 +82,7 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 <link href="{{ asset('assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
 @endpush
 
 @push('scripts')
@@ -95,6 +95,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
 
 <script>
 $(document).ready(function () {
@@ -106,16 +107,15 @@ $(document).ready(function () {
         buttons: [
             {
                 extend: 'pdfHtml5',
-                className: 'btn btn-sm btn-danger',
+                className: 'btn btn-sm btn-danger me-2',
                 text: '<i class="mdi mdi-file-pdf"></i> Exporter en PDF',
                 orientation: 'landscape',
                 pageSize: 'A4',
                 exportOptions: {
-                    modifier: {
-                        search: 'applied',
-                        order: 'applied'
-                    },
-                    columns: ':visible'
+                    columns: ':visible',
+                    rows: function (idx, data, node) {
+                        return $(node).is(':visible');
+                    }
                 },
                 customize: function (doc) {
                     doc.styles.title = {
@@ -133,7 +133,6 @@ $(document).ready(function () {
 
                     const contentTable = doc.content.find(item => item.table);
                     if (contentTable) {
-                        // Centrer le texte de chaque cellule
                         contentTable.table.body.forEach(row => {
                             row.forEach(cell => {
                                 if (typeof cell === 'object') {
@@ -141,23 +140,43 @@ $(document).ready(function () {
                                 }
                             });
                         });
-
-                        // Méthode simple et SÛRE pour centrer le tableau : alignement global
                         contentTable.alignment = 'center';
                     }
+                },
+                action: function(e, dt, button, config) {
+                    const visibleRows = dt.rows({ filter: 'applied' }).nodes().to$().filter(':visible').length;
+                    if (visibleRows === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Aucune donnée à exporter',
+                            text: 'Aucune ligne visible selon les filtres appliqués.',
+                        });
+                        return;
+                    }
+                    $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
                 }
-
             },
             {
                 extend: 'excelHtml5',
                 className: 'btn btn-sm btn-success',
                 text: '<i class="mdi mdi-file-excel"></i> Exporter en Excel',
                 exportOptions: {
-                    modifier: {
-                        search: 'applied',
-                        order: 'applied'
-                    },
-                    columns: ':visible'
+                    columns: ':visible',
+                    rows: function (idx, data, node) {
+                        return $(node).is(':visible');
+                    }
+                },
+                action: function(e, dt, button, config) {
+                    const visibleRows = dt.rows({ filter: 'applied' }).nodes().to$().filter(':visible').length;
+                    if (visibleRows === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Aucune donnée à exporter',
+                            text: 'Aucune ligne visible selon les filtres appliqués.',
+                        });
+                        return;
+                    }
+                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
                 }
             }
         ]
@@ -179,9 +198,7 @@ $(document).ready(function () {
         });
     }
 
-    $('#filterStatut, #filterType').on('change', function () {
-        filtrerTable();
-    });
+    $('#filterStatut, #filterType').on('change', filtrerTable);
 });
 </script>
 @endpush

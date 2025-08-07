@@ -36,7 +36,7 @@
 
                                 {{-- Nom du rôle --}}
                                 <div class="mb-3">
-                                    <label for="name" class="form-label">Nom du rôle</label>
+                                    <label for="name" class="form-label">Nom du rôle<span class="text-danger">*</span></label>
                                     <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror"
                                         placeholder="Ex: ADMIN, RH..." value="{{ old('name') }}" >
                                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror

@@ -159,6 +159,39 @@
         </div>
     </div>
 
+     <!-- Bouton d'export des graphiques -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <form id="exportForm" method="POST" action="{{ route('graph.export') }}">
+                @csrf
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Exporter des graphiques</h5>
+                        <p class="text-muted mb-2">Sélectionnez les graphiques à exporter :</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="selected_graphs[]" value="lineCandidatures" id="check1">
+                            <label class="form-check-label" for="check1">Candidatures reçues par mois</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="selected_graphs[]" value="chartOffresPubliees" id="check2">
+                            <label class="form-check-label" for="check2">Offres publiées par mois</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="selected_graphs[]" value="usersParMoisChart" id="check3">
+                            <label class="form-check-label" for="check3">Utilisateurs par mois</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="selected_graphs[]" value="stagesActivityChart" id="check4">
+                            <label class="form-check-label" for="check4">Activité des stages</label>
+                        </div>
+                        <!-- Ajoute d'autres si besoin -->
+                        <button type="submit" class="btn btn-danger mt-3">Exporter en PDF</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -220,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
     });
-    
+
     new Chart(document.getElementById('entretiensStatutChart'), {
         type: 'doughnut',
         data: {
@@ -229,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
     });
-    
+
     new Chart(document.getElementById('chartUsersRoles'), {
         type: 'pie',
         data: {
@@ -240,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // --- ANALYSE PAR DÉPARTEMENT ---
-    
+
     new Chart(document.getElementById('usersParDepartementChart'), {
         type: 'bar',
         data: {
@@ -283,4 +316,30 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<script>
+    document.getElementById('exportForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const selected = Array.from(document.querySelectorAll('input[name="selected_graphs[]"]:checked')).map(input => input.value);
+        const chartImages = [];
+
+        selected.forEach(id => {
+            const canvas = document.getElementById(id);
+            if (canvas) {
+                const img = canvas.toDataURL("image/png");
+                chartImages.push({ id, image: img });
+            }
+        });
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'chart_images';
+        input.value = JSON.stringify(chartImages);
+
+        this.appendChild(input);
+        this.submit();
+    });
+
+</script>
+
 @endpush

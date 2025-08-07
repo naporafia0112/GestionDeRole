@@ -21,4 +21,15 @@ class NotificationController extends Controller
         return view('emails.notification', compact('notifications'));
     }
 
+    public function markAsRead($id)
+    {
+        $notification = Auth::user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+
+        // Rediriger vers le lien de la notif ou une autre page
+        $redirectUrl = $notification->data['link'] ?? route('notifications.index');
+        return redirect($redirectUrl);
+    }
+
+
 }

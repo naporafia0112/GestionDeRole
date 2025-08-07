@@ -41,6 +41,8 @@
                                                     <tr>
                                                         <th>Nom</th>
                                                         <th>Email</th>
+                                                        <th>Statut</th>
+                                                        <th>Département</th>
                                                         <th style="width: 85px;">Action</th>
                                                     </tr>
                                                 </thead>
@@ -49,6 +51,14 @@
                                                     <tr>
                                                         <td>{{ $user->name }}</td>
                                                         <td>{{ $user->email }}</td>
+                                                        <td>
+                                                            @if($user->active)
+                                                                <span class="badge bg-success">Actif</span>
+                                                            @else
+                                                                <span class="badge bg-danger">Désactivé</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $user->departement ? $user->departement->nom : 'N/A' }}</td>
                                                         <td class="text-center">
                                                             <div class="col-sm-6 col-md-4 col-lg-3">
                                                                 <div class="d-flex gap-1">
@@ -65,6 +75,19 @@
                                                                         <i class="mdi mdi-delete"></i>
                                                                     </button>
 
+                                                                </form>
+                                                                <form id="toggle-active-form-{{ $user->id }}" action="{{ route('user.toggleActive', $user) }}" method="POST" style="display: inline;">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="button" class="btn btn-sm {{ $user->active ? 'btn-danger' : 'btn-success' }}"
+                                                                        onclick="confirmToggleActive({{ $user->id }}, {{ $user->active ? 1 : 0 }})"
+                                                                        title="{{ $user->active ? 'Désactiver' : 'Activer' }}">
+                                                                        @if($user->active)
+                                                                            <i class="mdi mdi-account-cancel"></i>
+                                                                        @else
+                                                                            <i class="mdi mdi-account-check"></i>
+                                                                        @endif
+                                                                    </button>
                                                                 </form>
                                                                 </div>
                                                             </div>
@@ -125,6 +148,26 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+    function confirmToggleActive(userId, isActive) {
+        const actionText = isActive ? 'désactiver' : 'activer';
+        const confirmButtonColor = isActive ? '#e3342f' : '#28a745';
+        const icon = isActive ? 'warning' : 'info';
+
+        Swal.fire({
+            title: `Confirmer ${actionText} ?`,
+            text: `Voulez-vous vraiment ${actionText} ce compte ?`,
+            icon: icon,
+            showCancelButton: true,
+            confirmButtonColor: confirmButtonColor,
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `Oui, ${actionText}`,
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('toggle-active-form-' + userId).submit();
             }
         });
     }

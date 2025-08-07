@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 
 class Entretien extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     public const TYPES = [
         'présentiel' => 'Présentiel',
@@ -84,7 +85,7 @@ class Entretien extends Model
             }
         }
 
-        return $this->statut; // fallback
+        return $this->statut;
     }
-
+    
 }

@@ -8,6 +8,11 @@ use App\Models\Offre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use App\Http\Requests\EntretienRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use App\Http\Controllers\Controller;
 use App\Mail\EntretienCreeMail;
 use Illuminate\Support\Facades\Mail;
 class EntretienController extends Controller
@@ -148,9 +153,14 @@ class EntretienController extends Controller
         $candidat = Candidat::find($request->id_candidat);
 
         if ($candidat && !empty($candidat->email)) {
-            Mail::to($candidat->email)->send(new EntretienCreeMail($candidat, $entretien));
+            try {
+                Mail::to($candidat->email)->send(new EntretienCreeMail($candidat, $entretien));
+            } catch (\Exception $e) {
+                Log::error("Erreur lors de l'envoi du mail d'entretien à {$candidat->email} : " . $e->getMessage());
+            }
         }
 
+            // Redirection avec succès
 
         return redirect()->route('entretiens.calendrier')
                 ->with('success', 'Entretien créé avec succès !');

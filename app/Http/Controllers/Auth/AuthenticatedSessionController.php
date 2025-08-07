@@ -30,10 +30,17 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
+        if (!$user->active) {
+            Auth::logout();
+            return redirect('/login')->withErrors([
+                'email' => 'Votre compte est désactivé. Contactez un administrateur.',
+            ]);
+        }
+
          if ($user->must_change_password) {
             return redirect()->route('password.change.form');
         }
-       $redirectRoutes = [
+        $redirectRoutes = [
             'ADMIN' => 'dashboard',
             'RH' => 'dashboard.RH',
             'DIRECTEUR' => 'dashboard.directeur',

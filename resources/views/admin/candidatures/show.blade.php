@@ -131,7 +131,7 @@
                             @if($candidature->entretien)
                                 @if($candidature->entretien->statut === 'effectuee')
                                     <span class="badge bg-success">Effectué</span>
-                                @elseif($candidature->entretien->statut === 'programme')
+                                @elseif($candidature->entretien->statut === 'prevu')
                                     <span class="badge bg-warning text-dark">Programmé</span>
                                 @else
                                     <span class="badge bg-secondary">{{ ucfirst($candidature->entretien->statut) }}</span>

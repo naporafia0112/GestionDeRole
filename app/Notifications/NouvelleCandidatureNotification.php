@@ -24,12 +24,13 @@ class NouvelleCandidatureNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'titre' => 'Nouvelle candidature',
-            'message' => "Une nouvelle candidature a été soumise.",
-            'link' => route('candidatures.show', $this->candidature->id),
+            'title' => 'Nouvelle candidature',
+            'message' => "Une nouvelle candidature a été soumise pour l'offre : " . $this->candidature->offre->titre,
+            'link' => route('offres.candidatures', $this->candidature->offre_id),
             'icon' => 'mdi mdi-account-plus',
             'bg' => 'bg-info',
             'created_at' => now()->toDateTimeString(),
         ];
     }
+
 }

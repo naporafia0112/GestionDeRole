@@ -12,6 +12,7 @@ use App\Mail\CandidatureRecueMail;
 use Illuminate\Support\Facades\Mail;
 use App\Services\GeminiService;
 use App\Helpers\Helpers;
+use App\Jobs\EnvoyerMailCandidature;
 use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -252,6 +253,10 @@ TÂCHE:
 
 CVS À ANALYSER:
 {$cvContent}
+    Règles obligatoires :
+- Ne jamais inclure un score < 50 dans "selectionnes".
+- Le champ "commentaire" doit toujours être une phrase complète.
+- Le total des candidats dans "selectionnes" + "rejetes" doit égaler le nombre total d’entrées fournies.
 
 RÉPONSE ATTENDUE:
 TU DOIS ABSOLUMENT RÉPONDRE AVEC DU JSON VALIDE ET RIEN D'AUTRE.
@@ -559,38 +564,45 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
             'lm_fichier' => 'required|file|mimes:pdf,doc,docx|max:2048',
             'lr_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
+        try {
 
-        DB::transaction(function () use ($request, $offreId) {
-            $candidat = Candidat::firstOrCreate(
-                ['email' => $request->email],
-                $request->only(['nom', 'prenoms', 'telephone', 'quartier', 'ville', 'type_depot'])
-            );
+            DB::transaction(function () use ($request, $offreId) {
+                $candidat = Candidat::firstOrCreate(
+                    ['email' => $request->email],
+                    $request->only(['nom', 'prenoms', 'telephone', 'quartier', 'ville', 'type_depot'])
+                );
 
-            $cvPath = $request->file('cv_fichier')?->store('candidatures/cv', 'public');
-            $lmPath = $request->file('lm_fichier')?->store('candidatures/lm', 'public');
-            $lrPath = $request->file('lr_fichier')?->store('candidatures/lr', 'public');
+                $cvPath = $request->file('cv_fichier')?->store('candidatures/cv', 'public');
+                $lmPath = $request->file('lm_fichier')?->store('candidatures/lm', 'public');
+                $lrPath = $request->file('lr_fichier')?->store('candidatures/lr', 'public');
 
-            $candidature = Candidature::create([
-                'offre_id' => $offreId,
-                'candidat_id' => $candidat->id,
-                'statut' => 'en_cours',
-                'cv_fichier' => $cvPath,
-                'lm_fichier' => $lmPath,
-                'lr_fichier' => $lrPath,
-            ]);
+                $candidature = Candidature::create([
+                    'offre_id' => $offreId,
+                    'candidat_id' => $candidat->id,
+                    'statut' => 'en_cours',
+                    'cv_fichier' => $cvPath,
+                    'lm_fichier' => $lmPath,
+                    'lr_fichier' => $lrPath,
+                ]);
 
-            $rhs = User::whereHas('roles', function ($q) {
-                $q->where('name', 'RH');
-            })->get();
+                $rhs = User::whereHas('roles', function ($q) {
+                    $q->where('name', 'RH');
+                })->get();
 
-            foreach ($rhs as $rh) {
-                $rh->notify(new NouvelleCandidatureNotification($candidature));
+                foreach ($rhs as $rh) {
+                    $rh->notify(new NouvelleCandidatureNotification($candidature));
+                }
+                EnvoyerMailCandidature::dispatch($candidature);
+            });
             }
-                        // Envoyer l'email de confirmation au candidat
-            Mail::to($candidat->email)->send(new CandidatureConfirmationMail($candidature));
-        });
+        catch (\Exception $e) {
+            // Logue ou gère l'erreur si besoin
+            Log::error('Erreur création candidature : ' . $e->getMessage());
 
-        return redirect()->route('vitrine.show', $offreId)->with('success', 'Votre candidature a été envoyée avec succès. Un mail de confirmation vous a été envoyé.');
+            return back()->withErrors('Une erreur est survenue, veuillez réessayer.');
+        }
+
+        return redirect()->route('vitrine.show', $offreId)->with('success', 'Votre candidature a été envoyée avec succès. Un mail de confirmation vous sera envoyé bientôt.');
     }
 
    public function recherche(Request $request)

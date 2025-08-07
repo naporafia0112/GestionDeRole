@@ -24,7 +24,7 @@ class StageValideNotification extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'titre' => 'Stage validé',
+            'title' => 'Stage validé',
             'message' => "Le stage « {$this->stage->sujet} » a été validé par le directeur.",
             'link' => route('rh.stages.en_cours'),
             'icon' => 'mdi mdi-check-circle',

@@ -49,9 +49,11 @@
                     @if($statut === 'en_cours'|| $statut === 'reçue')
                       <span class="badge bg-warning text-dark">En cours de traitement</span>
                     @elseif($statut === 'retenu')
-                      <span class="badge bg-success">Retenu</span>
+                      <span class="badge bg-success">Retenue</span>
                     @elseif($statut === 'rejete')
-                      <span class="badge bg-danger">Rejeté</span>
+                      <span class="badge bg-danger">Rejetée</span>
+                    @elseif($statut === 'valide')
+                      <span class="badge bg-success">Validée</span>
                     @else
                       <span class="badge bg-secondary">Inconnu</span>
                     @endif
