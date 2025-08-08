@@ -565,9 +565,12 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
             'lm_fichier' => 'required|file|mimes:pdf,doc,docx|max:2048',
             'lr_fichier' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
-        try {
 
-            DB::transaction(function () use ($request, $offreId) {
+        try {
+            // On initialise $candidature ici pour y avoir accès après la transaction
+            $candidature = null;
+
+            DB::transaction(function () use ($request, $offreId, &$candidature) {
                 $candidat = Candidat::firstOrCreate(
                     ['email' => $request->email],
                     $request->only(['nom', 'prenoms', 'telephone', 'quartier', 'ville', 'type_depot'])
@@ -586,6 +589,7 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
                     'lr_fichier' => $lrPath,
                 ]);
 
+                // Notifications internes (ça peut rester dans la transaction)
                 $rhs = User::whereHas('roles', function ($q) {
                     $q->where('name', 'RH');
                 })->get();
@@ -593,18 +597,20 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
                 foreach ($rhs as $rh) {
                     $rh->notify(new NouvelleCandidatureNotification($candidature));
                 }
-                EnvoyerMailCandidature::dispatch($candidature);
             });
-            }
-        catch (\Exception $e) {
-            // Logue ou gère l'erreur si besoin
-            Log::error('Erreur création candidature : ' . $e->getMessage());
 
+            // Dispatch du job après la transaction
+            EnvoyerMailCandidature::dispatch($candidature);
+        }
+        catch (\Exception $e) {
+            Log::error('Erreur création candidature : ' . $e->getMessage());
             return back()->withErrors('Une erreur est survenue, veuillez réessayer.');
         }
 
-        return redirect()->route('vitrine.show', $offreId)->with('success', 'Votre candidature a été envoyée avec succès. Un mail de confirmation vous sera envoyé bientôt.');
+        return redirect()->route('vitrine.show', $offreId)
+            ->with('success', 'Votre candidature a été envoyée avec succès. Un mail de confirmation vous sera envoyé bientôt.');
     }
+
 
    public function recherche(Request $request)
     {
@@ -732,5 +738,28 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
 
         return view('admin.dossiers.dossiersvalide.valides', compact('candidatures'));
     }
+
+    public function renvoyerEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:candidats,email',
+        ]);
+
+        // On récupère le candidat via l'email
+        $candidat = Candidat::where('email', $request->email)->first();
+
+        // On récupère la dernière candidature de ce candidat (ou la plus récente)
+        $candidature = $candidat->candidatures()->latest()->first();
+
+        if (!$candidature) {
+            return back()->with('error', 'Aucune candidature trouvée pour cet email.');
+        }
+
+        // Envoi de mail direct
+        Mail::to($candidat->email)->send(new CandidatureConfirmationMail($candidature));
+
+        return back()->with('success', 'Email renvoyé avec succès.');
+    }
+
 
 }

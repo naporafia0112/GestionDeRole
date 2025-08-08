@@ -223,6 +223,9 @@ class FormulaireController extends Controller
 
         return redirect()->route('directeur.formulaires.liste')->with('success', 'Formulaire mis à jour avec succès.');
     }
-
+    public function preview(Formulaire $formulaire)
+    {
+        return view('admin.rapports.directeur._preview', compact('formulaire'));
+    }
 
     }

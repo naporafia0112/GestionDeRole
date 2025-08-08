@@ -50,16 +50,24 @@
                                 <a href="{{ route('formulaires.edit', $formulaire) }}" class="btn btn-warning btn-sm" title="Modifier le formulaire">
                                     <i data-feather="edit" class="feather-sm me-1"></i>
                                 </a>
+                                <!-- Aperçu -->
+                                <button
+                                    type="button"
+                                    class="btn btn-info btn-sm btn-preview"
+                                    data-id="{{ $formulaire->id }}"
+                                    title="Aperçu">
+                                    <i data-feather="eye" class="feather-sm me-1"></i>
+                                </button>
 
-                               <form method="POST" action="{{ route('formulaires.archiver', $formulaire) }}">
+                                <form method="POST" action="{{ route('formulaires.archiver', $formulaire) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="btn btn-warning btn-sm btn-archiver" title="Archiver ce formulaire" data-titre="{{ $formulaire->titre }}">
+                                    <button type="submit" class="btn btn-light btn-sm btn-archiver" title="Archiver ce formulaire" data-titre="{{ $formulaire->titre }}">
                                         <i data-feather="archive" class="feather-sm me-1"></i>
                                     </button>
 
                                 </form>
-
+                                
                             </div>
 
                         </div>
@@ -70,6 +78,23 @@
         {{-- Fin de la Timeline --}}
     @endif
 </div>
+<!-- Modal Preview -->
+<div class="modal fade" id="modalPreview" tabindex="-1" aria-labelledby="modalPreviewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPreviewLabel">Aperçu du formulaire</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div id="preview-content">Chargement...</div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('styles')
@@ -320,4 +345,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const previewButtons = document.querySelectorAll('.btn-preview');
+    const previewContent = document.getElementById('preview-content');
+    const modalPreview = new bootstrap.Modal(document.getElementById('modalPreview'));
+
+    previewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const formulaireId = this.getAttribute('data-id');
+            previewContent.innerHTML = '<p class="text-center">Chargement...</p>';
+
+            fetch(`/formulaires/${formulaireId}/preview`)
+                .then(response => response.text())
+                .then(html => {
+                    previewContent.innerHTML = html;
+                    modalPreview.show();
+                })
+                .catch(err => {
+                    previewContent.innerHTML = '<p class="text-danger">Erreur de chargement.</p>';
+                    console.error(err);
+                });
+        });
+    });
+});
+</script>
+
 @endpush

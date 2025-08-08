@@ -39,6 +39,7 @@ Route::match(['get', 'post'], '/candidatures/suivi/{uuid?}', [VitrineController:
 Route::post('/candidatures/recherche', [CandidatureController::class, 'recherche'])->name('candidatures.recherche');
 Route::get('/candidature-spontanee', [CandidatureSpontaneeController::class, 'create'])->name('candidature.spontanee.form');
 Route::post('/candidature-spontanee', [CandidatureSpontaneeController::class, 'store'])->name('candidature.spontanee.store');
+Route::post('/candidature/renvoi-email', [CandidatureController::class, 'renvoyerEmail'])->name('candidature.renvoi.email');
 // Routes accessibles uniquement aux utilisateurs connectés
 Route::middleware(['auth'])->group(function () {
     // Tableau de bord
@@ -113,6 +114,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/formulaires/{formulaire}/archiver', [FormulaireController::class, 'archiver'])->name('formulaires.archiver');
     Route::get('/formulaires/{formulaire}/edit', [FormulaireController::class, 'edit'])->name('formulaires.edit');
     Route::put('/formulaires/{formulaire}', [FormulaireController::class, 'update'])->name('formulaires.update');
+    Route::get('/formulaires/{formulaire}/preview', [FormulaireController::class, 'preview'])->name('formulaires.preview');
 
     });
 
