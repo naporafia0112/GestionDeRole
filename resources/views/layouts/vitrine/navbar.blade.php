@@ -9,7 +9,7 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="{{ route("vitrine.index") }}" >Acceuil</a></li>
+          <li><a href="#hero" >Acceuil</a></li>
           <li><a href="#offres">Offres</a></li>
           <li><a href="#footer">Á propos de nous</a></li>
           <li><a href="#footer">Contact</a></li>

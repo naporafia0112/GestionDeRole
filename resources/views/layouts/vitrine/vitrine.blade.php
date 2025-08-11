@@ -73,6 +73,55 @@
     });
 </script>
 @endif
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{{-- Message succès --}}
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Succès',
+        text: '{{ session("success") }}',
+        confirmButtonText: 'OK',
+        timer: 5000
+    });
+</script>
+@endif
+
+{{-- Message erreur personnalisée --}}
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: '{{ session("error") }}',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+
+{{-- Erreurs de validation --}}
+@if($errors->any())
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Erreur de validation',
+        html: `{!! implode('<br>', $errors->all()) !!}`,
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+
+{{-- Réouverture du modal si nécessaire --}}
+@if(session('open_modal') || $errors->any())
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        var resendModal = new bootstrap.Modal(document.getElementById('resendEmailModal'));
+        resendModal.show();
+    });
+</script>
+@endif
 
 </body>
 </html>

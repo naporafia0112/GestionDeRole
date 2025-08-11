@@ -109,9 +109,9 @@
 <div class="modal fade" id="resendEmailModal" tabindex="-1" aria-labelledby="resendEmailModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content rounded-4 shadow-lg">
-      <div class="modal-header bg-light text-white">
+      <div class="modal-header bg-light">
         <h5 class="modal-title" id="resendEmailModalLabel">Renvoyer l'email de confirmation</h5>
-        <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <form method="POST" action="{{ route('candidature.renvoi.email') }}">
         @csrf
@@ -119,7 +119,9 @@
           <p>Entrez votre adresse email pour recevoir à nouveau l'email de suivi de candidature.</p>
           <div class="mb-3">
             <label for="email" class="form-label">Adresse email</label>
-            <input type="email" class="form-control" id="email" name="email" placeholder="exemple@email.com">
+            <input type="email" class="form-control" id="email" name="email"
+                   placeholder="exemple@email.com"
+                   value="{{ old('email') }}">
           </div>
         </div>
         <div class="modal-footer">
@@ -129,4 +131,5 @@
     </div>
   </div>
 </div>
+
 @endsection

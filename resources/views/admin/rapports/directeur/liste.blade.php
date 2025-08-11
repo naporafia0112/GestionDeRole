@@ -67,7 +67,7 @@
                                     </button>
 
                                 </form>
-                                
+
                             </div>
 
                         </div>
@@ -283,6 +283,7 @@
         left: 15px; margin-left: 0; top: 16px;
     }
 }
+
 </style>
 @endpush
 

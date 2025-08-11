@@ -741,21 +741,28 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
 
     public function renvoyerEmail(Request $request)
     {
+        // Validation simple
         $request->validate([
-            'email' => 'required|email|exists:candidats,email',
+            'email' => 'required|email',
         ]);
 
-        // On récupère le candidat via l'email
+        // Recherche du candidat
         $candidat = Candidat::where('email', $request->email)->first();
 
-        // On récupère la dernière candidature de ce candidat (ou la plus récente)
+        if (!$candidat) {
+            return back()->withInput()->with('error', 'Aucun email correspondant trouvé.')
+                        ->with('open_modal', true);
+        }
+
+        // Récupération de la dernière candidature
         $candidature = $candidat->candidatures()->latest()->first();
 
         if (!$candidature) {
-            return back()->with('error', 'Aucune candidature trouvée pour cet email.');
+            return back()->withInput()->with('error', 'Aucune candidature trouvée pour cet email.')
+                        ->with('open_modal', true);
         }
 
-        // Envoi de mail direct
+        // Envoi de l'email
         Mail::to($candidat->email)->send(new CandidatureConfirmationMail($candidature));
 
         return back()->with('success', 'Email renvoyé avec succès.');
