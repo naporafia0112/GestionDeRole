@@ -78,7 +78,7 @@
                     <div class="flex-grow-1">
                         <h3 class="text-dark mb-1">{{ $totalValideOffre }}</h3>
                         <p class="text-muted mb-0">Candidatures á offres</p>
-                         <small class="text-muted">(Candidures liés á des offres, candidatures postulées suite á une publication d'offre)</small>
+                         <small class="text-muted">(candidatures postulées suite á une publication d'offre)</small>
                     </div>
                 </div>
             </div>
