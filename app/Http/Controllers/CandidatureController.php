@@ -412,9 +412,6 @@ private function traiterReponseIA($reponseIA, $candidaturesValides)
 /**
  * Met à jour les candidatures en base
  */
-/**
- * Met à jour les candidatures en base
- */
 private function mettreAJourCandidatures($resultats, $candidaturesValides)
 {
     $stats = ['retenus' => 0, 'rejetes' => 0, 'erreurs' => 0];
@@ -658,65 +655,6 @@ private function mettreAJourCandidatures($resultats, $candidaturesValides)
         return Storage::disk('public')->download($path);
     }
 
-    /*public function analyser(Request $request)
-    {
-        $criteres = $request->input('criteres', []);
-        $prompt = $this->construirePrompt($criteres);
-        $parser = new Parser();
-        $fichiers = Storage::files('candidatures');
-        $texte = "Voici une liste de CVs de candidats :\n\n";
-
-        foreach ($fichiers as $fichier) {
-            $nom = pathinfo($fichier, PATHINFO_FILENAME);
-            $pdf = $parser->parseFile(storage_path('app/' . $fichier));
-            $texte .= "Candidat : $nom\nCV :\n" . $pdf->getText() . "\n\n";
-        }
-
-        Log::info("Prompt IA : " . $prompt . "\n\n" . $texte);
-        $analyse = Helpers::analyserCandidaturesAvecGemini($prompt . "\n\n" . $texte);
-
-        return view('admin.candidatures.analyse_resultats', compact('analyse', 'prompt'));
-    }
-
-    private function construirePrompt(array $criteres)
-    {
-        $base = "Analyse les profils de ces candidats pour un poste et classe-les du plus au moins adapté.";
-        $map = [
-            'experience' => "l'expérience professionnelle",
-            'recommandation' => "la réputation de l’entreprise ou personne qui recommande",
-            'coherence' => "la cohérence entre le profil et le poste",
-        ];
-        if ($criteres) {
-            $base .= " Critères : " . implode(', ', array_map(fn($c) => $map[$c] ?? $c, $criteres)) . ".";
-        }
-        return $base;
-    }
-
-    public function analyserIA(int $id)
-    {
-        $candidature = Candidature::with('candidat')->findOrFail($id);
-        $score = rand(50, 95);
-        $badges = [];
-
-        if (str_contains(strtolower($candidature->candidat->nom), 'docteur')) {
-            $badges[] = '🎓 Profil académique avancé';
-        }
-        if ($candidature->cv_fichier) {
-            $badges[] = 'CV fourni';
-        }
-        if ($candidature->lr_fichier) {
-            $badges[] = 'Recommandation présente';
-        }
-        if ($candidature->candidat->type_depot === 'stage professionnel') {
-            $badges[] = 'Cherche un stage professionnel';
-        }
-        $badges[] = $score > 80 ? 'Très bon profil' : 'Profil à vérifier';
-
-        return response()->json([
-            'score' => $score,
-            'badges' => $badges,
-        ]);
-    }*/
     // Afficher les candidatures retenues
     public function dossiersRetenus()
     {

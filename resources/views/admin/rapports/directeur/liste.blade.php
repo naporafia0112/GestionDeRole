@@ -48,7 +48,7 @@
 
                                 {{-- Boutons d'action pour modifier et archiver --}}
                                 <a href="{{ route('formulaires.edit', $formulaire) }}" class="btn btn-warning btn-sm" title="Modifier le formulaire">
-                                    <i data-feather="edit" class="feather-sm me-1"></i>
+                                    <i data-feather="edit" class="feather-sm"></i>
                                 </a>
                                 <!-- Aperçu -->
                                 <button
@@ -56,14 +56,14 @@
                                     class="btn btn-info btn-sm btn-preview"
                                     data-id="{{ $formulaire->id }}"
                                     title="Aperçu">
-                                    <i data-feather="eye" class="feather-sm me-1"></i>
+                                    <i class="fe-eye"></i>
                                 </button>
 
                                 <form method="POST" action="{{ route('formulaires.archiver', $formulaire) }}">
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit" class="btn btn-light btn-sm btn-archiver" title="Archiver ce formulaire" data-titre="{{ $formulaire->titre }}">
-                                        <i data-feather="archive" class="feather-sm me-1"></i>
+                                        <i data-feather="archive" class="feather-sm"></i>
                                     </button>
 
                                 </form>

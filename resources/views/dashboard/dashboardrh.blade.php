@@ -7,17 +7,6 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4 class="page-title">Dashboard RH</h4>
-            <form class="d-flex align-items-center">
-                <div class="input-group input-group-sm">
-                    <input type="text" class="form-control border" id="dash-daterange" placeholder="Sélectionnez une période">
-                    <span class="input-group-text bg-primary border-primary text-white">
-                        <i class="mdi mdi-calendar-range"></i>
-                    </span>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm ms-2" title="Filtrer">
-                    <i class="mdi mdi-filter"></i> Appliquer
-                </button>
-            </form>
         </div>
     </div>
 

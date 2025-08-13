@@ -8,16 +8,6 @@
         <div class="col-12">
             <div class="page-title-box d-flex justify-content-between align-items-center">
                 <h4 class="page-title">Dashboard Directeur</h4>
-                <form method="GET" class="d-flex align-items-center">
-                    <div class="input-group input-group-sm">
-                        <select class="form-select" name="days" onchange="this.form.submit()">
-                            <option value="">Toutes les dates</option>
-                            <option value="7" {{ request('days') == 7 ? 'selected' : '' }}>7 derniers jours</option>
-                            <option value="30" {{ request('days') == 30 ? 'selected' : '' }}>30 derniers jours</option>
-                            <option value="90" {{ request('days') == 90 ? 'selected' : '' }}>90 derniers jours</option>
-                        </select>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -102,7 +92,7 @@
                         <div class="d-flex align-items-start mb-3">
                             <div class="flex-grow-1">
                                 <h5 class="mt-0 mb-1">
-                                    {{ $stage->sujet }} — 
+                                    {{ $stage->sujet }} —
                                     <span class="text-muted small">{{ $candidat ? $candidat->nom . ' ' . $candidat->prenoms : 'Candidat inconnu' }}</span>
                                 </h5>
                                 <p class="text-muted mb-0"><i class="fe-calendar me-1"></i> Début prévu : {{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</p>

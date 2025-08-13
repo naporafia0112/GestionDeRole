@@ -81,11 +81,6 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                {{-- pagination Laravel --}}
-                <div class="mt-3">
-                    {{ $candidatures->links() }}
-                </div>
             </div>
             </div>
         </div>
@@ -111,6 +106,8 @@
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
             },
+            paging: true,        // active la pagination
+            pageLength: 20,      // nombre de lignes par page
             responsive: true,
             order: [[4, 'desc']],
             columnDefs: [

@@ -187,6 +187,20 @@ class FormulaireController extends Controller
         $formulaires = Formulaire::where('est_archive', true)->latest()->get();
         return view('admin.rapports.directeur.archives', compact('formulaires'));
     }
+    public function restore($id)
+    {
+        $formulaire = Formulaire::findOrFail($id);
+
+        if ($formulaire->est_archive) {
+            $formulaire->est_archive = false;
+            $formulaire->save();
+
+            return redirect()->back()->with('success', 'Formulaire restauré avec succès.');
+        }
+
+        return redirect()->back()->with('info', 'Ce formulaire n’était pas archivé.');
+    }
+
 
     public function edit(Formulaire $formulaire)
     {

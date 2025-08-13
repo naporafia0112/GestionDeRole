@@ -257,8 +257,9 @@ class EntretienController extends Controller
         $validator = Validator::make($request->all(), [
             'date'   => ['required', 'date'],
             'heure'  => ['required'],
-            'statut' => ['required', 'in:effectuee,termine,annule'],
-            'lieu'   => ['required_if:type,présentiel', 'string'], // Validation pour le lieu
+            'statut' => ['required', 'in:effectuee,prevu'],
+            'lieu'   => ['required_if:type,présentiel', 'string'],
+            'commentaire' => ['nullable', 'string'],
         ]);
 
         // Règles personnalisées
@@ -283,7 +284,8 @@ class EntretienController extends Controller
             'date' => $request->input('date'),
             'heure' => $request->input('heure'),
             'statut' => $request->input('statut'),
-            'lieu' => $request->input('lieu', $entretien->lieu), // Garde l'ancienne valeur si non fournie
+            'lieu' => $request->input('lieu', $entretien->lieu),
+            'commentaire' => $request->input('commentaire', $entretien->commentaire),
         ];
 
         // 5. Debug avant sauvegarde (optionnel)
