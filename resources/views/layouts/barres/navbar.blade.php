@@ -11,7 +11,7 @@
 
         {{-- Menu à droite --}}
         <ul class="list-unstyled topnav-menu mb-0 d-flex align-items-center">
-
+            @if (!Auth::user()->hasRole('ADMIN'))
             {{-- Notifications --}}
             <li class="dropdown notification-list topbar-dropdown">
                 <a class="nav-link dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
@@ -69,6 +69,7 @@
                     </a>
 
                 </div>
+            @endif
             </li>
             {{-- Utilisateur --}}
             <li class="dropdown notification-list topbar-dropdown">

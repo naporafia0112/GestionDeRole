@@ -59,18 +59,23 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php $i = 1; @endphp
                         @foreach($stagesParType as $typeDepot => $stages)
                             @foreach($stages as $stage)
                                 @php
                                     $candidat = $stage->candidature->candidat ?? $stage->candidatureSpontanee->candidat ?? null;
                                 @endphp
                                 <tr data-type="{{ $typeDepot }}">
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $i++ }}</td>
                                     <td>{{ $candidat?->nom }} {{ $candidat?->prenoms }}</td>
                                     <td>{{ ucfirst($typeDepot) }}</td>
                                     <td>{{ $stage->candidature->offre->titre ?? '-' }}</td>
                                     <td>{{ $stage->tuteur->name ?? '-' }}</td>
-                                    <td><span class="badge bg-{{ $labels[$stage->statut] ?? 'secondary' }}">{{ ucfirst(str_replace('_', ' ', $stage->statut)) }}</span></td>
+                                    <td>
+                                        <span class="badge bg-{{ $labels[$stage->statut] ?? 'secondary' }}">
+                                            {{ ucfirst(str_replace('_', ' ', $stage->statut)) }}
+                                        </span>
+                                    </td>
                                     <td>{{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($stage->date_fin)->format('d/m/Y') }}</td>
                                     <td>
@@ -84,7 +89,6 @@
                                                 </a>
                                             @endif
                                             @if($stage->validation_directeur)
-
                                                 <a href="{{ route('stages.edit', $stage->id) }}" class="btn btn-success btn-sm" title="Terminer le stage">
                                                     <i class="mdi mdi-check-circle-outline"></i>
                                                 </a>
@@ -95,6 +99,7 @@
                             @endforeach
                         @endforeach
                     </tbody>
+
                 </table>
             </div>
 

@@ -105,11 +105,14 @@
                                         @if(!$offre->est_publie)
                                             <form action="{{ route('offres.publish', $offre->id) }}" id="publish-offre-{{ $offre->id }}" method="POST" class="d-inline">
                                                 @csrf
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="confirmPublish({{ $offre->id }})" title="Publier">
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                        onclick="confirmPublish({{ $offre->id }}, '{{ $offre->date_limite }}')"
+                                                        title="Publier">
                                                     <i class="mdi mdi-send"></i>
                                                 </button>
                                             </form>
                                         @endif
+
                                         <form id="delete-offre-{{ $offre->id }}" action="{{ route('offres.destroy', $offre->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
@@ -192,7 +195,19 @@
         });
     }
 
-    function confirmPublish(id) {
+    function confirmPublish(id, dateLimite) {
+        const limite = new Date(dateLimite);
+        const maintenant = new Date();
+
+        // Vérification si la date limite est dépassée
+        if (limite < maintenant) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Date limite dépassée',
+                text: 'Veuillez changer la date limite avant de publier cette offre.',
+            });
+            return; // Stop le formulaire
+        }
         Swal.fire({
             title: 'Publier cette offre ?',
             text: "Elle sera visible publiquement.",
@@ -207,6 +222,7 @@
                 document.getElementById('publish-offre-' + id).submit();
             }
         });
+
     }
 </script>
 @endpush

@@ -71,12 +71,6 @@
                                                     <i class="mdi mdi-square-edit-outline"></i>
                                                 </a>
                                             @endif
-                                            @if($stage->validation_directeur)
-
-                                                <a href="{{ route('stages.edit', $stage->id) }}" class="btn btn-success btn-sm">
-                                                    <i class="mdi mdi-check-circle-outline"></i> Terminer stage
-                                                </a>
-                                            @endif
                                         </div>
                                     </td>
                                 </tr>

@@ -117,6 +117,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/formulaires/{formulaire}/preview', [FormulaireController::class, 'preview'])->name('formulaires.preview');
     Route::patch('/formulaires/{id}/restore', [FormulaireController::class, 'restore'])
     ->name('directeur.formulaires.restore');
+    Route::patch('/reponses-formulaire/{reponse}/valider', [FormulaireController::class, 'validerParDirecteur'])
+    ->name('reponses.valider');
 
     });
 

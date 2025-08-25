@@ -22,6 +22,14 @@ class OffreController extends Controller
                 'statut' => 'publie',
             ]);
 
+         // Retirer la publication des offres dont la date limite est dépassée
+        Offre::where('est_publie', true)
+            ->where('date_limite', '<', now())
+            ->update([
+                'est_publie' => false,
+                'statut' => 'expire', // ou 'brouillon' selon ton besoin
+            ]);
+
         $offres = Offre::with('localisation')->orderByDesc('created_at')->get();
         return view('admin.offres.index', compact('offres'));
     }

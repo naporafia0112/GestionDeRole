@@ -41,7 +41,7 @@
                 <a href="#" id="export-pdf" class="btn btn-danger mb-2">
                     <i class="mdi mdi-file-pdf-box"></i> Export PDF
                 </a>
-                <a href="#" id="export-word" class="btn btn-primary mb-2">
+                <a href="#" id="export-word" class="btn btn-primary mb-2" style="background-color:#0d6efd; border-color:#0d6efd;">
                     <i class="mdi mdi-file-word-box"></i> Export Word
                 </a>
                 <a href="#" target="_blank" id="imprimer" class="btn btn-secondary mb-2">

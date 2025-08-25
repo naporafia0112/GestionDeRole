@@ -53,8 +53,7 @@
                                                         class="btn btn-sm {{ $reponse->valide ? 'btn-danger' : 'btn-success' }} btn-valider"
                                                         data-reponse-id="{{ $reponse->id }}"
                                                         title="{{ $reponse->valide ? 'Validation faite' : 'Valider' }}"
-                                                        {{ $reponse->valide ? 'disabled' : '' }}
-                                                    >
+                                                        {{ $reponse->valide ? 'disabled' : '' }}>
                                                         @if($reponse->valide)
                                                             <i class="fe-check-circle"></i> Validation faite
                                                         @else
@@ -142,7 +141,7 @@
                 if (result.isConfirmed) {
                     btn.prop('disabled', true).html('Validation...');
 
-                    fetch(`/stages/${reponseId}/valider-par-directeur`, {
+                    fetch(`/reponses-formulaire/${reponseId}/valider`, {
                         method: 'PATCH',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',

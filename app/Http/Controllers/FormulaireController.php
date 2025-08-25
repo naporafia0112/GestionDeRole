@@ -156,9 +156,6 @@ class FormulaireController extends Controller
         abort_if($formulaire->cree_par !== $user->id, 403);
 
         $formulaire->load(['reponses.tuteur', 'champs', 'reponses.stage.candidature.candidat']);
-        foreach ($formulaire->reponses as $reponse) {
-            $reponse->valide = $reponse->stage ? (bool) $reponse->stage->est_valide : false;
-        }
 
         return view('admin.rapports.directeur.reponses', compact('formulaire'));
     }
@@ -240,6 +237,18 @@ class FormulaireController extends Controller
     public function preview(Formulaire $formulaire)
     {
         return view('admin.rapports.directeur._preview', compact('formulaire'));
+    }
+    public function validerParDirecteur(ReponseFormulaire $reponse)
+    {
+        if ($reponse->valide) {
+            return response()->json(['success' => false, 'message' => 'Déjà validé']);
+        }
+
+        $reponse->valide = true;
+        $reponse->save();
+        $reponse->stage->update(['validation_directeur' => true]);
+        
+        return response()->json(['success' => true]);
     }
 
     }

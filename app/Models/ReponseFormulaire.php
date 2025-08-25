@@ -8,7 +8,7 @@ class ReponseFormulaire extends Model
 {
         protected $table = 'reponses_formulaires';
 
-    protected $fillable = ['formulaire_id', 'user_id', 'stage_id'];
+    protected $fillable = ['formulaire_id', 'user_id', 'stage_id', 'valide'];
 
     public function formulaire()
     {
@@ -37,4 +37,5 @@ class ReponseFormulaire extends Model
     {
         return $this->belongsTo(Stage::class);
     }
+
 }
